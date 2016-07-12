@@ -25,3 +25,6 @@ Add the animator component to the object you want to animate.
 - **onFinish** calls when the animation reach the last frame.
 - **onPlay** calls when the animation start playing.
 - **onStop** calls when the animation is forced to stop.
+
+# Licence
+MIT

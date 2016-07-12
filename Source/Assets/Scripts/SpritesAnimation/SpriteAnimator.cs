@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,6 +11,11 @@ public class SpriteAnimator : MonoBehaviour {
 	public int framesPerSecond = 30;
 	public List<SpriteAnimation> animations;
 
+	[HideInInspector]
+	public UnityEvent onFinish;
+	public UnityEvent onStop;
+	public UnityEvent onPlay;
+
 	private bool _playing;
 	private bool _oneShot;
 	private int _animationIndex;
@@ -18,7 +24,7 @@ public class SpriteAnimator : MonoBehaviour {
 	private SpriteAnimation _currentAnimation;
 	private SpriteRenderer _spriteRenderer;
 
-	public void Awake()
+	private void Awake()
 	{
 		_spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -37,12 +43,12 @@ public class SpriteAnimator : MonoBehaviour {
 		_currentAnimation = animations[0];
 	}
 
-	public void Update()
+	private void Update()
 	{
 		//We do nothing if FPS = 0
 		if(framesPerSecond == 0)
 			return;
-		
+
 		if(_playing)
 		{
 			_animationTimer += Time.deltaTime;
@@ -55,6 +61,7 @@ public class SpriteAnimator : MonoBehaviour {
 				if(_animationIndex >= _framesInAnimation)
 				{
 					_animationIndex = 0;
+					onFinish.Invoke();
 					if(_oneShot)
 						Stop();
 				}
@@ -106,5 +113,10 @@ public class SpriteAnimator : MonoBehaviour {
 		_animationTimer 	= 0;
 		_animationIndex		= 0;
 		_playing 			= true;
+	}
+
+	public bool IsPlaying
+	{
+		get { return _playing; }
 	}
 }

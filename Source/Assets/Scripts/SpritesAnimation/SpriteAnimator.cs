@@ -13,7 +13,9 @@ public class SpriteAnimator : MonoBehaviour {
 
 	[HideInInspector]
 	public UnityEvent onFinish;
+	[HideInInspector]
 	public UnityEvent onStop;
+	[HideInInspector]
 	public UnityEvent onPlay;
 
 	private bool _playing;
@@ -93,6 +95,7 @@ public class SpriteAnimator : MonoBehaviour {
 		{
 			//We don't reset the animation index because if we do we can't resume the animation
 			//The animation index will reset alone if it's necessary
+			onPlay.Invoke();
 			_animationTimer 	= 0;
 			_playing 			= true;
 			_framesInAnimation 	= _currentAnimation.FramesCount;
@@ -105,6 +108,7 @@ public class SpriteAnimator : MonoBehaviour {
 	{
 		//Stop the animation
 		_playing = false;
+		onStop.Invoke();
 	}
 
 	public void Reset()

@@ -26,5 +26,5 @@ Add the animator component to the object you want to animate.
 - **onPlay** calls when the animation start playing.
 - **onStop** calls when the animation is forced to stop.
 
-# Licence
+# License
 MIT

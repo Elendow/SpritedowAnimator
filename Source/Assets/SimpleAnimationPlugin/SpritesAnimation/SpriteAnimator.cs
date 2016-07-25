@@ -37,12 +37,11 @@ public class SpriteAnimator : MonoBehaviour {
 			return;
 		}
 
-		//Play the first animation if play on awake
-		//TODO choose the play on awake animation
-		if(playOnAwake)
+        //Play the first animation if play on awake
+        //TODO choose the play on awake animation
+        _currentAnimation = animations[0];
+        if (playOnAwake)
 			Play(animations[0].Name);
-
-		_currentAnimation = animations[0];
 	}
 
 	private void Update()
@@ -55,20 +54,20 @@ public class SpriteAnimator : MonoBehaviour {
 		{
 			_animationTimer += Time.deltaTime;
 
-			if(1f / framesPerSecond < _animationTimer)
-			{
-				_animationTimer			= 0;
-				_spriteRenderer.sprite 	= _currentAnimation.GetFrame(_animationIndex);
-				_animationIndex        += 1;
-				if(_animationIndex >= _framesInAnimation)
-				{
-					_animationIndex = 0;
-					onFinish.Invoke();
-					if(_oneShot)
-						Stop();
-				}
-			}
-		}
+            if (1f / framesPerSecond < _animationTimer)
+            {
+                _spriteRenderer.sprite = _currentAnimation.GetFrame(_animationIndex);
+                _animationTimer = 0;
+                _animationIndex += 1;
+                if (_animationIndex >= _framesInAnimation)
+                {
+                    _animationIndex = 0;
+                    onFinish.Invoke();
+                    if (_oneShot)
+                        Stop();
+                }
+            }
+        }
 	}
 
 	public void PlayOneShot(string name)
@@ -96,9 +95,10 @@ public class SpriteAnimator : MonoBehaviour {
 			//We don't reset the animation index because if we do we can't resume the animation
 			//The animation index will reset alone if it's necessary
 			onPlay.Invoke();
-			_animationTimer 	= 0;
-			_playing 			= true;
-			_framesInAnimation 	= _currentAnimation.FramesCount;
+			_animationTimer = 0;
+            _animationIndex = 0;
+            _playing = true;
+			_framesInAnimation = _currentAnimation.FramesCount;
 		}
 		else
 			Debug.LogError("Animation '" + name + "' not found.", gameObject);
@@ -108,15 +108,16 @@ public class SpriteAnimator : MonoBehaviour {
 	{
 		//Stop the animation
 		_playing = false;
-		onStop.Invoke();
+        _oneShot = false;
+        onStop.Invoke();
 	}
 
 	public void Reset()
 	{
 		//Reset all the animation counters
-		_animationTimer 	= 0;
-		_animationIndex		= 0;
-		_playing 			= true;
+		_animationTimer = 0;
+		_animationIndex	= 0;
+		_playing = true;
 	}
 
 	public bool IsPlaying

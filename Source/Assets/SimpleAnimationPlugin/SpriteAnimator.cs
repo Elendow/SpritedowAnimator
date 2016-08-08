@@ -37,7 +37,6 @@ public class SpriteAnimator : MonoBehaviour {
 		}
 
         // Play the first animation if play on awake
-        _currentAnimation = animations[0];
         if (playOnAwake)
 			Play(startAnimation);
 	}
@@ -60,6 +59,7 @@ public class SpriteAnimator : MonoBehaviour {
                 _animationIndex += 1;
                 if (_animationIndex >= _framesInAnimation)
                 {
+                    // Last frame, reset index and stop if is one shot
                     _animationIndex = 0;
                     onFinish.Invoke();
                     if (_oneShot)
@@ -73,18 +73,15 @@ public class SpriteAnimator : MonoBehaviour {
 	{
         _oneShot = oneShot;
 
-        if (_currentAnimation != null)
+        // If it's the same animation, only reset it and continue
+        if (_currentAnimation != null && _currentAnimation.Name == name)
         {
-            // If it's the same animation, only reset it and continue
-            if (_currentAnimation.Name == name)
-            {
-                Reset();
-                return;
-            }
-            // Look for the animation only if its new
-            else
-                _currentAnimation = animations.Find(x => x.Name.Contains(name));
-		}
+            Reset();
+            return;
+        }
+        // Look for the animation only if its new or current animation is null
+        else if (_currentAnimation == null || _currentAnimation.Name != name)
+            _currentAnimation = animations.Find(x => x.Name.Contains(name));
 
 		// If we have an animation to play, flag as playing, reset timer and take frame count
 		if(_currentAnimation != null)
@@ -99,6 +96,7 @@ public class SpriteAnimator : MonoBehaviour {
 			Debug.LogError("Animation '" + name + "' not found.", gameObject);
 	}
 
+    [ContextMenu("Resume Animation")]
     public void Resume()
     {
         // Resume the animation, this is the same as calling Play with the same name, but more simplificated
@@ -106,19 +104,20 @@ public class SpriteAnimator : MonoBehaviour {
             _playing = true;
     }
 
-	public void Stop()
+    [ContextMenu("Stop Animation")]
+    public void Stop()
 	{
         // Stop the animation
         _playing = false;
         onStop.Invoke();
 	}
 
-	public void Reset()
+    [ContextMenu("Reset Animation")]
+    public void Reset()
 	{
 		//Reset all the animation counters
 		_animationTimer = 0;
 		_animationIndex	= 0;
-		_playing = true;
 	}
 
 	public bool IsPlaying

@@ -48,9 +48,13 @@ public class EditorSpriteAnimator : Editor
         for (int i = 0; i < _animationNames.Length; i++)
         {
             if (_target.animations[i])
+            {
                 _animationNames[i] = _target.animations[i].Name;
+                if (_target.animations[i].Name == _target.startAnimation)
+                    _startAnimationIndex = i;
+            }
             else
-                _animationNames[i] = "null_"+i;
+                _animationNames[i] = "null_" + i;
         }
     }
 }

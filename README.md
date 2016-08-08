@@ -5,16 +5,17 @@ A plugin to do simple sprite animations avoiding the big and tedious Mechanim sy
 Simply copy the files on your project or use the UnityPackage included.
 
 # Creating an animation
-Use the animation editor to create new animation files. You can open it selecting **Sprite Animation Editor** on **Elendow Tools// tab.
-- Give a name to the animation.
+Use the animation editor to create new animation files. You can open it selecting **Sprite Animation Editor** on **Elendow Tools** tab.
+- Give a name to the animation. This will be also the asset name. This name will be the one used to play the animations.
 - Select the folder to save.
 - Add frames manually or dropping the sprite to the Drag&Drop box.
 - Any change is automatically saved.
 
-# Configuring the animator
-- **playOnAwake** will start playing the first animation of the list on the object awake.
-- **framesPerSecond** is the speed of the animation, 0 will pause the animation.
-- **animations** is a list with all the animations.
+# Inspector properties
+- **Play on Awake** will start playing the **Start Animation** when the object awakes.
+- **Start Animation** is the animation that will plays when **Play on Awake** is true.
+- **FPS** is the speed of the animation, <= 0 will pause the animation.
+- **Animations** is a list with all the animations.
 
 # Using the animations
 Add the animator component to the object you want to animate and fill the animations list with the animations you want. 

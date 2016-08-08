@@ -10,13 +10,11 @@ public class SpriteAnimator : MonoBehaviour {
 
 	public bool playOnAwake = false;
 	public int framesPerSecond = 30;
-	public List<SpriteAnimation> animations;
+    public string startAnimation;
+    public List<SpriteAnimation> animations;
 
-	[HideInInspector]
 	public UnityEvent onFinish;
-	[HideInInspector]
 	public UnityEvent onStop;
-	[HideInInspector]
 	public UnityEvent onPlay;
 
 	private bool _playing;
@@ -39,10 +37,9 @@ public class SpriteAnimator : MonoBehaviour {
 		}
 
         //Play the first animation if play on awake
-        //TODO choose the play on awake animation
         _currentAnimation = animations[0];
         if (playOnAwake)
-			Play(animations[0].Name);
+			Play(startAnimation);
 	}
 
 	private void Update()

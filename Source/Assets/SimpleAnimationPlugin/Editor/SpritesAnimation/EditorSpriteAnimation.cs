@@ -7,9 +7,14 @@ using System.Collections.Generic;
 
 public class EditorSpriteAnimation : EditorWindow {
 
-	private SpriteAnimation _selectedAnimation;
-	private string _animName = "Animation";
-	private Vector2 _pos = Vector2.zero;
+    private float _frameWidth = 70f;
+    private float _frameHeight = 70f;
+    private float _frameOffset = 10f;
+
+    private string _newAnimName = "Animation";
+
+    private SpriteAnimation _selectedAnimation;
+    private Vector2 _pos = Vector2.zero;
     private List<Sprite> _draggedSprites;
 
 	[MenuItem ("Elendow Tools/Sprite Animation Editor", false, 0)]
@@ -19,12 +24,14 @@ public class EditorSpriteAnimation : EditorWindow {
 
 	private void Update()
 	{
+        // Change animation if we select an animation on the project
 		if(Selection.activeObject != null && Selection.activeObject.GetType() == typeof(SpriteAnimation))
 		{
 			_selectedAnimation = Selection.activeObject as SpriteAnimation;
 			Repaint();
 		}
 
+        // Add the frames dropped on the drag and drop box
         if(_draggedSprites != null && _draggedSprites.Count > 0)
         {
             for(int i = 0; i < _draggedSprites.Count; i++)
@@ -36,11 +43,15 @@ public class EditorSpriteAnimation : EditorWindow {
 	}
 
 	private void OnGUI(){	
+        // Create animation box
 		EditorGUILayout.Space();
-
 		EditorGUILayout.LabelField("Create Animation");
 		EditorGUILayout.BeginHorizontal("box");
-		_animName = EditorGUILayout.TextField("Name", _animName);
+
+        // New animation name field
+        _newAnimName = EditorGUILayout.TextField("Name", _newAnimName);
+
+        // New animaton button
 		if(GUILayout.Button("New Animation"))
 		{
 			string folder = EditorUtility.OpenFolderPanel("New Animation", "Assets", "");
@@ -52,16 +63,24 @@ public class EditorSpriteAnimation : EditorWindow {
 		}
 		EditorGUILayout.EndHorizontal();
 
+        // Edit animation box
 		EditorGUILayout.Space();
-
 		EditorGUILayout.LabelField("Edit Animation");
 		EditorGUILayout.BeginVertical("box");
 		{
-			_selectedAnimation = EditorGUILayout.ObjectField(_selectedAnimation, typeof(SpriteAnimation), false) as SpriteAnimation;
-			if(_selectedAnimation != null)
-			{
-				_selectedAnimation.Name = EditorGUILayout.TextField("Name", _selectedAnimation.Name);
+            EditorGUILayout.Space();
+            // Animation asset field
+            _selectedAnimation = EditorGUILayout.ObjectField(_selectedAnimation, typeof(SpriteAnimation), false) as SpriteAnimation;
 
+            EditorGUILayout.Space();
+            if (_selectedAnimation != null)
+			{
+                // Name field
+                _selectedAnimation.Name = EditorGUILayout.TextField("Name", _selectedAnimation.Name);
+              
+                EditorGUILayout.Space();
+
+                // Drag and drop box for sprite frames
                 Event evt = Event.current;
                 Rect dropArea = GUILayoutUtility.GetRect(0f, 50f, GUILayout.ExpandWidth(true));
                 GUIStyle style = new GUIStyle("box");
@@ -87,10 +106,16 @@ public class EditorSpriteAnimation : EditorWindow {
                         break;
                 }
 
+                EditorGUILayout.Space();
+
+                // Manually add empty frames
                 if (GUILayout.Button("Add Frame"))
                     AddFrame();
 
-				if(_selectedAnimation.FramesCount > 0)
+                EditorGUILayout.Space();
+
+                // Individual frames
+                if (_selectedAnimation.FramesCount > 0)
 				{
 					List<int> remove = new List<int>();
 					_pos = EditorGUILayout.BeginScrollView(_pos);
@@ -99,21 +124,23 @@ public class EditorSpriteAnimation : EditorWindow {
 						int j = 0;
 						for(int i = 0; i < _selectedAnimation.FramesCount; i++)
 						{
-							if((j+1) * 80 > EditorGUIUtility.currentViewWidth)
+							if((j+1) * (_frameWidth + _frameOffset) > EditorGUIUtility.currentViewWidth)
 							{
 								EditorGUILayout.EndHorizontal();
 								EditorGUILayout.BeginHorizontal();
 								j = 0;
 							}
-							EditorGUILayout.BeginVertical(GUILayout.Width(70f));
+							EditorGUILayout.BeginVertical(GUILayout.Width(_frameWidth));
 							{
-								_selectedAnimation.Frames[i] = EditorGUILayout.ObjectField(_selectedAnimation.Frames[i], typeof(Sprite), false, GUILayout.Width(70f), GUILayout.Height(70f)) as Sprite;
-								if(GUILayout.Button("Remove", GUILayout.Width(70f)))
+								_selectedAnimation.Frames[i] = EditorGUILayout.ObjectField(_selectedAnimation.Frames[i], typeof(Sprite), false, GUILayout.Width(_frameWidth), GUILayout.Height(_frameHeight)) as Sprite;
+                                // Remove button for individual frame
+                                if (GUILayout.Button("Remove", GUILayout.Width(_frameWidth)))
 									remove.Add(i);
 							}
 							EditorGUILayout.EndVertical();
 							j++;
 						}
+                        // Remove the previously selected frames
 						for(int i = 0; i < remove.Count; i++)
 							_selectedAnimation.Frames.RemoveAt(remove[i]);
 						EditorGUILayout.EndHorizontal();
@@ -142,7 +169,7 @@ public class EditorSpriteAnimation : EditorWindow {
     private void CreateAnimation(string folder){
 		SpriteAnimation asset = CreateInstance<SpriteAnimation>();
 		string relativeFolder = "";
-		asset.Name = _animName;
+		asset.Name = _newAnimName;
         int folderPosition = folder.IndexOf("Assets/");
         if (folderPosition > 0)
         {
@@ -151,12 +178,11 @@ public class EditorSpriteAnimation : EditorWindow {
         }
         else
             relativeFolder = "Assets/";
-		AssetDatabase.CreateAsset(asset, relativeFolder + _animName + ".asset");
+		AssetDatabase.CreateAsset(asset, relativeFolder + _newAnimName + ".asset");
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 		Selection.activeObject 	= asset;
 		_selectedAnimation = asset;
-		EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + _animName , "OK");
+		EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + _newAnimName, "OK");
 	}
-
 }

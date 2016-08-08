@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿// Simple Sprite Animation Plugin by Elendow
+// http://elendow.com
+// https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
+using UnityEngine;
 using UnityEngine.Events;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(SpriteRenderer))]

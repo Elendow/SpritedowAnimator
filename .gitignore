@@ -22,3 +22,5 @@ ExportedObj/
 *.svd
 *.meta
 sysinfo.txt
+*.png
+*.asset

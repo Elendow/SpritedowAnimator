@@ -1,6 +1,7 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
-using System.Collections;
+﻿// Simple Sprite Animation Plugin by Elendow
+// http://elendow.com
+// https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
+using UnityEngine;
 using System.Collections.Generic;
 
 public class SpriteAnimation : ScriptableObject

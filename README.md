@@ -5,7 +5,11 @@ A plugin to do simple sprite animations avoiding the big and tedious Mechanim sy
 Simply copy the files on your project or use the UnityPackage included.
 
 # Creating an animation
-Use the animation editor to create new animation files. It's easy an simple to use.
+Use the animation editor to create new animation files. You can open it selecting **Sprite Animation Editor** on **Elendow Tools// tab.
+- Give a name to the animation.
+- Select the folder to save.
+- Add frames manually or dropping the sprite to the Drag&Drop box.
+- Any change is automatically saved.
 
 # Configuring the animator
 - **playOnAwake** will start playing the first animation of the list on the object awake.

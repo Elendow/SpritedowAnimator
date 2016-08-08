@@ -29,14 +29,14 @@ public class SpriteAnimator : MonoBehaviour {
 	{
 		_spriteRenderer = GetComponent<SpriteRenderer>();
 
-		//Why an animator without animation?
+		// Why an animator without animation?
 		if(animations.Count == 0)
 		{
 			Debug.LogError("Sprite animator without animations.", gameObject);
 			return;
 		}
 
-        //Play the first animation if play on awake
+        // Play the first animation if play on awake
         _currentAnimation = animations[0];
         if (playOnAwake)
 			Play(startAnimation);
@@ -44,7 +44,7 @@ public class SpriteAnimator : MonoBehaviour {
 
 	private void Update()
 	{
-		//We do nothing if FPS = 0
+		// We do nothing if FPS = 0
 		if(framesPerSecond <= 0)
 			return;
 
@@ -54,6 +54,7 @@ public class SpriteAnimator : MonoBehaviour {
 
             if (1f / framesPerSecond < _animationTimer)
             {
+                // Next Frame!
                 _spriteRenderer.sprite = _currentAnimation.GetFrame(_animationIndex);
                 _animationTimer = 0;
                 _animationIndex += 1;
@@ -68,30 +69,26 @@ public class SpriteAnimator : MonoBehaviour {
         }
 	}
 
-	public void PlayOneShot(string name)
+	public void Play(string name, bool oneShot = false)
 	{
-		//Play the animation only one time
-		_oneShot = true;
-		Play(name);
-	}
+        _oneShot = oneShot;
 
-	public void Play(string name)
-	{
-		if(_currentAnimation != null)
-		{
-			//Do nothing if this animation is already playing
-			if(_currentAnimation.Name == name && _playing)
-				return;
-			//Look for the animation only if its new
-			else if(_currentAnimation.Name != name)
-				_currentAnimation = animations.Find(x => x.Name.Contains(name));
+        if (_currentAnimation != null)
+        {
+            // If it's the same animation, only reset it and continue
+            if (_currentAnimation.Name == name)
+            {
+                Reset();
+                return;
+            }
+            // Look for the animation only if its new
+            else
+                _currentAnimation = animations.Find(x => x.Name.Contains(name));
 		}
 
-		//If we have an animation to play, flag as playing, reset timer and take frame count
+		// If we have an animation to play, flag as playing, reset timer and take frame count
 		if(_currentAnimation != null)
 		{
-			//We don't reset the animation index because if we do we can't resume the animation
-			//The animation index will reset alone if it's necessary
 			onPlay.Invoke();
 			_animationTimer = 0;
             _animationIndex = 0;
@@ -102,11 +99,17 @@ public class SpriteAnimator : MonoBehaviour {
 			Debug.LogError("Animation '" + name + "' not found.", gameObject);
 	}
 
+    public void Resume()
+    {
+        // Resume the animation, this is the same as calling Play with the same name, but more simplificated
+        if (_currentAnimation != null)
+            _playing = true;
+    }
+
 	public void Stop()
 	{
-		//Stop the animation
-		_playing = false;
-        _oneShot = false;
+        // Stop the animation
+        _playing = false;
         onStop.Invoke();
 	}
 

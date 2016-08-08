@@ -16,12 +16,12 @@ public class EditorSpriteAnimator : Editor
             GetAnimationNames();
 
         SerializedProperty animations = serializedObject.FindProperty("animations");
-        _target.playOnAwake = EditorGUILayout.Toggle("Play on awake", _target.playOnAwake);
+        _target.playOnAwake = EditorGUILayout.Toggle("Play on Awake", _target.playOnAwake);
         if (_target.playOnAwake)
         {
             if (_animationNames.Length > 0)
             {
-                _startAnimationIndex = EditorGUILayout.Popup("Start animation", _startAnimationIndex, _animationNames);
+                _startAnimationIndex = EditorGUILayout.Popup("Start Animation", _startAnimationIndex, _animationNames);
                 _target.startAnimation = _animationNames[_startAnimationIndex];
             }
             else

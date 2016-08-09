@@ -22,10 +22,13 @@ Add the animator component to the object you want to animate and fill the animat
 This component requires a SpriteRenderer component to work. If the object doesn't have one, the animator will add it automatically.
 
 # Methods
-- **Play(string animationName, bool oneShot = false)** plays the animation infinite times if oneShot = false, only one time if true. If the animationName is the same as the last used, it simply resets it with the new oneShot property.
-- **Resume()** resumes a stopped animation.
+- **Play(string animationName, bool oneShot = false)** plays the animation infinite times if oneShot = false, only one time if true.
+  * If the animation is the same that is playing, nothing will happend but the **oneShot** attribute will update.
+  * If the animation is the same that was playing but its not playing now, the animation will **Reset** and **Resume** and the **oneShot** attribute will update.
+  * If the animation is different, it will play the new animation from the start.
+- **Resume()** resumes the current animation.
 - **Stop()** stops the current animation.
-- **Reset()** restarts the animation (playing or not) to its initial state.
+- **Reset()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.
 
 # Properties
 - **IsPlaying** returns true if the animation is playing and false if not.

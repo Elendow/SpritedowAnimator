@@ -12,14 +12,14 @@ public class EditorSpriteAnimator : Editor
     {
         _target = (SpriteAnimator)target;
 
-        if(_animationNames == null)
+        if (_animationNames == null)
             GetAnimationNames();
 
         SerializedProperty animations = serializedObject.FindProperty("animations");
         _target.playOnAwake = EditorGUILayout.Toggle("Play on Awake", _target.playOnAwake);
         if (_target.playOnAwake)
         {
-            if (_animationNames.Length > 0)
+            if (_animationNames != null && _animationNames.Length > 0)
             {
                 _startAnimationIndex = EditorGUILayout.Popup("Start Animation", _startAnimationIndex, _animationNames);
                 _target.startAnimation = _animationNames[_startAnimationIndex];
@@ -44,17 +44,20 @@ public class EditorSpriteAnimator : Editor
 
     private void GetAnimationNames()
     {
-        _animationNames = new string[_target.animations.Count];
-        for (int i = 0; i < _animationNames.Length; i++)
+        if (_target.animations != null && _target.animations.Count > 0)
         {
-            if (_target.animations[i])
+            _animationNames = new string[_target.animations.Count];
+            for (int i = 0; i < _animationNames.Length; i++)
             {
-                _animationNames[i] = _target.animations[i].Name;
-                if (_target.animations[i].Name == _target.startAnimation)
-                    _startAnimationIndex = i;
+                if (_target.animations[i])
+                {
+                    _animationNames[i] = _target.animations[i].Name;
+                    if (_target.animations[i].Name == _target.startAnimation)
+                        _startAnimationIndex = i;
+                }
+                else
+                    _animationNames[i] = "null_" + i;
             }
-            else
-                _animationNames[i] = "null_" + i;
         }
     }
 }

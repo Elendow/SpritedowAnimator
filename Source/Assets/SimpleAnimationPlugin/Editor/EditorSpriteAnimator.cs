@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿// Simple Sprite Animation Plugin by Elendow
+// http://elendow.com
+// https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
+using UnityEngine;
 using UnityEditor;
 
 [CustomEditor(typeof(SpriteAnimator))]

@@ -9,7 +9,7 @@ Use the animation editor to create new animation files. You can open it selectin
 - Give a name to the animation. This will be also the asset name. This name will be the one used to play the animations.
 - Select the folder to save.
 - Add frames manually or dropping the sprite to the Drag&Drop box.
-  - You can change the duration of this frame, 1 by default, to any number greater than 0. 
+  - You can change the duration of each frame, 1 by default, to any number greater than 0. 
 - Any change is automatically saved.
 
 # Inspector properties
@@ -21,6 +21,7 @@ Use the animation editor to create new animation files. You can open it selectin
 # Using the animations
 Add the animator component to the object you want to animate and fill the animations list with the animations you want. 
 This component requires a SpriteRenderer component to work. If the object doesn't have one, the animator will add it automatically.
+On your code, use **GetComponent<SpriteAnimator>** to get the reference and start using it.
 
 # Methods
 - **Play(string animationName, bool oneShot = false)** plays the animation infinite times if oneShot = false, only one time if true.

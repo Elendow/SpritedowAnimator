@@ -9,6 +9,7 @@ Use the animation editor to create new animation files. You can open it selectin
 - Give a name to the animation. This will be also the asset name. This name will be the one used to play the animations.
 - Select the folder to save.
 - Add frames manually or dropping the sprite to the Drag&Drop box.
+  - You can change the duration of this frame, 1 by default, to any number greater than 0. 
 - Any change is automatically saved.
 
 # Inspector properties
@@ -32,6 +33,7 @@ This component requires a SpriteRenderer component to work. If the object doesn'
 
 # Properties
 - **IsPlaying** returns true if the animation is playing and false if not.
+- **CurrentAnimation** returns a string with the current animation name.
 
 # Events
 - **onFinish** calls when the animation reach the last frame.

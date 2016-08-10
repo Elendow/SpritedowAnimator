@@ -8,7 +8,8 @@ ProjectSettings/
 /[Bb]uild/
 /[Bb]uilds/
 /[Pp]rojectSettings/
-/Assets/AssetStoreTools*
+Source/Assets/AssetStoreTools/*
+Source/Assets/Sprites/*
 ExportedObj/
 *.csproj
 *.unityproj
@@ -22,6 +23,5 @@ ExportedObj/
 *.svd
 *.meta
 sysinfo.txt
-*.png
 *.asset
 *.unity

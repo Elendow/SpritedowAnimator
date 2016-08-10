@@ -13,6 +13,7 @@ public class EditorSpriteAnimation : EditorWindow {
 
     private string _newAnimName = "Animation";
 
+    private Texture2D _clockIcon = null;
     private SpriteAnimation _selectedAnimation;
     private Vector2 _pos = Vector2.zero;
     private List<Sprite> _draggedSprites;
@@ -42,9 +43,14 @@ public class EditorSpriteAnimation : EditorWindow {
         }
 	}
 
-	private void OnGUI(){	
+	private void OnGUI()
+    {
+        // Get clock icon
+        if (_clockIcon == null)
+            _clockIcon = Resources.Load<Texture2D>("clockIcon");
+
         // Create animation box
-		EditorGUILayout.Space();
+        EditorGUILayout.Space();
 		EditorGUILayout.LabelField("Create Animation");
 		EditorGUILayout.BeginHorizontal("box");
 
@@ -146,7 +152,7 @@ public class EditorSpriteAnimation : EditorWindow {
 
                                 // Frames duration field
                                 EditorGUILayout.BeginHorizontal();
-                                EditorGUILayout.LabelField("D", GUILayout.Width(15));
+                                GUILayout.Label(_clockIcon);
                                 _selectedAnimation.FramesDuration[i] = EditorGUILayout.IntField(_selectedAnimation.FramesDuration[i], GUILayout.Width(_frameWidth - 20));
                                 if (_selectedAnimation.FramesDuration[i] <= 0) _selectedAnimation.FramesDuration[i] = 1;
                                 EditorGUILayout.EndHorizontal();

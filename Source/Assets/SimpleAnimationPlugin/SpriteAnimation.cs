@@ -7,34 +7,48 @@ using System.Collections.Generic;
 public class SpriteAnimation : ScriptableObject
 {
 	[SerializeField]
-	private string animationName;
+	private string _animationName;
 	[SerializeField]
-	private List<Sprite> frames;
+	private List<Sprite> _frames;
+    [SerializeField]
+    private List<int> _framesDuration;
 
-	public SpriteAnimation()
+    public SpriteAnimation()
 	{
-		frames = new List<Sprite>();
-	}
+        _frames = new List<Sprite>();
+        _framesDuration = new List<int>();
+    }
 
 	public Sprite GetFrame(int index)
 	{
-		return frames[index];
+		return _frames[index];
 	}
+
+    public int GetFrameDuration(int index)
+    {
+        return _framesDuration[index];
+    }
 
 	public string Name
 	{
-		get { return animationName; }
-		set { animationName = value; }
+		get { return _animationName; }
+		set { _animationName = value; }
 	}
 
 	public int FramesCount
 	{
-		get { return frames.Count; }
+		get { return _frames.Count; }
 	}
 
 	public List<Sprite> Frames
 	{
-		get { return frames; }
-		set { frames = value; }
+		get { return _frames; }
+		set { _frames = value; }
 	}
+
+    public List<int> FramesDuration
+    {
+        get { return _framesDuration; }
+        set { _framesDuration = value; }
+    }
 }

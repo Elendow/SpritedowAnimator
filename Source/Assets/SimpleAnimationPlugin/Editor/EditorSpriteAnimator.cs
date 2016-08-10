@@ -35,6 +35,8 @@ public class EditorSpriteAnimator : Editor
         }
 
         _target.framesPerSecond = EditorGUILayout.IntField("FPS", _target.framesPerSecond);
+        if (_target.framesPerSecond < 0) _target.framesPerSecond = 0;
+
         EditorGUILayout.PropertyField(animations, true);
 
         if (GUI.changed)

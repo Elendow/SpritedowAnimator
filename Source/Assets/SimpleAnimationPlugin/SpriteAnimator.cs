@@ -8,7 +8,6 @@ using System.Collections.Generic;
 [RequireComponent(typeof(SpriteRenderer))]
 public class SpriteAnimator : MonoBehaviour
 {
-
     public bool playOnAwake = false;
     public int framesPerSecond = 30;
     public string startAnimation;
@@ -22,6 +21,7 @@ public class SpriteAnimator : MonoBehaviour
     private bool _oneShot;
     private int _animationIndex;
     private int _framesInAnimation;
+    private int _frameDurationCounter;
     private float _animationTimer;
     private SpriteAnimation _currentAnimation;
     private SpriteRenderer _spriteRenderer;
@@ -44,7 +44,7 @@ public class SpriteAnimator : MonoBehaviour
 
     private void Update()
     {
-        // We do nothing if FPS = 0
+        // We do nothing if FPS <= 0
         if (framesPerSecond <= 0)
             return;
 
@@ -54,17 +54,24 @@ public class SpriteAnimator : MonoBehaviour
 
             if (1f / framesPerSecond < _animationTimer)
             {
-                // Next Frame!
-                _spriteRenderer.sprite = _currentAnimation.GetFrame(_animationIndex);
-                _animationTimer = 0;
-                _animationIndex += 1;
-                if (_animationIndex >= _framesInAnimation)
+                // Check the duration of this frame (in frames, lol)
+                _frameDurationCounter++;
+
+                if (_frameDurationCounter >= _currentAnimation.FramesDuration[_animationIndex])
                 {
-                    // Last frame, reset index and stop if is one shot
-                    _animationIndex = 0;
-                    onFinish.Invoke();
-                    if (_oneShot)
-                        Stop();
+                    // Next Frame!
+                    _spriteRenderer.sprite = _currentAnimation.GetFrame(_animationIndex);
+                    _animationTimer = 0;
+                    _animationIndex += 1;
+                    _frameDurationCounter = 0;
+                    if (_animationIndex >= _framesInAnimation)
+                    {
+                        // Last frame, reset index and stop if is one shot
+                        _animationIndex = 0;
+                        onFinish.Invoke();
+                        if (_oneShot)
+                            Stop();
+                    }
                 }
             }
         }
@@ -94,8 +101,7 @@ public class SpriteAnimator : MonoBehaviour
         if (_currentAnimation != null)
         {
             onPlay.Invoke();
-            _animationTimer = 0;
-            _animationIndex = 0;
+            Reset();
             _playing = true;
             _framesInAnimation = _currentAnimation.FramesCount;
         }
@@ -125,10 +131,16 @@ public class SpriteAnimator : MonoBehaviour
         //Reset all the animation counters
         _animationTimer = 0;
         _animationIndex = 0;
+        _frameDurationCounter = 0;
     }
 
     public bool IsPlaying
     {
         get { return _playing; }
+    }
+
+    public string CurrentAnimation
+    {
+        get { return _currentAnimation.Name; }
     }
 }

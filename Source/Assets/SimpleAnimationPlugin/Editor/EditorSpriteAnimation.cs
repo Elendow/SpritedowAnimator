@@ -25,7 +25,7 @@ public class EditorSpriteAnimation : EditorWindow {
 	private void Update()
 	{
         // Change animation if we select an animation on the project
-		if(Selection.activeObject != null && Selection.activeObject.GetType() == typeof(SpriteAnimation))
+        if (Selection.activeObject != null && Selection.activeObject.GetType() == typeof(SpriteAnimation))
 		{
 			_selectedAnimation = Selection.activeObject as SpriteAnimation;
 			Repaint();
@@ -75,6 +75,15 @@ public class EditorSpriteAnimation : EditorWindow {
             EditorGUILayout.Space();
             if (_selectedAnimation != null)
 			{
+                // Retrocompatibility check for the new frames duration field
+                if (_selectedAnimation.FramesCount != _selectedAnimation.FramesDuration.Count)
+                {
+                    _selectedAnimation.FramesDuration.Clear();
+
+                    for (int i = 0; i < _selectedAnimation.FramesCount; i++)
+                        _selectedAnimation.FramesDuration.Add(1);
+                }
+
                 // Name field
                 _selectedAnimation.Name = EditorGUILayout.TextField("Name", _selectedAnimation.Name);
               
@@ -132,7 +141,16 @@ public class EditorSpriteAnimation : EditorWindow {
 							}
 							EditorGUILayout.BeginVertical(GUILayout.Width(_frameWidth));
 							{
+                                // Frame Sprite field
 								_selectedAnimation.Frames[i] = EditorGUILayout.ObjectField(_selectedAnimation.Frames[i], typeof(Sprite), false, GUILayout.Width(_frameWidth), GUILayout.Height(_frameHeight)) as Sprite;
+
+                                // Frames duration field
+                                EditorGUILayout.BeginHorizontal();
+                                EditorGUILayout.LabelField("D", GUILayout.Width(15));
+                                _selectedAnimation.FramesDuration[i] = EditorGUILayout.IntField(_selectedAnimation.FramesDuration[i], GUILayout.Width(_frameWidth - 20));
+                                if (_selectedAnimation.FramesDuration[i] <= 0) _selectedAnimation.FramesDuration[i] = 1;
+                                EditorGUILayout.EndHorizontal();
+
                                 // Remove button for individual frame
                                 if (GUILayout.Button("Remove", GUILayout.Width(_frameWidth)))
 									remove.Add(i);
@@ -141,8 +159,11 @@ public class EditorSpriteAnimation : EditorWindow {
 							j++;
 						}
                         // Remove the previously selected frames
-						for(int i = 0; i < remove.Count; i++)
-							_selectedAnimation.Frames.RemoveAt(remove[i]);
+                        for (int i = 0; i < remove.Count; i++)
+                        {
+                            _selectedAnimation.Frames.RemoveAt(remove[i]);
+                            _selectedAnimation.FramesDuration.RemoveAt(remove[i]);
+                        }
 						EditorGUILayout.EndHorizontal();
 					}
 					EditorGUILayout.EndScrollView();
@@ -157,7 +178,8 @@ public class EditorSpriteAnimation : EditorWindow {
 
     private void AddFrame()
     {
-        _selectedAnimation.Frames.Add(Sprite.Create(new Texture2D(0, 0), new Rect(), Vector2.zero));
+        _selectedAnimation.Frames.Add(new Sprite());
+        _selectedAnimation.FramesDuration.Add(1);
     }
 
     private void AddFrame(Sprite s)

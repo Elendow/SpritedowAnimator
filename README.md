@@ -1,5 +1,5 @@
 # Unity Simple Sprite Animation Plugin
-A plugin to do simple sprite animations avoiding the big and tedious Mechanim system. Oriented to programmers, if you prefer visual scripting you maybe prefer using Mechanim instead of this.
+A plugin to do simple sprite animations avoiding the big and tedious Unitys's Mechanim system. Oriented to programmers, if you prefer visual scripting you maybe prefer using Mechanim instead of this.
 
 # Installation Guide
 Simply copy the files on your project or use the UnityPackage included.

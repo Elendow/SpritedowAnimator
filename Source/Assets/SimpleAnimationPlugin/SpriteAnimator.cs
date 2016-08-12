@@ -54,24 +54,26 @@ public class SpriteAnimator : MonoBehaviour
 
             if (1f / framesPerSecond < _animationTimer)
             {
-                // Check the duration of this frame (in frames, lol)
+                // Next Frame!
                 _frameDurationCounter++;
+                _spriteRenderer.sprite = _currentAnimation.GetFrame(_animationIndex);
+                _animationTimer = 0;
 
                 if (_frameDurationCounter >= _currentAnimation.FramesDuration[_animationIndex])
                 {
-                    // Next Frame!
-                    _spriteRenderer.sprite = _currentAnimation.GetFrame(_animationIndex);
-                    _animationTimer = 0;
+                    // Change frame only if have passed the desired frames
                     _animationIndex += 1;
                     _frameDurationCounter = 0;
-                    if (_animationIndex >= _framesInAnimation)
-                    {
-                        // Last frame, reset index and stop if is one shot
-                        _animationIndex = 0;
-                        onFinish.Invoke();
-                        if (_oneShot)
-                            Stop();
-                    }
+
+                }
+
+                if (_animationIndex >= _framesInAnimation)
+                {
+                    // Last frame, reset index and stop if is one shot
+                    _animationIndex = 0;
+                    onFinish.Invoke();
+                    if (_oneShot)
+                        Stop();
                 }
             }
         }

@@ -93,22 +93,19 @@ public class SpriteAnimator : MonoBehaviour
             }
             return;
         }
-        else if (_currentAnimation != null && _currentAnimation.Name == name && _playing)
-            return;
+       
         // Look for the animation only if its new or current animation is null
-        else if (_currentAnimation == null || _currentAnimation.Name != name)
+        if (_currentAnimation == null || _currentAnimation.Name != name)
             _currentAnimation = animations.Find(x => x.Name.Contains(name));
 
         // If we have an animation to play, flag as playing, reset timer and take frame count
-        if (_currentAnimation != null)
-        {
-            onPlay.Invoke();
-            Reset();
-            _playing = true;
-            _framesInAnimation = _currentAnimation.FramesCount;
-        }
-        else
+        if (_currentAnimation == null)
             Debug.LogError("Animation '" + name + "' not found.", gameObject);
+
+        onPlay.Invoke();
+        Reset();
+        _playing = true;
+        _framesInAnimation = _currentAnimation.FramesCount;
     }
 
     [ContextMenu("Resume Animation")]

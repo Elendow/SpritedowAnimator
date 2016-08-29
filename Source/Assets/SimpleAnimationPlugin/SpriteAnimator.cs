@@ -37,7 +37,7 @@ public class SpriteAnimator : MonoBehaviour
             return;
         }
 
-        // Play the first animation if play on awake
+        // Play the start animation if play on awake
         if (playOnAwake)
             Play(startAnimation);
     }
@@ -64,7 +64,6 @@ public class SpriteAnimator : MonoBehaviour
                     // Change frame only if have passed the desired frames
                     _animationIndex += 1;
                     _frameDurationCounter = 0;
-
                 }
 
                 if (_animationIndex >= _framesInAnimation)
@@ -98,10 +97,11 @@ public class SpriteAnimator : MonoBehaviour
         if (_currentAnimation == null || _currentAnimation.Name != name)
             _currentAnimation = animations.Find(x => x.Name.Contains(name));
 
-        // If we have an animation to play, flag as playing, reset timer and take frame count
+       // Animation not found
         if (_currentAnimation == null)
             Debug.LogError("Animation '" + name + "' not found.", gameObject);
 
+        // If we have an animation to play, flag as playing, reset timer and take frame count
         onPlay.Invoke();
         Reset();
         _playing = true;

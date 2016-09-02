@@ -19,6 +19,7 @@ public class SpriteAnimator : MonoBehaviour
 
     private bool _playing;
     private bool _oneShot;
+    private bool _backwards;
     private int _animationIndex;
     private int _framesInAnimation;
     private int _frameDurationCounter;
@@ -62,14 +63,14 @@ public class SpriteAnimator : MonoBehaviour
                 if (_frameDurationCounter >= _currentAnimation.FramesDuration[_animationIndex])
                 {
                     // Change frame only if have passed the desired frames
-                    _animationIndex += 1;
+                    _animationIndex = (_backwards) ? _animationIndex - 1 : _animationIndex + 1;
                     _frameDurationCounter = 0;
                 }
 
-                if (_animationIndex >= _framesInAnimation)
+                if (_animationIndex >= _framesInAnimation || _animationIndex < 0)
                 {
                     // Last frame, reset index and stop if is one shot
-                    _animationIndex = 0;
+                    _animationIndex = (_backwards) ? _framesInAnimation - 1 : 0;
                     onFinish.Invoke();
                     if (_oneShot)
                         Stop();
@@ -78,9 +79,10 @@ public class SpriteAnimator : MonoBehaviour
         }
     }
 
-    public void Play(string name, bool oneShot = false)
+    public void Play(string name, bool oneShot = false, bool backwards = false)
     {
         _oneShot = oneShot;
+        _backwards = backwards;
 
         // If it's the same animation but not playing, reset it, if playing, do nothing.
         if (_currentAnimation != null && _currentAnimation.Name == name)

@@ -24,7 +24,7 @@ This component requires a SpriteRenderer component to work. If the object doesn'
 On your code, use **GetComponent** to get the reference and start using it.
 
 # Methods
-- **Play(string animationName, bool oneShot = false)** plays the animation infinite times if oneShot = false, only one time if true.
+- **Play(string animationName, bool oneShot = false, bool backwards = false)** plays the animation infinite times if oneShot = false, only one time if true, fordward if backwards = false and backwards if its true.
   * If the animation is the same that is playing, nothing will happend but the **oneShot** attribute will update.
   * If the animation is the same that was playing but its not playing now, the animation will **Reset** and **Resume** and the **oneShot** attribute will update.
   * If the animation is different, it will play the new animation from the start.

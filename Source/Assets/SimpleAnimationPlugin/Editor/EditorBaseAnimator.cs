@@ -46,7 +46,7 @@ public class EditorBaseAnimator : Editor
 
         if (GUI.changed)
         {
-            EditorUtility.SetDirty(t);
+            EditorUtility.SetDirty(targetAnimator);
             serializedObject.ApplyModifiedProperties();
             GetAnimationNames(targetAnimator);
         }

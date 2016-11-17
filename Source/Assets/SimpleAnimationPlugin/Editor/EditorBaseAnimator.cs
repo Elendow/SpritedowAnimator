@@ -10,14 +10,6 @@ public class EditorBaseAnimator : Editor
     protected int startAnimationIndex = 0;
     protected string[] animationNames;
 
-    private BaseAnimator t;
-
-    public override void OnInspectorGUI()
-    {
-        t = (UIAnimator)target;
-        DrawInspector(t);
-    }
-
     protected void DrawInspector(BaseAnimator targetAnimator)
     {
         if (animationNames == null)

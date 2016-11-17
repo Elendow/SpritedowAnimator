@@ -2,20 +2,21 @@
 // http://elendow.com
 // https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
 using UnityEngine;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(SpriteRenderer))]
-public class SpriteAnimator : BaseAnimator
+[RequireComponent(typeof(Image))]
+public class UIAnimator : BaseAnimator
 {
-    private SpriteRenderer spriteRenderer;
+    private Image imageRenderer;
 
     protected override void Awake()
     {
         base.Awake();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        imageRenderer = GetComponent<Image>();
     }
 
     protected override void ChangeFrame(Sprite frame)
     {
-        spriteRenderer.sprite = frame;
+        imageRenderer.sprite = frame;
     }
 }

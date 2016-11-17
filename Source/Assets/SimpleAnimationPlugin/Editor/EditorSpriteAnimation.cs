@@ -7,16 +7,16 @@ using System.Collections.Generic;
 
 public class EditorSpriteAnimation : EditorWindow {
 
-    private float _frameWidth = 70f;
-    private float _frameHeight = 70f;
-    private float _frameOffset = 10f;
+    private const float FRAME_WIDTH = 70f;
+    private const float FRAME_HEIGHT = 70f;
+    private const float FRAME_OFFSET = 10f;
 
-    private string _newAnimName = "Animation";
+    private string newAnimName = "Animation";
 
-    private Texture2D _clockIcon = null;
-    private SpriteAnimation _selectedAnimation;
-    private Vector2 _pos = Vector2.zero;
-    private List<Sprite> _draggedSprites;
+    private Texture2D clockIcon = null;
+    private SpriteAnimation selectedAnimation;
+    private Vector2 pos = Vector2.zero;
+    private List<Sprite> draggedSprites;
 
 	[MenuItem ("Elendow Tools/Sprite Animation Editor", false, 0)]
     private static void ShowWindow(){
@@ -28,26 +28,26 @@ public class EditorSpriteAnimation : EditorWindow {
         // Change animation if we select an animation on the project
         if (Selection.activeObject != null && Selection.activeObject.GetType() == typeof(SpriteAnimation))
 		{
-			_selectedAnimation = Selection.activeObject as SpriteAnimation;
+			selectedAnimation = Selection.activeObject as SpriteAnimation;
 			Repaint();
 		}
 
         // Add the frames dropped on the drag and drop box
-        if(_draggedSprites != null && _draggedSprites.Count > 0)
+        if(draggedSprites != null && draggedSprites.Count > 0)
         {
-            for(int i = 0; i < _draggedSprites.Count; i++)
+            for(int i = 0; i < draggedSprites.Count; i++)
             {
-                AddFrame(_draggedSprites[i]);
+                AddFrame(draggedSprites[i]);
             }
-            _draggedSprites = null;
+            draggedSprites = null;
         }
 	}
 
 	private void OnGUI()
     {
         // Get clock icon
-        if (_clockIcon == null)
-            _clockIcon = Resources.Load<Texture2D>("clockIcon");
+        if (clockIcon == null)
+            clockIcon = Resources.Load<Texture2D>("clockIcon");
 
         // Create animation box
         EditorGUILayout.Space();
@@ -55,7 +55,7 @@ public class EditorSpriteAnimation : EditorWindow {
 		EditorGUILayout.BeginHorizontal("box");
 
         // New animation name field
-        _newAnimName = EditorGUILayout.TextField("Name", _newAnimName);
+        newAnimName = EditorGUILayout.TextField("Name", newAnimName);
 
         // New animaton button
 		if(GUILayout.Button("New Animation"))
@@ -76,22 +76,22 @@ public class EditorSpriteAnimation : EditorWindow {
 		{
             EditorGUILayout.Space();
             // Animation asset field
-            _selectedAnimation = EditorGUILayout.ObjectField(_selectedAnimation, typeof(SpriteAnimation), false) as SpriteAnimation;
+            selectedAnimation = EditorGUILayout.ObjectField(selectedAnimation, typeof(SpriteAnimation), false) as SpriteAnimation;
 
             EditorGUILayout.Space();
-            if (_selectedAnimation != null)
+            if (selectedAnimation != null)
 			{
                 // Retrocompatibility check for the new frames duration field
-                if (_selectedAnimation.FramesCount != _selectedAnimation.FramesDuration.Count)
+                if (selectedAnimation.FramesCount != selectedAnimation.FramesDuration.Count)
                 {
-                    _selectedAnimation.FramesDuration.Clear();
+                    selectedAnimation.FramesDuration.Clear();
 
-                    for (int i = 0; i < _selectedAnimation.FramesCount; i++)
-                        _selectedAnimation.FramesDuration.Add(1);
+                    for (int i = 0; i < selectedAnimation.FramesCount; i++)
+                        selectedAnimation.FramesDuration.Add(1);
                 }
 
                 // Name field
-                _selectedAnimation.Name = EditorGUILayout.TextField("Name", _selectedAnimation.Name);
+                selectedAnimation.Name = EditorGUILayout.TextField("Name", selectedAnimation.Name);
               
                 EditorGUILayout.Space();
 
@@ -112,10 +112,10 @@ public class EditorSpriteAnimation : EditorWindow {
                         if (evt.type == EventType.DragPerform)
                         {
                             DragAndDrop.AcceptDrag();
-                            _draggedSprites = new List<Sprite>();
+                            draggedSprites = new List<Sprite>();
                             foreach (Sprite draggedObject in DragAndDrop.objectReferences)
                             {
-                                _draggedSprites.Add(draggedObject);
+                                draggedSprites.Add(draggedObject);
                             }
                         }
                         break;
@@ -130,35 +130,35 @@ public class EditorSpriteAnimation : EditorWindow {
                 EditorGUILayout.Space();
 
                 // Individual frames
-                if (_selectedAnimation.FramesCount > 0)
+                if (selectedAnimation.FramesCount > 0)
 				{
 					List<int> remove = new List<int>();
-					_pos = EditorGUILayout.BeginScrollView(_pos);
+					pos = EditorGUILayout.BeginScrollView(pos);
 					{
 						EditorGUILayout.BeginHorizontal();
 						int j = 0;
-						for(int i = 0; i < _selectedAnimation.FramesCount; i++)
+						for(int i = 0; i < selectedAnimation.FramesCount; i++)
 						{
-							if((j+1) * (_frameWidth + _frameOffset) > EditorGUIUtility.currentViewWidth)
+							if((j+1) * (FRAME_WIDTH + FRAME_OFFSET) > EditorGUIUtility.currentViewWidth)
 							{
 								EditorGUILayout.EndHorizontal();
 								EditorGUILayout.BeginHorizontal();
 								j = 0;
 							}
-							EditorGUILayout.BeginVertical(GUILayout.Width(_frameWidth));
+							EditorGUILayout.BeginVertical(GUILayout.Width(FRAME_WIDTH));
 							{
                                 // Frame Sprite field
-								_selectedAnimation.Frames[i] = EditorGUILayout.ObjectField(_selectedAnimation.Frames[i], typeof(Sprite), false, GUILayout.Width(_frameWidth), GUILayout.Height(_frameHeight)) as Sprite;
+								selectedAnimation.Frames[i] = EditorGUILayout.ObjectField(selectedAnimation.Frames[i], typeof(Sprite), false, GUILayout.Width(FRAME_WIDTH), GUILayout.Height(FRAME_HEIGHT)) as Sprite;
 
                                 // Frames duration field
                                 EditorGUILayout.BeginHorizontal();
-                                GUILayout.Label(_clockIcon);
-                                _selectedAnimation.FramesDuration[i] = EditorGUILayout.IntField(_selectedAnimation.FramesDuration[i], GUILayout.Width(_frameWidth - 20));
-                                if (_selectedAnimation.FramesDuration[i] <= 0) _selectedAnimation.FramesDuration[i] = 1;
+                                GUILayout.Label(clockIcon);
+                                selectedAnimation.FramesDuration[i] = EditorGUILayout.IntField(selectedAnimation.FramesDuration[i], GUILayout.Width(FRAME_WIDTH - 20));
+                                if (selectedAnimation.FramesDuration[i] <= 0) selectedAnimation.FramesDuration[i] = 1;
                                 EditorGUILayout.EndHorizontal();
 
                                 // Remove button for individual frame
-                                if (GUILayout.Button("Remove", GUILayout.Width(_frameWidth)))
+                                if (GUILayout.Button("Remove", GUILayout.Width(FRAME_WIDTH)))
 									remove.Add(i);
 							}
 							EditorGUILayout.EndVertical();
@@ -167,8 +167,8 @@ public class EditorSpriteAnimation : EditorWindow {
                         // Remove the previously selected frames
                         for (int i = 0; i < remove.Count; i++)
                         {
-                            _selectedAnimation.Frames.RemoveAt(remove[i]);
-                            _selectedAnimation.FramesDuration.RemoveAt(remove[i]);
+                            selectedAnimation.Frames.RemoveAt(remove[i]);
+                            selectedAnimation.FramesDuration.RemoveAt(remove[i]);
                         }
 						EditorGUILayout.EndHorizontal();
 					}
@@ -178,26 +178,26 @@ public class EditorSpriteAnimation : EditorWindow {
 		}
 		EditorGUILayout.EndVertical();
 
-		if(GUI.changed && _selectedAnimation != null)
-			EditorUtility.SetDirty(_selectedAnimation); 
+		if(GUI.changed && selectedAnimation != null)
+			EditorUtility.SetDirty(selectedAnimation); 
 	}
 
     private void AddFrame()
     {
-        _selectedAnimation.Frames.Add(new Sprite());
-        _selectedAnimation.FramesDuration.Add(1);
+        selectedAnimation.Frames.Add(new Sprite());
+        selectedAnimation.FramesDuration.Add(1);
     }
 
     private void AddFrame(Sprite s)
     {
         AddFrame();
-        _selectedAnimation.Frames[_selectedAnimation.Frames.Count - 1] = s;
+        selectedAnimation.Frames[selectedAnimation.Frames.Count - 1] = s;
     }
 
     private void CreateAnimation(string folder){
 		SpriteAnimation asset = CreateInstance<SpriteAnimation>();
 		string relativeFolder = "";
-		asset.Name = _newAnimName;
+		asset.Name = newAnimName;
         int folderPosition = folder.IndexOf("Assets/");
         if (folderPosition > 0)
         {
@@ -206,11 +206,11 @@ public class EditorSpriteAnimation : EditorWindow {
         }
         else
             relativeFolder = "Assets/";
-		AssetDatabase.CreateAsset(asset, relativeFolder + _newAnimName + ".asset");
+		AssetDatabase.CreateAsset(asset, relativeFolder + newAnimName + ".asset");
 		AssetDatabase.SaveAssets();
 		AssetDatabase.Refresh();
 		Selection.activeObject 	= asset;
-		_selectedAnimation = asset;
-		EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + _newAnimName, "OK");
+		selectedAnimation = asset;
+		EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + newAnimName, "OK");
 	}
 }

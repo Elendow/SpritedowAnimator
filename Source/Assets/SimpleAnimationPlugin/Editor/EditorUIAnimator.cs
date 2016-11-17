@@ -3,14 +3,14 @@
 // https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
 using UnityEditor;
 
-[CustomEditor(typeof(SpriteAnimator))]
-public class EditorSpriteAnimator : EditorBaseAnimator
+[CustomEditor(typeof(UIAnimator))]
+public class EditorUIAnimator : EditorBaseAnimator
 {
-    private SpriteAnimator t;
+    private UIAnimator t;
 
     public override void OnInspectorGUI()
     {
-        t = (SpriteAnimator)target;
+        t = (UIAnimator)target;
         DrawInspector(t);
     }
 }

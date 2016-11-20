@@ -19,8 +19,8 @@ Use the animation editor to create new animation files. You can open it selectin
 - **Animations** is a list with all the animations.
 
 # Using the animations
-Add the animator component to the object you want to animate and fill the animations list with the animations you want. 
-This component requires a SpriteRenderer component to work. If the object doesn't have one, the animator will add it automatically.
+Add the spriteAnimator or UIAnimator component to the object you want to animate and fill the animations list with the animations you want. 
+This component requires a SpriteRenderer or Image component to work. If the object doesn't have one, the animator will add it automatically.
 On your code, use **GetComponent** to get the reference and start using it.
 
 # Methods

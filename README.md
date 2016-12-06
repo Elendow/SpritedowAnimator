@@ -36,7 +36,9 @@ On your code, use **GetComponent** to get the reference and start using it.
 - **SetActiveRenderer(bool active)** enable/disables the renderer.
 - **FlipSpriteX(bool flip)** flips the sprite on the X axis.
 - **AddCustomEvent(string animation, int frame)** adds an event to a specific frame of an animation and returns it.
+  * If the animation name is empty, it will get the first animation of the list.
 - **GetCustomEvent(string animation, int frame)** returns the event of the animation at the specific frame. Returns null if there's no event on that frame and animation.
+  * If the animation name is empty, it will get the first animation of the list.
 
 # Properties
 - **IsPlaying {get;}** returns true if the animation is playing and false if not.
@@ -44,12 +46,12 @@ On your code, use **GetComponent** to get the reference and start using it.
 - **DisableRenderOnFinish {set;}** sets the disableRenderer attribute. This will disable the renderer when the animation ends.
 
 # Events
-You can suscribe to the animation events using the AddListener(Listener) method of the UnityEvent class.
+* You can suscribe to the animation events using the AddListener(Listener) method of the UnityEvent class.
 - **onFinish** calls when the animation reach the last frame.
 - **onPlay** calls when the animation starts playing.
 - **onStop** calls when the animation is forced to stop.
 - You can add an event to a specific frame of an animation using the method **AddCustomEvent(string animation, int frame)**.
-  - Ex: animation.AddCustomEvent("Walk", 3).AddListener(StepFrame). Now on the frame 3 of the animation "Walk" the method StepFrame will be called.
+  * Ex: animation.AddCustomEvent("Walk", 3).AddListener(StepFrame). Now on the frame 3 of the animation "Walk" the method StepFrame will be called.
   
 # License
 MIT

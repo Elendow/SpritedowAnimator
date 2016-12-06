@@ -25,7 +25,7 @@ public class BaseAnimator : MonoBehaviour
     protected int frameDurationCounter;
     protected float animationTimer;
     protected SpriteAnimation currentAnimation;
-    protected Dictionary<int, SpriteAnimatorEvent> customEvents;
+    protected Dictionary<SpriteAnimatorEventInfo, SpriteAnimatorEvent> customEvents;
 
     protected virtual void Awake()
     {
@@ -56,8 +56,9 @@ public class BaseAnimator : MonoBehaviour
                 // Next Frame!
                 frameDurationCounter++;
                 ChangeFrame(currentAnimation.GetFrame(animationIndex));
-                if (customEvents != null && customEvents.ContainsKey(animationIndex))
-                    customEvents[animationIndex].Invoke(this);
+                SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, animationIndex);
+                if (customEvents != null && customEvents.ContainsKey(frameInfo))
+                    customEvents[frameInfo].Invoke(this);
                 animationTimer = 0;
 
                 if (frameDurationCounter >= currentAnimation.FramesDuration[animationIndex])
@@ -167,15 +168,31 @@ public class BaseAnimator : MonoBehaviour
         get { return currentAnimation.Name; }
     }
 
-    public SpriteAnimatorEvent AddCustomEvent(int frame)
+    public SpriteAnimatorEvent AddCustomEvent(string animation, int frame)
     {
-        if(customEvents == null)
-            customEvents = new Dictionary<int, SpriteAnimatorEvent>();
+        if (animation == "")
+            animation = animations[0].Name;
 
-        if (!customEvents.ContainsKey(frame))
-            customEvents.Add(frame, new SpriteAnimatorEvent());
+        SpriteAnimatorEventInfo eventInfo = new SpriteAnimatorEventInfo(animation, frame);
+        if (customEvents == null)
+            customEvents = new Dictionary<SpriteAnimatorEventInfo, SpriteAnimatorEvent>();
 
-        return customEvents[frame];
+        if (!customEvents.ContainsKey(eventInfo))
+            customEvents.Add(eventInfo, new SpriteAnimatorEvent());
+
+        return customEvents[eventInfo];
+    }
+}
+
+public struct SpriteAnimatorEventInfo
+{
+    public string animation;
+    public int frame;
+
+    public SpriteAnimatorEventInfo(string animation, int frame)
+    {
+        this.animation = animation;
+        this.frame = frame;
     }
 }
 

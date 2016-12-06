@@ -28,18 +28,26 @@ On your code, use **GetComponent** to get the reference and start using it.
   * If the animation is the same that is playing, nothing will happend but the **oneShot** attribute will update.
   * If the animation is the same that was playing but its not playing now, the animation will **Reset** and **Resume** and the **oneShot** attribute will update.
   * If the animation is different, it will play the new animation from the start.
+  * If the animation name is "" will play the first on the animation list.
+- **PlayRandom(bool playOneShot = false)** plays a random animation from the animation list.
 - **Resume()** resumes the current animation.
 - **Stop()** stops the current animation.
 - **Reset()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.
+- **SetActiveRenderer(bool active)** enable/disables the renderer.
+- **FlipSpriteX(bool flip)** flips the sprite on the X axis.
 
 # Properties
-- **IsPlaying** returns true if the animation is playing and false if not.
-- **CurrentAnimation** returns a string with the current animation name.
+- **IsPlaying {get;}** returns true if the animation is playing and false if not.
+- **CurrentAnimation {get;}** returns a string with the current animation name.
+- **DisableRenderOnFinish {set;}** sets the disableRenderer attribute. This will disable the renderer when the animation ends.
 
 # Events
+You can suscribe to the animation events using the AddListener(Listener) method of the UnityEvent class.
 - **onFinish** calls when the animation reach the last frame.
 - **onPlay** calls when the animation starts playing.
 - **onStop** calls when the animation is forced to stop.
-
+- You can add an event to a specific frame of the animation using the method **AddCustomEvent(int frame)**.
+  - Ex: animation.AddCustomEvent(3).AddListener(StepFrame). Now on the frame 3 of the animation the method StepFrame will be called.
+  - **Note** this system is provisional.
 # License
 MIT

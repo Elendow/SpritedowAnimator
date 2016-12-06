@@ -49,5 +49,6 @@ You can suscribe to the animation events using the AddListener(Listener) method 
 - You can add an event to a specific frame of the animation using the method **AddCustomEvent(int frame)**.
   - Ex: animation.AddCustomEvent(3).AddListener(StepFrame). Now on the frame 3 of the animation the method StepFrame will be called.
   - **Note** this system is provisional.
+  
 # License
 MIT

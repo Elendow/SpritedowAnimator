@@ -37,6 +37,7 @@ On your code, use **GetComponent** to get the reference and start using it.
 - **FlipSpriteX(bool flip)** flips the sprite on the X axis.
 - **AddCustomEvent(string animation, int frame)** adds an event to a specific frame of an animation and returns it.
   * If the animation name is empty, it will get the first animation of the list.
+  * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
 - **GetCustomEvent(string animation, int frame)** returns the event of the animation at the specific frame. Returns null if there's no event on that frame and animation.
   * If the animation name is empty, it will get the first animation of the list.
 
@@ -51,6 +52,7 @@ On your code, use **GetComponent** to get the reference and start using it.
 - **onPlay** calls when the animation starts playing.
 - **onStop** calls when the animation is forced to stop.
 - You can add an event to a specific frame of an animation using the method **AddCustomEvent(string animation, int frame)**.
+  * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
   * Ex: animation.AddCustomEvent("Walk", 3).AddListener(StepFrame). Now on the frame 3 of the animation "Walk" the method StepFrame will be called.
   
 # License

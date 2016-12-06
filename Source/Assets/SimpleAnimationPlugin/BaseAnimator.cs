@@ -170,9 +170,7 @@ public class BaseAnimator : MonoBehaviour
 
     public SpriteAnimatorEvent AddCustomEvent(string animation, int frame)
     {
-        if (animation == "")
-            animation = animations[0].Name;
-
+        if (animation == "") animation = animations[0].Name;
         SpriteAnimatorEventInfo eventInfo = new SpriteAnimatorEventInfo(animation, frame);
         if (customEvents == null)
             customEvents = new Dictionary<SpriteAnimatorEventInfo, SpriteAnimatorEvent>();
@@ -181,6 +179,17 @@ public class BaseAnimator : MonoBehaviour
             customEvents.Add(eventInfo, new SpriteAnimatorEvent());
 
         return customEvents[eventInfo];
+    }
+
+    public SpriteAnimatorEvent GetCustomEvent(string animation, int frame)
+    {
+        if (animation == "") animation = animations[0].Name;
+        SpriteAnimatorEventInfo eventInfo = new SpriteAnimatorEventInfo(animation, frame);
+
+        if (customEvents.ContainsKey(eventInfo))
+            return customEvents[eventInfo];
+        else
+            return null;
     }
 }
 

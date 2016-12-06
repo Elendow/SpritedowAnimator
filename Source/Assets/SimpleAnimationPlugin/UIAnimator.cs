@@ -15,12 +15,12 @@ public class UIAnimator : BaseAnimator
 
     protected override void Awake()
     {
-        base.Awake();
         imageRenderer = GetComponent<Image>();
         initSize = imageRenderer.rectTransform.sizeDelta;
         firstFrameSize = imageRenderer.sprite.rect.size;
         wDiff = firstFrameSize.x / initSize.x;
         hDiff = firstFrameSize.y / initSize.y;
+        base.Awake();
     }
 
     protected override void ChangeFrame(Sprite frame)
@@ -29,5 +29,10 @@ public class UIAnimator : BaseAnimator
         float newHDiff = frame.rect.size.y / initSize.y;
         imageRenderer.rectTransform.sizeDelta = new Vector2(initSize.x * (newWDiff / wDiff), initSize.y * (newHDiff / hDiff));
         imageRenderer.sprite = frame;
+    }
+
+    public override void SetActiveRenderer(bool active)
+    {
+        imageRenderer.enabled = active;
     }
 }

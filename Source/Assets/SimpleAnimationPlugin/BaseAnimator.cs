@@ -18,11 +18,13 @@ public class BaseAnimator : MonoBehaviour
 
     protected bool playing;
     protected bool oneShot;
+    protected bool disableRenderer;
     protected int animationIndex;
     protected int framesInAnimation;
     protected int frameDurationCounter;
     protected float animationTimer;
     protected SpriteAnimation currentAnimation;
+    protected Dictionary<int, SpriteAnimatorEvent> customEvents;
 
     protected virtual void Awake()
     {
@@ -34,7 +36,7 @@ public class BaseAnimator : MonoBehaviour
         }
 
         // Play the first animation if play on awake
-        if (playOnAwake) Play(startAnimation);
+        if (playOnAwake) Play(startAnimation);       
     }
 
     protected virtual void ChangeFrame(Sprite frame) { }
@@ -53,6 +55,8 @@ public class BaseAnimator : MonoBehaviour
                 // Next Frame!
                 frameDurationCounter++;
                 ChangeFrame(currentAnimation.GetFrame(animationIndex));
+                if (customEvents != null && customEvents.ContainsKey(animationIndex))
+                    customEvents[animationIndex].Invoke(this);
                 animationTimer = 0;
 
                 if (frameDurationCounter >= currentAnimation.FramesDuration[animationIndex])
@@ -75,6 +79,11 @@ public class BaseAnimator : MonoBehaviour
 
     public void Play(string name, bool playOneShot = false)
     {
+        SetActiveRenderer(true);
+
+        if (name == "")
+            name = animations[0].Name;
+
         oneShot = playOneShot;
 
         // If it's the same animation but not playing, reset it, if playing, do nothing.
@@ -105,6 +114,12 @@ public class BaseAnimator : MonoBehaviour
             Debug.LogError("Animation '" + name + "' not found.", gameObject);
     }
 
+    public void PlayRandom(bool playOneShot = false)
+    {
+        int animIndex = Random.Range(0, animations.Count);
+        Play(animations[animIndex].Name, playOneShot);
+    }
+
     [ContextMenu("Resume Animation")]
     public void Resume()
     {
@@ -119,6 +134,7 @@ public class BaseAnimator : MonoBehaviour
         // Stop the animation
         playing = false;
         onStop.Invoke();
+        SetActiveRenderer(!disableRenderer);
     }
 
     [ContextMenu("Reset Animation")]
@@ -130,13 +146,36 @@ public class BaseAnimator : MonoBehaviour
         frameDurationCounter = 0;
     }
 
+    public virtual void SetActiveRenderer(bool active) { }
+
+    public virtual void FlipSpriteX(bool flip) { }
+
     public bool IsPlaying
     {
         get { return playing; }
+    }
+
+    public bool DisableRenderOnFinish
+    {
+        set { disableRenderer = value; }
     }
 
     public string CurrentAnimation
     {
         get { return currentAnimation.Name; }
     }
+
+    public SpriteAnimatorEvent AddCustomEvent(int frame)
+    {
+        if(customEvents == null)
+            customEvents = new Dictionary<int, SpriteAnimatorEvent>();
+
+        if (!customEvents.ContainsKey(frame))
+            customEvents.Add(frame, new SpriteAnimatorEvent());
+
+        return customEvents[frame];
+    }
 }
+
+[System.Serializable]
+public class SpriteAnimatorEvent : UnityEvent<BaseAnimator>{}

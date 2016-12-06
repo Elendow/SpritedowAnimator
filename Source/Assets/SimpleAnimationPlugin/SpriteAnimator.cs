@@ -10,12 +10,22 @@ public class SpriteAnimator : BaseAnimator
 
     protected override void Awake()
     {
-        base.Awake();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        base.Awake();
     }
 
     protected override void ChangeFrame(Sprite frame)
     {
         spriteRenderer.sprite = frame;
+    }
+
+    public override void SetActiveRenderer(bool active)
+    {
+        spriteRenderer.enabled = active;
+    }
+
+    public override void FlipSpriteX(bool flip)
+    {
+        spriteRenderer.flipX = flip;
     }
 }

@@ -18,6 +18,7 @@ public class BaseAnimator : MonoBehaviour
 
     protected bool playing;
     protected bool oneShot;
+    protected bool backwards;
     protected bool disableRenderer;
     protected int animationIndex;
     protected int framesInAnimation;
@@ -62,14 +63,14 @@ public class BaseAnimator : MonoBehaviour
                 if (frameDurationCounter >= currentAnimation.FramesDuration[animationIndex])
                 {
                     // Change frame only if have passed the desired frames
-                    animationIndex += 1;
+                    animationIndex = (backwards) ? animationIndex - 1 : animationIndex + 1;
                     frameDurationCounter = 0;
                 }
 
                 if (animationIndex >= framesInAnimation)
                 {
                     // Last frame, reset index and stop if is one shot
-                    animationIndex = 0;
+                    animationIndex = (backwards) ? framesInAnimation - 1 : 0;
                     onFinish.Invoke();
                     if (oneShot) Stop();
                 }
@@ -77,7 +78,7 @@ public class BaseAnimator : MonoBehaviour
         }
     }
 
-    public void Play(string name, bool playOneShot = false)
+    public void Play(string name, bool playOneShot = false, bool playBackwards = false)
     {
         SetActiveRenderer(true);
 
@@ -85,6 +86,7 @@ public class BaseAnimator : MonoBehaviour
             name = animations[0].Name;
 
         oneShot = playOneShot;
+        backwards = playBackwards;
 
         // If it's the same animation but not playing, reset it, if playing, do nothing.
         if (currentAnimation != null && currentAnimation.Name == name)
@@ -114,10 +116,10 @@ public class BaseAnimator : MonoBehaviour
             Debug.LogError("Animation '" + name + "' not found.", gameObject);
     }
 
-    public void PlayRandom(bool playOneShot = false)
+    public void PlayRandom(bool playOneShot = false, bool playBackwards = false)
     {
         int animIndex = Random.Range(0, animations.Count);
-        Play(animations[animIndex].Name, playOneShot);
+        Play(animations[animIndex].Name, playOneShot, playBackwards);
     }
 
     [ContextMenu("Resume Animation")]

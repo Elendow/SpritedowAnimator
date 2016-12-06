@@ -29,7 +29,7 @@ On your code, use **GetComponent** to get the reference and start using it.
   * If the animation is the same that was playing but its not playing now, the animation will **Reset** and **Resume** and the **oneShot** attribute will update.
   * If the animation is different, it will play the new animation from the start.
   * If the animation name is "" will play the first on the animation list.
-- **PlayRandom(bool playOneShot = false)** plays a random animation from the animation list.
+- **PlayRandom(bool playOneShot = false, bool backwards = false))** plays a random animation from the animation list.
 - **Resume()** resumes the current animation.
 - **Stop()** stops the current animation.
 - **Reset()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.

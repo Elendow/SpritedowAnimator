@@ -23,7 +23,7 @@ Use the animation editor to create new animation files. You can open it selectin
 # Using the animations
 Add the **SpriteAnimator** or **UIAnimator** component to the object you want to animate and fill the animations list with the animations you want.
 This component requires a SpriteRenderer or Image component to work. If the object doesn't have one, the animator will add it automatically.
-On your code, use **GetComponent<SpriteAnimator>** or **GetComponent<UIAnimator>** to get the reference and start using it.
+On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimator\>** to get the reference and start using it.
 
 # Methods
 - **Play (bool oneShot = false, bool backwards = false)** plays the first animation of the animation list.

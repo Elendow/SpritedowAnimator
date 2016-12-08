@@ -4,6 +4,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>Animator for Image from the Unity UI system.</summary>
 [RequireComponent(typeof(Image))]
 public class UIAnimator : BaseAnimator
 {
@@ -23,16 +24,25 @@ public class UIAnimator : BaseAnimator
         base.Awake();
     }
 
+    /// <summary>Changes the sprite to the given sprite</summary>
     protected override void ChangeFrame(Sprite frame)
     {
+        // Unity UI system doesn't change the rect size to the sprite rect size, we do it manually using the initial size as a reference.
         float newWDiff = frame.rect.size.x / initSize.x;
         float newHDiff = frame.rect.size.y / initSize.y;
         imageRenderer.rectTransform.sizeDelta = new Vector2(initSize.x * (newWDiff / wDiff), initSize.y * (newHDiff / hDiff));
         imageRenderer.sprite = frame;
     }
 
+    /// <summary>Enable or disable the renderer</summary>
     public override void SetActiveRenderer(bool active)
     {
         imageRenderer.enabled = active;
+    }
+
+    /// <summary>Flip the sprite on the X axis</summary>
+    public override void FlipSpriteX(bool flip)
+    {
+        //TODO Use the rect transform of the Image to flip the sprite.
     }
 }

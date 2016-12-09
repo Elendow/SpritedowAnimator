@@ -10,6 +10,7 @@ Use the animation editor to create new animation files. You can open it selectin
 - Give a name to the animation. This will be also the asset name. This name will be the one used to play the animations.
 - Select the folder to save.
 - Add frames manually or dropping the sprite to the Drag&Drop box.
+  - If you drop a Texture instead of a sprite to the Drag&Drop box, the plugin will take all the sprites on that Texture
   - You can change the duration of each frame, 1 by default, to any number greater than 0.
 - Any change is automatically saved.
 - If your animation has more than 40 frames, the editor will paginate it to avoid memory problems.

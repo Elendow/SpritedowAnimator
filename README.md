@@ -17,6 +17,7 @@ Use the animation editor to create new animation files. You can open it selectin
 
 # Inspector properties
 - **Play on Awake** will start playing the **Start Animation** when the object awakes.
+- **Ignore TimeScale** will set the animation to ignore the game TimeScale.
 - **Start Animation** is the animation that will plays when **Play on Awake** is true.
 - **FPS** is the speed of the animation, <= 0 will pause the animation.
 - **Animations** is a list with all the animations.

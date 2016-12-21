@@ -10,6 +10,7 @@ public class BaseAnimator : MonoBehaviour
 {
     #region Attributes
     public bool playOnAwake = false;
+    public bool ignoreTimeScale = false;
     public int framesPerSecond = 30;
     public string startAnimation;
     public List<SpriteAnimation> animations;
@@ -45,7 +46,7 @@ public class BaseAnimator : MonoBehaviour
         }
 
         // Play the first animation if play on awake
-        if (playOnAwake) Play(startAnimation);       
+        if (playOnAwake) Play(startAnimation);
     }
 
     private void Update()
@@ -55,7 +56,10 @@ public class BaseAnimator : MonoBehaviour
 
         if (playing)
         {
-            animationTimer += Time.deltaTime;
+            if (!ignoreTimeScale)
+                animationTimer += Time.deltaTime;
+            else
+                animationTimer += Time.unscaledDeltaTime;
 
             if (1f / framesPerSecond < animationTimer)
             {
@@ -213,7 +217,7 @@ public class BaseAnimator : MonoBehaviour
     /// <returns>The animation. Null if not found.</returns>  
     private SpriteAnimation GetAnimation(string name)
     {
-      return animations.Find(x => x.Name.Contains(name));
+        return animations.Find(x => x.Name.Contains(name));
     }
 
     /// <summary>Changes the sprite to the given sprite</summary>
@@ -263,5 +267,5 @@ public struct SpriteAnimatorEventInfo
 
 /// <summary>UnityEvent with BaseAnimator as argument.</summary>
 [System.Serializable]
-public class SpriteAnimatorEvent : UnityEvent<BaseAnimator>{}
+public class SpriteAnimatorEvent : UnityEvent<BaseAnimator> { }
 #endregion

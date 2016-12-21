@@ -17,6 +17,8 @@ public class EditorBaseAnimator : Editor
 
         SerializedProperty animations = serializedObject.FindProperty("animations");
         targetAnimator.playOnAwake = EditorGUILayout.Toggle("Play on Awake", targetAnimator.playOnAwake);
+        targetAnimator.ignoreTimeScale = EditorGUILayout.Toggle("Ignore TimeScale", targetAnimator.ignoreTimeScale);
+
         if (targetAnimator.playOnAwake)
         {
             if (animationNames != null && animationNames.Length > 0)

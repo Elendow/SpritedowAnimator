@@ -51,14 +51,6 @@ public class EditorSpriteAnimation : EditorWindow
                 Repaint();
             }
         }
-
-        // Add the frames dropped on the drag and drop box
-        if (draggedSprites != null && draggedSprites.Count > 0)
-        {
-            for (int i = 0; i < draggedSprites.Count; i++)
-                AddFrame(draggedSprites[i]);
-            draggedSprites.Clear();
-        }
     }
 
     private void OnGUI()
@@ -95,6 +87,14 @@ public class EditorSpriteAnimation : EditorWindow
             EditorGUILayout.Space();
             if (selectedAnimation != null)
             {
+                // Add the frames dropped on the drag and drop box
+                if (draggedSprites != null && draggedSprites.Count > 0)
+                {
+                    for (int i = 0; i < draggedSprites.Count; i++)
+                        AddFrame(draggedSprites[i]);
+                    draggedSprites.Clear();
+                }
+
                 // Retrocompatibility check for the new frames duration field
                 if (selectedAnimation.FramesCount != selectedAnimation.FramesDuration.Count)
                 {

@@ -122,10 +122,19 @@ public class BaseAnimator : MonoBehaviour
         // If we have an animation to play, flag as playing, reset timer and take frame count
         if (currentAnimation != null)
         {
+            // Check if the animation have frames. Show warning if not.
+            if (currentAnimation.FramesCount == 0)
+            {
+                Debug.LogWarning("Animation '" + name + "' has no frames.", gameObject);
+                playing = false;
+                return;
+            }
+
             onPlay.Invoke();
             Restart();
             playing = true;
             framesInAnimation = currentAnimation.FramesCount;
+            ChangeFrame(currentAnimation.GetFrame(animationIndex));
         }
         else
             Debug.LogError("Animation '" + name + "' not found.", gameObject);

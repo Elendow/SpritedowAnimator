@@ -276,3 +276,95 @@ public class EditorSpriteAnimation : EditorWindow
         EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + newAnimName, "OK");
     }
 }
+
+[CustomEditor(typeof(SpriteAnimation))]
+public class SpriteAnimationEditor : Editor
+{
+	private bool isPlaying = false;
+	private int currentFrame = 0;
+	private int framesPerSecond = 60;
+	private int frameDurationCounter = 0;
+	private float animationTimer = 0;
+	private float lastFrameEditorTime = 0;
+	private SpriteAnimation animation;
+
+	private void OnEnable()
+	{
+		if(animation == null)
+			animation = (SpriteAnimation)target;
+		
+		EditorApplication.update += Update;
+	}
+
+	private void Update()
+	{
+		if(animation == null || animation.FramesCount == 0)
+			return;
+
+		if(isPlaying)
+		{
+			float timeSinceStartup = (float)EditorApplication.timeSinceStartup;
+			float deltaTime = timeSinceStartup - lastFrameEditorTime;
+			lastFrameEditorTime = timeSinceStartup;
+			animationTimer += deltaTime;
+			if (1f / framesPerSecond < animationTimer)
+			{
+				frameDurationCounter++;
+				animationTimer = 0;
+
+				if (frameDurationCounter >= animation.FramesDuration[currentFrame])
+				{
+					currentFrame++;
+					frameDurationCounter = 0;
+					Repaint();
+					if (currentFrame >= animation.FramesCount)
+						currentFrame = 0;
+				}
+			}
+		}
+	}
+
+	private void OnDisable()
+	{
+		EditorApplication.update -= Update;
+	}
+
+	public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
+	{
+		if (animation.FramesCount > 0)
+		{
+			Texture2D texture = AssetPreview.GetAssetPreview(animation.Frames[currentFrame]);
+			if(texture != null)
+			{
+				texture.filterMode = animation.Frames[currentFrame].texture.filterMode;
+				EditorGUI.DrawTextureTransparent(r, texture, ScaleMode.ScaleToFit);
+			}
+		}
+	}
+
+	public override GUIContent GetPreviewTitle ()
+	{
+		return new GUIContent ("Animation Preview");
+	}
+
+	public override void OnPreviewSettings()
+	{
+		GUIContent playButtonContent = EditorGUIUtility.IconContent("PlayButton");
+		GUIContent pauseButtonContent = EditorGUIUtility.IconContent("PauseButton");
+		GUIStyle previewButtonSettingsStyle = new GUIStyle("preButton");
+		GUIContent buttonContent = isPlaying ? pauseButtonContent : playButtonContent;
+		isPlaying = GUILayout.Toggle(isPlaying, buttonContent, previewButtonSettingsStyle);	
+		GUIStyle preSlider = new GUIStyle("preSlider");
+		GUIStyle preSliderThumb = new GUIStyle("preSliderThumb");
+		GUIStyle preLabel = new GUIStyle("preLabel");
+		GUIContent speedScale = EditorGUIUtility.IconContent("SpeedScale");
+		GUILayout.Box(speedScale, preLabel);
+		framesPerSecond = (int)GUILayout.HorizontalSlider(framesPerSecond, 0, 60, preSlider, preSliderThumb);
+		GUILayout.Label(framesPerSecond.ToString("0") + " fps", preLabel, GUILayout.Width(50));
+	}
+
+	public override bool HasPreviewGUI ()
+	{
+		return true;
+	}
+}

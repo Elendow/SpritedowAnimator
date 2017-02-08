@@ -5,7 +5,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
 
-/// <summary>Base class for the animation system. Controls the sprites and events.</summary>
+/// <summary>
+/// Base class for the animation system. Controls the sprites and events.
+/// </summary>
 public class BaseAnimator : MonoBehaviour
 {
     #region Attributes
@@ -15,11 +17,17 @@ public class BaseAnimator : MonoBehaviour
     public string startAnimation;
     public List<SpriteAnimation> animations;
 
-    /// <summary>Called when the animation ends.</summary>
+    /// <summary>
+    /// Called when the animation ends.
+    /// </summary>
     public UnityEvent onFinish;
-    /// <summary>Called when the animation is stopped.</summary>
+    /// <summary>
+    /// Called when the animation is stopped.
+    /// </summary>
     public UnityEvent onStop;
-    /// <summary>Called when the animation starts playing.</summary>
+    /// <summary>
+    /// Called when the animation starts playing.
+    /// </summary>
     public UnityEvent onPlay;
 
     private bool playing;
@@ -89,13 +97,17 @@ public class BaseAnimator : MonoBehaviour
         }
     }
 
-    /// <summary>Plays the first animation of the animation list.</summary>
+    /// <summary>
+    /// Plays the first animation of the animation list.
+    /// </summary>
     public void Play(bool playOneShot = false, bool playBackwards = false)
     {
         Play(animations[0].Name, playOneShot, playBackwards);
     }
 
-    /// <summary>Plays an animation.</summary>
+    /// <summary>
+    /// Plays an animation.
+    /// </summary>
     public void Play(string name, bool playOneShot = false, bool playBackwards = false)
     {
         SetActiveRenderer(true);
@@ -140,7 +152,9 @@ public class BaseAnimator : MonoBehaviour
             Debug.LogError("Animation '" + name + "' not found.", gameObject);
     }
 
-    /// <summary>Plays a random animation of the animation list.</summary>
+    /// <summary>
+    /// Plays a random animation of the animation list.
+    /// </summary>
     public void PlayRandom(bool playOneShot = false, bool playBackwards = false)
     {
         // Get a random animation a plays it
@@ -148,16 +162,18 @@ public class BaseAnimator : MonoBehaviour
         Play(animations[animIndex].Name, playOneShot, playBackwards);
     }
 
-    [ContextMenu("Resume Animation")]
-    /// <summary>Resumes the animation.</summary>
+    /// <summary>
+    /// Resumes the animation.
+    /// </summary>
     public void Resume()
     {
         if (currentAnimation != null)
             playing = true;
     }
 
-    [ContextMenu("Stop Animation")]
-    /// <summary>Stops the animation.</summary>
+    /// <summary>
+    /// Stops the animation.
+    /// </summary>
     public void Stop()
     {
         playing = false;
@@ -165,8 +181,9 @@ public class BaseAnimator : MonoBehaviour
         SetActiveRenderer(!disableRenderer);
     }
 
-    [ContextMenu("Restart Animation")]
-    /// <summary>Restarts the animation. If the animation is not playing the effects will apply when starts playing.</summary>
+    /// <summary>
+    /// Restarts the animation. If the animation is not playing the effects will apply when starts playing.
+    /// </summary>
     public void Restart()
     {
         animationTimer = 0;
@@ -174,15 +191,23 @@ public class BaseAnimator : MonoBehaviour
         frameDurationCounter = 0;
     }
 
-    /// <summary>Adds a custom event to the first animation on the list on a certain frame.</summary>
-    /// <returns>The event created. Null if the animation is not found or doesn't have enough frames.</returns>  
+    /// <summary>
+    /// Adds a custom event to the first animation on the list on a certain frame.
+    /// </summary>
+    /// <returns>
+    /// The event created. Null if the animation is not found or doesn't have enough frames.
+    /// </returns>  
     public SpriteAnimatorEvent AddCustomEvent(int frame)
     {
         return AddCustomEvent(animations[0].Name, frame);
     }
 
-    /// <summary>Adds a custom event to specified nimation on the list on a certain frame.</summary>
-    /// <returns>The event created. Null if the animation is not found or doesn't have enough frames.</returns>  
+    /// <summary>
+    /// Adds a custom event to specified nimation on the list on a certain frame.
+    /// </summary>
+    /// <returns>
+    /// The event created. Null if the animation is not found or doesn't have enough frames.
+    /// </returns>  
     public SpriteAnimatorEvent AddCustomEvent(string animation, int frame)
     {
         SpriteAnimation anim = GetAnimation(animation);
@@ -200,15 +225,23 @@ public class BaseAnimator : MonoBehaviour
         return customEvents[eventInfo];
     }
 
-    /// <summary>Gets the custom event of the first animation on the list on a certain frame.</summary>
-    /// <returns>The event of the first animation on the selected frame. Null if not found.</returns>  
+    /// <summary>
+    /// Gets the custom event of the first animation on the list on a certain frame.
+    /// </summary>
+    /// <returns>
+    /// The event of the first animation on the selected frame. Null if not found.
+    /// </returns>  
     public SpriteAnimatorEvent GetCustomEvent(int frame)
     {
         return GetCustomEvent(animations[0].Name, frame);
     }
 
-    /// <summary>Gets the custom event of an animation on a certain frame.</summary>
-    /// <returns>The event of the specified animation on the selected frame. Null if not found.</returns>  
+    /// <summary>
+    /// Gets the custom event of an animation on a certain frame.
+    /// </summary>
+    /// <returns>
+    /// The event of the specified animation on the selected frame. Null if not found.
+    /// </returns>  
     public SpriteAnimatorEvent GetCustomEvent(string animation, int frame)
     {
         SpriteAnimation anim = GetAnimation(animation);
@@ -222,59 +255,56 @@ public class BaseAnimator : MonoBehaviour
             return null;
     }
 
-    /// <summary>Search an animation with the given name.</summary>
-    /// <returns>The animation. Null if not found.</returns>  
+    /// <summary>
+    /// Search an animation with the given name.
+    /// </summary>
+    /// <returns>
+    /// The animation. Null if not found.
+    /// </returns>  
     private SpriteAnimation GetAnimation(string name)
     {
         return animations.Find(x => x.Name.Contains(name));
     }
 
-    /// <summary>Changes the sprite to the given sprite</summary>
+    /// <summary>
+    /// Changes the sprite to the given sprite
+    /// </summary>
     protected virtual void ChangeFrame(Sprite frame) { }
 
-    /// <summary>Enable or disable the renderer</summary>
+    /// <summary>
+    /// Enable or disable the renderer
+    /// </summary>
     public virtual void SetActiveRenderer(bool active) { }
 
-    /// <summary>Flip the sprite on the X axis</summary>
+    /// <summary>
+    /// Flip the sprite on the X axis
+    /// </summary>
     public virtual void FlipSpriteX(bool flip) { }
     #endregion
 
     #region Properties
-    /// <summary>Gets if the animator is playing an animation or not.</summary>
+    /// <summary>
+    /// Gets if the animator is playing an animation or not.
+    /// </summary>
     public bool IsPlaying
     {
         get { return playing; }
     }
 
-    /// <summary>If true, the animator will disable the renderer when the animation ends.</summary>
+    /// <summary>
+    /// If true, the animator will disable the renderer when the animation ends.
+    /// </summary>
     public bool DisableRendererOnFinish
     {
         set { disableRenderer = value; }
     }
 
-    /// <summary>The currently playing animation name.</summary>
+    /// <summary>
+    /// The currently playing animation name.
+    /// </summary>
     public string CurrentAnimation
     {
         get { return currentAnimation.Name; }
     }
     #endregion
 }
-
-#region Event types
-/// <summary>Struct used on the events dictionary to store animation and frame.</summary>
-public struct SpriteAnimatorEventInfo
-{
-    public string animation;
-    public int frame;
-
-    public SpriteAnimatorEventInfo(string animation, int frame)
-    {
-        this.animation = animation;
-        this.frame = frame;
-    }
-}
-
-/// <summary>UnityEvent with BaseAnimator as argument.</summary>
-[System.Serializable]
-public class SpriteAnimatorEvent : UnityEvent<BaseAnimator> { }
-#endregion

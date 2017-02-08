@@ -4,7 +4,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>Asset class to store the animations.</summary>
+/// <summary>
+/// Asset class to store the animations.
+/// </summary>
 public class SpriteAnimation : ScriptableObject
 {
     [SerializeField]
@@ -14,46 +16,60 @@ public class SpriteAnimation : ScriptableObject
     [SerializeField]
     private List<int> framesDuration;
 
-    /// <summary>Creates an empty animation.</summary>
+    /// <summary>
+    /// Creates an empty animation.
+    /// </summary>
     public SpriteAnimation()
     {
         frames = new List<Sprite>();
         framesDuration = new List<int>();
     }
 
-    /// <summary>Returns the sprite on the selected frame.</summary>
+    /// <summary>
+    /// Returns the sprite on the selected frame.
+    /// </summary>
     public Sprite GetFrame(int index)
     {
         return frames[index];
     }
 
-    /// <summary>Returns the duration (in frames) of the selected frame.</summary>
+    /// <summary>
+    /// Returns the duration (in frames) of the selected frame.
+    /// </summary>
     public int GetFrameDuration(int index)
     {
         return framesDuration[index];
     }
 
-    /// <summary>Name property.</summary>
+    /// <summary>
+    /// Name property.
+    /// </summary>
     public string Name
     {
         get { return animationName; }
         set { animationName = value; }
     }
 
-    /// <summary>Frames on this animation.</summary>
+    /// <summary>
+    /// Frames on this animation.
+    /// </summary>
     public int FramesCount
     {
         get { return frames.Count; }
     }
 
-    /// <summary>List of sprites.</summary>
+    /// <summary>
+    /// List of sprites.
+    /// </summary>
     public List<Sprite> Frames
     {
         get { return frames; }
         set { frames = value; }
     }
 
-    /// <summary>List with the duration of each frame.</summary>
+    /// <summary>
+    /// List with the duration of each frame.
+    /// </summary>
     public List<int> FramesDuration
     {
         get { return framesDuration; }

@@ -32,7 +32,7 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public Sprite GetFrame(int index)
         {
-            return frames[index];
+        	return frames[index];
         }
 
         /// <summary>

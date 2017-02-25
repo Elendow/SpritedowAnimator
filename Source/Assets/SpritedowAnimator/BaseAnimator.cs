@@ -1,6 +1,6 @@
-﻿// Simple Sprite Animation Plugin by Elendow
+﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
-// https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
+// https://github.com/Elendow/SpritedowAnimator
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
@@ -10,6 +10,7 @@ namespace Elendow.SpritedowAnimator
     /// <summary>
     /// Base class for the animation system. Controls the sprites and events.
     /// </summary>
+    [AddComponentMenu("")]
     public class BaseAnimator : MonoBehaviour
     {
         #region Attributes

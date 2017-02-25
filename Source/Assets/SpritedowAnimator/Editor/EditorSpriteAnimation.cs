@@ -1,6 +1,6 @@
-﻿// Simple Sprite Animation Plugin by Elendow
+﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
-// https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
+// https://github.com/Elendow/SpritedowAnimator
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
@@ -14,26 +14,19 @@ namespace Elendow.SpritedowAnimator
     /// </summary>
     public class EditorSpriteAnimation : EditorWindow
     {
-        private const int ITEMS_PER_PAGE = 40;
         private const float CONFIG_BOX_HEIGHT = 120;
         private const float DROP_AREA_HEIGHT = 50;
-        private const float PREVIEW_WINDOW_WIDTH = 100;
-        private const float FRAME_WIDTH = 65f;
-        private const float FRAME_HEIGHT = 65f;
-        private const float FRAME_OFFSET = 10f;
         private const float MIN_WINDOW_WIDTH = 500f;
         private const float MIN_WINDOW_HEIGHT = 200f;
 
-        private string newAnimName = "Animation";
-
         private bool init = false;
-        private int currentPage = 0;
+        private int frameListSelectedIndex = -1;
+        private string newAnimName = "Animation";
         private Texture2D clockIcon = null;
         private SpriteAnimation selectedAnimation = null;
         private Vector2 scrollWindowPosition = Vector2.zero;
         private List<Sprite> draggedSprites = null;
         private EditorPreviewSpriteAnimation spritePreview = null;
-
 		private ReorderableList frameList;
 		private List<AnimationFrame> frames;
 
@@ -69,62 +62,6 @@ namespace Elendow.SpritedowAnimator
 			EditorApplication.update += Update;
         }
 
-		private void DrawFrameListHeader(Rect r)
-		{
-			GUI.Label(r, "Frame List");
-		}
-
-		private void DrawFrameListElement(Rect r, int i, bool active, bool focused)
-		{
-			EditorGUI.BeginChangeCheck();
-			{
-				string spriteName = (selectedAnimation.Frames[i] != null) ? selectedAnimation.Frames[i].name : "No sprite selected";
-				EditorGUIUtility.labelWidth = r.width - 105;
-				selectedAnimation.Frames[i] = EditorGUI.ObjectField(new Rect(r.x + 10, r.y + 1, r.width - 85, r.height - 4), spriteName, selectedAnimation.Frames[i], typeof(Sprite), false) as Sprite;
-
-				EditorGUIUtility.labelWidth = 20;
-				selectedAnimation.FramesDuration[i] = EditorGUI.IntField(new Rect(r.x + r.width - 50, r.y + 1, 50, r.height - 4), speedScaleIcon, selectedAnimation.FramesDuration[i]);
-			}
-			if (EditorGUI.EndChangeCheck())
-				EditorUtility.SetDirty(selectedAnimation);
-		}
-
-		private void AddFrameListItem(ReorderableList list)
-		{
-			AddFrame();
-			frameList.list.Add(new AnimationFrame());
-			EditorUtility.SetDirty(selectedAnimation);
-		}
-
-		private void RemoveFrameListItem(ReorderableList list)
-		{
-			selectedAnimation.Frames.RemoveAt(list.index);
-			selectedAnimation.FramesDuration.RemoveAt(list.index);
-			frameList.list.RemoveAt(list.index);
-			EditorUtility.SetDirty(selectedAnimation);
-		}
-
-		private void ReorderFrameListItem(ReorderableList list)
-		{
-			Sprite s = selectedAnimation.Frames[selectedIndex];
-			selectedAnimation.Frames.RemoveAt(selectedIndex);
-			selectedAnimation.Frames.Insert(list.index, s);
-
-			int i = selectedAnimation.FramesDuration[selectedIndex];
-			selectedAnimation.FramesDuration.RemoveAt(selectedIndex);
-			selectedAnimation.FramesDuration.Insert(list.index, i);
-
-			EditorUtility.SetDirty(selectedAnimation);
-		}
-
-		int selectedIndex = 0;
-		private void SelectFrameListItem(ReorderableList list)
-		{
-			spritePreview.CurrentFrame = list.index;
-			spritePreview.ForceRepaint = true;
-			selectedIndex = list.index;
-		}
-
         private void OnDisable()
         {
             EditorApplication.update -= Update;
@@ -148,7 +85,6 @@ namespace Elendow.SpritedowAnimator
                 SpriteAnimation sa = Selection.activeObject as SpriteAnimation;
                 if (sa != selectedAnimation)
                 {
-                    currentPage = 0;
                     selectedAnimation = sa;
                     Repaint();
                 }
@@ -192,23 +128,9 @@ namespace Elendow.SpritedowAnimator
                 }
                 else
                 {
+                    // Init reorderable list
 					if(frameList == null)
-					{
-						if(frames == null)
-							frames = new List<AnimationFrame>();
-						
-						frames.Clear();
-						for(int i = 0; i < selectedAnimation.FramesCount; i++)
-							frames.Add(new AnimationFrame(selectedAnimation.Frames[i], selectedAnimation.FramesDuration[i]));
-
-						frameList = new ReorderableList(frames, typeof(AnimationFrame));
-						frameList.drawHeaderCallback += DrawFrameListHeader;
-						frameList.drawElementCallback += DrawFrameListElement;
-						frameList.onAddCallback += AddFrameListItem;
-						frameList.onRemoveCallback += RemoveFrameListItem;
-						frameList.onSelectCallback += SelectFrameListItem;
-						frameList.onReorderCallback += ReorderFrameListItem;
-					}
+                        InitializeReorderableList();
 
                     // Add the frames dropped on the drag and drop box
                     if (draggedSprites != null && draggedSprites.Count > 0)
@@ -229,15 +151,6 @@ namespace Elendow.SpritedowAnimator
 					// Config settings
 					ConfigBox();
 
-
-					// EditorGUILayout.BeginHorizontal();
-					// {
-						// Preview window setup
-						//Rect previewRect = EditorGUILayout.BeginVertical(lowPaddingBox, GUILayout.Width(PREVIEW_WINDOW_WIDTH), GUILayout.Height(CONFIG_BOX_HEIGHT));
-						//PreviewBox(previewRect);
-					// }
-					// EditorGUILayout.EndHorizontal();
-
 					EditorGUILayout.BeginHorizontal();
 					{
                         // Preview window setup
@@ -247,22 +160,22 @@ namespace Elendow.SpritedowAnimator
 
 						scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition);
 						{
-							// Individual frames
-							if (selectedAnimation.FramesCount > 0)
-							{
-								frameList.DoLayoutList();
-
-								/*
-								// Pagination for very big animations in order to avoid GC Alloc
-								if (selectedAnimation.FramesCount > ITEMS_PER_PAGE)
-									PaginationBox();
-								else
-									currentPage = 0;
-
-								// FrameListBox();
-								*/
-							}
-							EditorGUILayout.Space();
+                            // Individual frames
+                            frameList.displayRemove = (selectedAnimation.FramesCount > 0);
+                            frameList.DoLayoutList();
+                            // Delete frames with supr
+                            Event evt = Event.current;
+                            switch (evt.type)
+                            {
+                                case EventType.keyDown:
+                                    if (Event.current.keyCode == KeyCode.Delete && 
+                                        selectedAnimation.FramesCount > 0 && 
+                                        frameList.HasKeyboardControl() &&
+                                        frameListSelectedIndex != -1)
+                                        RemoveFrameListItem(frameList);
+                                    break;
+                            }
+                            EditorGUILayout.Space();
 						}
 						EditorGUILayout.EndScrollView();
                     }
@@ -292,6 +205,24 @@ namespace Elendow.SpritedowAnimator
             lowPaddingBox.padding = new RectOffset(1, 1, 1, 1);
 			lowPaddingBox.stretchWidth = true;
 			lowPaddingBox.stretchHeight = true;
+        }
+
+        private void InitializeReorderableList()
+        {
+            if (frames == null)
+                frames = new List<AnimationFrame>();
+
+            frames.Clear();
+            for (int i = 0; i < selectedAnimation.FramesCount; i++)
+                frames.Add(new AnimationFrame(selectedAnimation.Frames[i], selectedAnimation.FramesDuration[i]));
+
+            frameList = new ReorderableList(frames, typeof(AnimationFrame));
+            frameList.drawHeaderCallback += DrawFrameListHeader;
+            frameList.drawElementCallback += DrawFrameListElement;
+            frameList.onAddCallback += AddFrameListItem;
+            frameList.onRemoveCallback += RemoveFrameListItem;
+            frameList.onSelectCallback += SelectFrameListItem;
+            frameList.onReorderCallback += ReorderFrameListItem;
         }
 
         /// <summary>
@@ -346,6 +277,9 @@ namespace Elendow.SpritedowAnimator
             EditorGUILayout.EndVertical();
         }
 
+        /// <summary>
+        /// Draws the drag and drop box and saves the dragged objects
+        /// </summary>
         private void DragAndDropBox()
         {
             // Drag and drop box for sprite frames
@@ -392,76 +326,6 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
-        /// Draws the pagintation box
-        /// </summary>
-        private void PaginationBox()
-        {
-            int pages = selectedAnimation.FramesCount / ITEMS_PER_PAGE;
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Pages", GUILayout.Width(FRAME_WIDTH));
-            string[] pageNames = new string[pages + 1];
-            for (int i = 0; i <= pages; i++)
-                pageNames[i] = (i + 1).ToString();
-            currentPage = GUILayout.Toolbar(currentPage, pageNames);
-            EditorGUILayout.EndHorizontal();
-            int maxValue = Mathf.Min((currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE, selectedAnimation.FramesCount);
-            EditorGUILayout.LabelField("Showing elements from " + ((currentPage * ITEMS_PER_PAGE)) + " to " + (maxValue - 1));
-            EditorGUILayout.Space();
-
-            if (currentPage > pages)
-                currentPage = pages + 1;
-        }
-
-        /// <summary>
-        /// Draws the frame list
-        /// </summary>
-        private void FrameListBox()
-        {
-            List<int> remove = new List<int>();
-            scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition, box);
-            {
-                EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                int j = 0;
-                for (int i = currentPage * ITEMS_PER_PAGE; i < (currentPage * ITEMS_PER_PAGE) + ITEMS_PER_PAGE && i < selectedAnimation.FramesCount; i++)
-                {
-                    if ((j + 1) * (FRAME_WIDTH + FRAME_OFFSET) > EditorGUIUtility.currentViewWidth)
-                    {
-                        EditorGUILayout.EndHorizontal();
-                        EditorGUILayout.BeginHorizontal();
-                        j = 0;
-                    }
-
-                    EditorGUILayout.BeginVertical(GUILayout.Width(FRAME_WIDTH));
-                    {
-                        // Frame Sprite field
-                        selectedAnimation.Frames[i] = EditorGUILayout.ObjectField(selectedAnimation.Frames[i], typeof(Sprite), false, GUILayout.Width(FRAME_WIDTH), GUILayout.Height(FRAME_HEIGHT)) as Sprite;
-
-                        // Frames duration field
-                        EditorGUILayout.BeginHorizontal();
-                        GUILayout.Label(clockIcon);
-                        selectedAnimation.FramesDuration[i] = EditorGUILayout.IntField(selectedAnimation.FramesDuration[i], GUILayout.Width(FRAME_WIDTH - 20));
-                        if (selectedAnimation.FramesDuration[i] <= 0) selectedAnimation.FramesDuration[i] = 1;
-                        EditorGUILayout.EndHorizontal();
-
-                        // Remove button for individual frame
-                        if (GUILayout.Button("Remove", GUILayout.Width(FRAME_WIDTH)))
-                            remove.Add(i);
-                    }
-                    EditorGUILayout.EndVertical();
-                    j++;
-                }
-                // Remove the previously selected frames
-                for (int i = 0; i < remove.Count; i++)
-                {
-                    selectedAnimation.Frames.RemoveAt(remove[i]);
-                    selectedAnimation.FramesDuration.RemoveAt(remove[i]);
-                }
-                EditorGUILayout.EndHorizontal();
-            }
-            EditorGUILayout.EndScrollView();
-        }
-
-        /// <summary>
         /// Draws the preview window
         /// </summary>
         /// <param name="r">Draw rect</param>
@@ -497,12 +361,84 @@ namespace Elendow.SpritedowAnimator
             }
         }
 
+        #region Reorderable List Methods
+        private void DrawFrameListHeader(Rect r)
+        {
+            GUI.Label(r, "Frame List");
+        }
+
+        private void DrawFrameListElement(Rect r, int i, bool active, bool focused)
+        {
+            if (i < selectedAnimation.FramesCount)
+            {
+                EditorGUI.BeginChangeCheck();
+                {
+                    string spriteName = (selectedAnimation.Frames[i] != null) ? selectedAnimation.Frames[i].name : "No sprite selected";
+                    EditorGUIUtility.labelWidth = r.width - 105;
+                    selectedAnimation.Frames[i] = EditorGUI.ObjectField(new Rect(r.x + 10, r.y + 1, r.width - 85, r.height - 4), spriteName, selectedAnimation.Frames[i], typeof(Sprite), false) as Sprite;
+
+                    EditorGUIUtility.labelWidth = 20;
+                    selectedAnimation.FramesDuration[i] = EditorGUI.IntField(new Rect(r.x + r.width - 50, r.y + 1, 50, r.height - 4), speedScaleIcon, selectedAnimation.FramesDuration[i]);
+                }
+                if (EditorGUI.EndChangeCheck())
+                    EditorUtility.SetDirty(selectedAnimation);
+            }
+        }
+
+        private void AddFrameListItem(ReorderableList list)
+        {
+            AddFrame();
+            EditorUtility.SetDirty(selectedAnimation);
+        }
+
+        private void RemoveFrameListItem(ReorderableList list)
+        {
+            int i = list.index;
+            selectedAnimation.Frames.RemoveAt(i);
+            selectedAnimation.FramesDuration.RemoveAt(i);
+            frameList.list.RemoveAt(i);
+            frameListSelectedIndex = frameList.index;
+
+            if (i >= selectedAnimation.FramesCount)
+            {
+                frameList.index = -1;
+                frameListSelectedIndex = -1;
+                frameList.ReleaseKeyboardFocus();
+            }
+
+            EditorUtility.SetDirty(selectedAnimation);
+            Repaint();
+        }
+
+        private void ReorderFrameListItem(ReorderableList list)
+        {
+            Sprite s = selectedAnimation.Frames[frameListSelectedIndex];
+            selectedAnimation.Frames.RemoveAt(frameListSelectedIndex);
+            selectedAnimation.Frames.Insert(list.index, s);
+
+            int i = selectedAnimation.FramesDuration[frameListSelectedIndex];
+            selectedAnimation.FramesDuration.RemoveAt(frameListSelectedIndex);
+            selectedAnimation.FramesDuration.Insert(list.index, i);
+
+            EditorUtility.SetDirty(selectedAnimation);
+        }
+
+        private void SelectFrameListItem(ReorderableList list)
+        {
+            spritePreview.CurrentFrame = list.index;
+            spritePreview.ForceRepaint = true;
+            frameListSelectedIndex = list.index;
+        }
+        #endregion
+
         /// <summary>
         /// Adds an empty frame
         /// </summary>
         private void AddFrame()
         {
-            selectedAnimation.Frames.Add(new Sprite());
+            Sprite emptySprite = new Sprite();
+            frameList.list.Add(new AnimationFrame(emptySprite, 1));
+            selectedAnimation.Frames.Add(emptySprite);
             selectedAnimation.FramesDuration.Add(1);
         }
 
@@ -514,6 +450,7 @@ namespace Elendow.SpritedowAnimator
         {
             AddFrame();
             selectedAnimation.Frames[selectedAnimation.Frames.Count - 1] = s;
+            frameList.list[selectedAnimation.Frames.Count - 1] = new AnimationFrame(s, 1);
         }
 
         /// <summary>

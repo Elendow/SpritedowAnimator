@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Spritedow Animation Plugin by Elendow
+// http://elendow.com
+// https://github.com/Elendow/SpritedowAnimator
+using System;
 using UnityEngine;
 
 [Serializable]

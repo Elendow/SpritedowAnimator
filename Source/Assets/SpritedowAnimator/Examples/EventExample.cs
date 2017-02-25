@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿// Spritedow Animation Plugin by Elendow
+// http://elendow.com
+// https://github.com/Elendow/SpritedowAnimator
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 

@@ -1,6 +1,6 @@
-﻿// Simple Sprite Animation Plugin by Elendow
+﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
-// https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
+// https://github.com/Elendow/SpritedowAnimator
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +9,7 @@ namespace Elendow.SpritedowAnimator
     /// <summary>
     /// Animator for Image from the Unity UI system.
     /// </summary>
+    [AddComponentMenu("Elendow Tools/UI Image Animator")]
     [RequireComponent(typeof(Image))]
     public class UIAnimator : BaseAnimator
     {

@@ -1,4 +1,8 @@
-﻿namespace Elendow.SpritedowAnimator
+﻿// Spritedow Animation Plugin by Elendow
+// http://elendow.com
+// https://github.com/Elendow/SpritedowAnimator
+
+namespace Elendow.SpritedowAnimator
 {
     /// <summary>
     /// Struct used on the events dictionary to store animation and frame.

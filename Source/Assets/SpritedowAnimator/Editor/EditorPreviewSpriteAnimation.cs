@@ -1,4 +1,7 @@
-﻿using UnityEditor;
+﻿// Spritedow Animation Plugin by Elendow
+// http://elendow.com
+// https://github.com/Elendow/SpritedowAnimator
+using UnityEditor;
 using UnityEngine;
 
 namespace Elendow.SpritedowAnimator

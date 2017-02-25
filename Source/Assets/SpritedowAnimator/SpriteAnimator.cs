@@ -1,6 +1,6 @@
-﻿// Simple Sprite Animation Plugin by Elendow
+﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
-// https://github.com/Elendow/Unity-Simple-Sprite-Animation-Plugin
+// https://github.com/Elendow/SpritedowAnimator
 using UnityEngine;
 
 namespace Elendow.SpritedowAnimator
@@ -8,6 +8,7 @@ namespace Elendow.SpritedowAnimator
     /// <summary>
     /// Animator for Sprite Renderers.
     /// </summary>
+    [AddComponentMenu("Elendow Tools/Sprite Animator")]
     [RequireComponent(typeof(SpriteRenderer))]
     public class SpriteAnimator : BaseAnimator
     {

@@ -2,12 +2,14 @@ Temp/
 Library/
 Build/
 ProjectSettings/
+TestAssets/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
 /[Bb]uilds/
 /[Pp]rojectSettings/
+/[Tt]estAssets/
 Source/Assets/AssetStoreTools/*
 Source/Assets/Sprites/*
 ExportedObj/

@@ -1,4 +1,7 @@
-﻿using UnityEditor;
+﻿// Spritedow Animation Plugin by Elendow
+// http://elendow.com
+// https://github.com/Elendow/SpritedowAnimator
+using UnityEditor;
 using UnityEngine;
 
 namespace Elendow.SpritedowAnimator
@@ -13,7 +16,7 @@ namespace Elendow.SpritedowAnimator
         private bool isPlaying = false;
         private bool forceRepaint = false;
         private int currentFrame = 0;
-        private int framesPerSecond = 60;
+        private int framesPerSecond = 30;
         private int frameDurationCounter = 0;
         private float animationTimer = 0;
         private float lastFrameEditorTime = 0;
@@ -82,7 +85,7 @@ namespace Elendow.SpritedowAnimator
 
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
         {
-            if (animation != null && animation.FramesCount > 0)
+			if (animation != null && animation.FramesCount > 0 && currentFrame < animation.FramesCount)
             {
                 Texture2D texture = AssetPreview.GetAssetPreview(animation.Frames[currentFrame]);
                 if (texture != null)
@@ -151,5 +154,10 @@ namespace Elendow.SpritedowAnimator
         {
             get { return animation; }
         }
+
+		public int CurrentFrame
+		{
+			set { currentFrame = value; }
+		}
     }
 }

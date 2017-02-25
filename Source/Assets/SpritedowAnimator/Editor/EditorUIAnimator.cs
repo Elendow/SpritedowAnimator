@@ -13,6 +13,7 @@ namespace Elendow.SpritedowAnimator
         public override void OnInspectorGUI()
         {
             t = (UIAnimator)target;
+            Undo.RecordObject(t, "Edit UI Animator");
             DrawInspector(t);
         }
     }

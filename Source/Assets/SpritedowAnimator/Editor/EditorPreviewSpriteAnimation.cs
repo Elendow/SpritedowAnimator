@@ -63,7 +63,6 @@ namespace Elendow.SpritedowAnimator
                 {
                     frameDurationCounter++;
                     animationTimer = 0;
-
                     if (frameDurationCounter >= animation.FramesDuration[currentFrame])
                     {
                         // Change frame and repaint the preview

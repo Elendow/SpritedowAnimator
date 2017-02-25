@@ -60,6 +60,8 @@ namespace Elendow.SpritedowAnimator
 
 			// Events
 			EditorApplication.update += Update;
+
+            Undo.undoRedoPerformed += OnUndoOrRedo;
         }
 
         private void OnDisable()
@@ -75,6 +77,17 @@ namespace Elendow.SpritedowAnimator
 				frameList.onSelectCallback -= SelectFrameListItem;
 				frameList.onReorderCallback -= ReorderFrameListItem;
 			}
+
+            Undo.undoRedoPerformed -= OnUndoOrRedo;
+        }
+
+        /// <summary>
+        /// Reinitialize the frame list on undo/redo
+        /// </summary>
+        private void OnUndoOrRedo()
+        {
+            InitializeReorderableList();
+            Repaint();
         }
 
         private void OnSelectionChange()
@@ -133,6 +146,7 @@ namespace Elendow.SpritedowAnimator
                         InitializeReorderableList();
 
                     // Add the frames dropped on the drag and drop box
+                    // TODO Record Undo/Redo for dragged sprites, currently not working, don't know why
                     if (draggedSprites != null && draggedSprites.Count > 0)
                     {
                         for (int i = 0; i < draggedSprites.Count; i++)
@@ -215,6 +229,17 @@ namespace Elendow.SpritedowAnimator
             frames.Clear();
             for (int i = 0; i < selectedAnimation.FramesCount; i++)
                 frames.Add(new AnimationFrame(selectedAnimation.Frames[i], selectedAnimation.FramesDuration[i]));
+
+            // Kill suscribers of the previous list
+            if (frameList != null)
+            {
+                frameList.drawHeaderCallback -= DrawFrameListHeader;
+                frameList.drawElementCallback -= DrawFrameListElement;
+                frameList.onAddCallback -= AddFrameListItem;
+                frameList.onRemoveCallback -= RemoveFrameListItem;
+                frameList.onSelectCallback -= SelectFrameListItem;
+                frameList.onReorderCallback -= ReorderFrameListItem;
+            }
 
             frameList = new ReorderableList(frames, typeof(AnimationFrame));
             frameList.drawHeaderCallback += DrawFrameListHeader;
@@ -336,7 +361,7 @@ namespace Elendow.SpritedowAnimator
 
             if (spritePreview != null)
             {
-				EditorGUILayout.BeginVertical(new GUIStyle("projectBrowserPreviewBg"), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+				EditorGUILayout.BeginVertical("projectBrowserPreviewBg", GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
                 {
                     r.height -= 21;
                     r.width -= 2;
@@ -346,7 +371,7 @@ namespace Elendow.SpritedowAnimator
                 }
                 EditorGUILayout.EndVertical();
 
-                EditorGUILayout.BeginHorizontal(new GUIStyle("projectBrowserPreviewBg"), GUILayout.Height(10));
+                EditorGUILayout.BeginHorizontal("projectBrowserPreviewBg", GUILayout.Height(10));
                 {
                     // Play Button
                     GUIContent buttonContent = spritePreview.IsPlaying ? pauseButtonContent : playButtonContent;
@@ -387,12 +412,15 @@ namespace Elendow.SpritedowAnimator
 
         private void AddFrameListItem(ReorderableList list)
         {
+            Undo.RecordObject(selectedAnimation, "Add Frame");
             AddFrame();
             EditorUtility.SetDirty(selectedAnimation);
         }
 
         private void RemoveFrameListItem(ReorderableList list)
         {
+            Undo.RecordObject(selectedAnimation, "Remove Frame");
+
             int i = list.index;
             selectedAnimation.Frames.RemoveAt(i);
             selectedAnimation.FramesDuration.RemoveAt(i);
@@ -412,6 +440,8 @@ namespace Elendow.SpritedowAnimator
 
         private void ReorderFrameListItem(ReorderableList list)
         {
+            Undo.RecordObject(selectedAnimation, "Reorder Frames");
+
             Sprite s = selectedAnimation.Frames[frameListSelectedIndex];
             selectedAnimation.Frames.RemoveAt(frameListSelectedIndex);
             selectedAnimation.Frames.Insert(list.index, s);
@@ -436,9 +466,8 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         private void AddFrame()
         {
-            Sprite emptySprite = new Sprite();
-            frameList.list.Add(new AnimationFrame(emptySprite, 1));
-            selectedAnimation.Frames.Add(emptySprite);
+            frameList.list.Add(new AnimationFrame(null, 1));
+            selectedAnimation.Frames.Add(null);
             selectedAnimation.FramesDuration.Add(1);
         }
 

@@ -15,6 +15,7 @@ namespace Elendow.SpritedowAnimator
         private bool init = false;
         private bool isPlaying = false;
         private bool forceRepaint = false;
+        private bool loop = false;
         private int currentFrame = 0;
         private int framesPerSecond = 30;
         private int frameDurationCounter = 0;
@@ -30,6 +31,8 @@ namespace Elendow.SpritedowAnimator
         private GUIContent speedScale;
         private GUIContent playButtonContent;
         private GUIContent pauseButtonContent;
+        private GUIContent loopIcon;
+        private GUIContent loopIconActive;
 
         private void OnEnable()
         {
@@ -57,7 +60,7 @@ namespace Elendow.SpritedowAnimator
 
                 // Double check out of bounds, sometimes the preview on the editor may desynchronize and get errors
                 if (currentFrame >= animation.FramesCount)
-                    currentFrame = 0;
+                        currentFrame = 0;
 
                 if (1f / framesPerSecond < animationTimer)
                 {
@@ -68,7 +71,13 @@ namespace Elendow.SpritedowAnimator
                         // Change frame and repaint the preview
                         currentFrame++;
                         if (currentFrame >= animation.FramesCount)
+                        {
                             currentFrame = 0;
+
+                            if (!loop)
+                                isPlaying = false;
+                        }
+
                         frameDurationCounter = 0;
                         Repaint();
                         forceRepaint = true;
@@ -113,12 +122,18 @@ namespace Elendow.SpritedowAnimator
                 speedScale = EditorGUIUtility.IconContent("SpeedScale");
                 playButtonContent = EditorGUIUtility.IconContent("PlayButton");
                 pauseButtonContent = EditorGUIUtility.IconContent("PauseButton");
+                loopIcon = EditorGUIUtility.IconContent("RotateTool");
+                loopIconActive = EditorGUIUtility.IconContent("RotateTool On");
                 init = true;
             }
 
             // Play Button
             GUIContent buttonContent = isPlaying ? pauseButtonContent : playButtonContent;
             isPlaying = GUILayout.Toggle(isPlaying, buttonContent, previewButtonSettings);
+
+            // Loop Button
+            GUIContent loopContent = loop ? loopIconActive : loopIcon;
+            loop = GUILayout.Toggle(loop, loopContent, previewButtonSettings);
 
             // FPS Slider
             GUILayout.Box(speedScale, preLabel);
@@ -158,5 +173,11 @@ namespace Elendow.SpritedowAnimator
 		{
 			set { currentFrame = value; }
 		}
+
+        public bool Loop
+        {
+            get { return loop; }
+            set { loop = value; }
+        }
     }
 }

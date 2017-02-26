@@ -37,10 +37,13 @@ namespace Elendow.SpritedowAnimator
         private GUIStyle sliderStyle;
         private GUIStyle sliderThumbStyle;
         private GUIStyle labelStyle;
+        private GUIStyle previewToolBar;
+        private GUIStyle preview;
         private GUIContent playButtonContent;
         private GUIContent pauseButtonContent;
 		private GUIContent speedScaleIcon;
-		private GUIContent imageIcon;
+        private GUIContent loopIcon;
+        private GUIContent loopIconActive;
 
         [MenuItem("Elendow Tools/Sprite Animation Editor", false, 0)]
         private static void ShowWindow()
@@ -213,12 +216,14 @@ namespace Elendow.SpritedowAnimator
             playButtonContent = EditorGUIUtility.IconContent("PlayButton");
             pauseButtonContent = EditorGUIUtility.IconContent("PauseButton");
             speedScaleIcon = EditorGUIUtility.IconContent("SpeedScale");
-			imageIcon = EditorGUIUtility.IconContent("Texture Icon");
-			imageIcon.tooltip = "Sprite";
+            loopIcon = EditorGUIUtility.IconContent("RotateTool");
+            loopIconActive = EditorGUIUtility.IconContent("RotateTool On");
             lowPaddingBox = new GUIStyle("box");
             lowPaddingBox.padding = new RectOffset(1, 1, 1, 1);
 			lowPaddingBox.stretchWidth = true;
 			lowPaddingBox.stretchHeight = true;
+            previewToolBar = new GUIStyle("RectangleToolHBar");
+            preview = new GUIStyle("CurveEditorBackground");
         }
 
         private void InitializeReorderableList()
@@ -361,7 +366,7 @@ namespace Elendow.SpritedowAnimator
 
             if (spritePreview != null)
             {
-				EditorGUILayout.BeginVertical("projectBrowserPreviewBg", GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+				EditorGUILayout.BeginVertical(preview, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
                 {
                     r.height -= 21;
                     r.width -= 2;
@@ -371,14 +376,18 @@ namespace Elendow.SpritedowAnimator
                 }
                 EditorGUILayout.EndVertical();
 
-                EditorGUILayout.BeginHorizontal("projectBrowserPreviewBg", GUILayout.Height(10));
+                EditorGUILayout.BeginHorizontal(previewToolBar);
                 {
                     // Play Button
                     GUIContent buttonContent = spritePreview.IsPlaying ? pauseButtonContent : playButtonContent;
-                    spritePreview.IsPlaying = GUILayout.Toggle(spritePreview.IsPlaying, buttonContent, buttonStyle);
+                    spritePreview.IsPlaying = GUILayout.Toggle(spritePreview.IsPlaying, buttonContent, buttonStyle, GUILayout.Width(40));
+
+                    // Loop Button
+                    GUIContent loopContent = spritePreview.Loop ? loopIconActive : loopIcon;
+                    spritePreview.Loop = GUILayout.Toggle(spritePreview.Loop, loopContent, buttonStyle, GUILayout.Width(40));
 
                     // FPS Slider
-                    GUILayout.Box(speedScaleIcon, labelStyle);
+                    GUILayout.Box(speedScaleIcon, labelStyle, GUILayout.ExpandWidth(false));
                     spritePreview.FramesPerSecond = (int)GUILayout.HorizontalSlider(spritePreview.FramesPerSecond, 0, 60, sliderStyle, sliderThumbStyle);
                     GUILayout.Label(spritePreview.FramesPerSecond.ToString("0") + " fps", labelStyle, GUILayout.Width(50));
                 }

@@ -238,6 +238,7 @@ namespace Elendow.SpritedowAnimator
             // Kill suscribers of the previous list
             if (frameList != null)
             {
+				frameList.list.Clear();
                 frameList.drawHeaderCallback -= DrawFrameListHeader;
                 frameList.drawElementCallback -= DrawFrameListElement;
                 frameList.onAddCallback -= AddFrameListItem;

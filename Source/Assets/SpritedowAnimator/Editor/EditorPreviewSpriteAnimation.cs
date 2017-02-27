@@ -34,6 +34,10 @@ namespace Elendow.SpritedowAnimator
         private GUIContent loopIcon;
         private GUIContent loopIconActive;
 
+		private GameObject go;
+		private Camera pc;
+		private SpriteRenderer sr;
+
         private void OnEnable()
         {
             if (animation == null)
@@ -42,7 +46,26 @@ namespace Elendow.SpritedowAnimator
             EditorApplication.update += Update;
             init = false;
 
-        }
+			go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer), typeof(Camera));
+			sr = go.GetComponent<SpriteRenderer>();
+			pc = go.GetComponent<Camera>();
+			pc.cameraType = CameraType.Preview;
+			pc.clearFlags = CameraClearFlags.Depth;
+			pc.backgroundColor = Color.clear;
+			pc.orthographic = true;
+			pc.orthographicSize = 2;
+			pc.nearClipPlane = -10;
+			pc.farClipPlane = 10;
+			pc.targetDisplay = -1;
+			pc.depth = -999;
+		}
+
+		private void OnDisable()
+		{
+			EditorApplication.update -= Update;
+			if(go != null)
+				DestroyImmediate(go);
+		}
 
         private void Update()
         {
@@ -86,22 +109,26 @@ namespace Elendow.SpritedowAnimator
             }
         }
 
-        private void OnDisable()
-        {
-            EditorApplication.update -= Update;
-        }
-
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
         {
+			//sr.sprite = animation.Frames[currentFrame];
+
 			if (animation != null && animation.FramesCount > 0 && currentFrame < animation.FramesCount)
             {
-                Texture2D texture = AssetPreview.GetAssetPreview(animation.Frames[currentFrame]);
+				sr.sprite = animation.Frames[currentFrame];
+				Handles.DrawCamera(r, pc);
+
+				/*
+				Texture2D texture = AssetPreview.GetAssetPreview(go);
+                //Texture2D texture = AssetPreview.GetAssetPreview(animation.Frames[currentFrame]);
                 if (texture != null)
                 {
                     // Use the filtermode of the texture to preview the sprite as ingame
                     texture.filterMode = animation.Frames[currentFrame].texture.filterMode;
-                    EditorGUI.DrawTextureTransparent(r, texture, ScaleMode.ScaleToFit);
+                    //EditorGUI.DrawTextureTransparent(r, texture, ScaleMode.ScaleToFit);
+					EditorGUI.DrawPreviewTexture(r, texture);
                 }
+                */
             }
         }
 

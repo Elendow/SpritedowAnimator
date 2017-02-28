@@ -102,6 +102,8 @@ namespace Elendow.SpritedowAnimator
                 if (sa != selectedAnimation)
                 {
                     selectedAnimation = sa;
+                    spritePreview = null;
+                    InitializeReorderableList();
                     Repaint();
                 }
             }
@@ -168,7 +170,7 @@ namespace Elendow.SpritedowAnimator
 					// Config settings
 					ConfigBox();
 
-					EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.BeginHorizontal();
 					{
                         // Preview window setup
 						Rect previewRect = EditorGUILayout.BeginVertical(lowPaddingBox, GUILayout.MaxWidth(position.width / 2));
@@ -180,21 +182,36 @@ namespace Elendow.SpritedowAnimator
                             // Individual frames
                             frameList.displayRemove = (selectedAnimation.FramesCount > 0);
                             frameList.DoLayoutList();
-                            // Delete frames with supr
-                            Event evt = Event.current;
-                            switch (evt.type)
-                            {
-                                case EventType.keyDown:
-                                    if (Event.current.keyCode == KeyCode.Delete && 
-                                        selectedAnimation.FramesCount > 0 && 
-                                        frameList.HasKeyboardControl() &&
-                                        frameListSelectedIndex != -1)
-                                        RemoveFrameListItem(frameList);
-                                    break;
-                            }
                             EditorGUILayout.Space();
 						}
 						EditorGUILayout.EndScrollView();
+
+                        // Check Events
+                        Event evt = Event.current;
+                        switch (evt.type)
+                        {
+                            // Delete frames with supr
+                            case EventType.KeyDown:
+                                if (Event.current.keyCode == KeyCode.Delete &&
+                                    selectedAnimation.FramesCount > 0 &&
+                                    frameList.HasKeyboardControl() &&
+                                    frameListSelectedIndex != -1)
+                                    RemoveFrameListItem(frameList);
+                                break;
+                            // Zoom preview window with scrollwheel
+                            case EventType.ScrollWheel:
+                                if (spritePreview != null)
+                                {
+                                    Vector2 mpos = Event.current.mousePosition;
+                                    if (mpos.x >= previewRect.x && mpos.x <= previewRect.x + previewRect.width &&
+                                        mpos.y >= previewRect.y && mpos.y <= previewRect.y + previewRect.height)
+                                    {
+                                        Repaint();
+                                        spritePreview.Zoom = -evt.delta.y;
+                                    }
+                                }
+                                break;
+                        }
                     }
                     EditorGUILayout.EndHorizontal();
                 }
@@ -238,7 +255,7 @@ namespace Elendow.SpritedowAnimator
             // Kill suscribers of the previous list
             if (frameList != null)
             {
-				frameList.list.Clear();
+                Debug.Log("hi");
                 frameList.drawHeaderCallback -= DrawFrameListHeader;
                 frameList.drawElementCallback -= DrawFrameListElement;
                 frameList.onAddCallback -= AddFrameListItem;
@@ -288,22 +305,21 @@ namespace Elendow.SpritedowAnimator
         {
             EditorGUILayout.BeginVertical(box);
             {
-                selectedAnimation = EditorGUILayout.ObjectField("Animation", selectedAnimation, typeof(SpriteAnimation), false) as SpriteAnimation;
-                if (selectedAnimation == null)
+                SpriteAnimation newSpriteAnimation = EditorGUILayout.ObjectField("Animation", selectedAnimation, typeof(SpriteAnimation), false) as SpriteAnimation; 
+                if (newSpriteAnimation == null)
                     return;
+
+                if(newSpriteAnimation != selectedAnimation)
+                {
+                    selectedAnimation = newSpriteAnimation;
+                    InitializeReorderableList();
+                    spritePreview = (EditorPreviewSpriteAnimation)Editor.CreateEditor(selectedAnimation, typeof(EditorPreviewSpriteAnimation));
+                }
 
                 // Name field
                 selectedAnimation.Name = EditorGUILayout.TextField("Name", selectedAnimation.Name);
-
                 EditorGUILayout.Space();
-
                 DragAndDropBox();
-
-				/*
-                // Manually add empty frames
-                if (GUILayout.Button("Add Frame"))
-                    AddFrame();
-				*/
             }
             EditorGUILayout.EndVertical();
         }
@@ -524,6 +540,7 @@ namespace Elendow.SpritedowAnimator
             AssetDatabase.Refresh();
             Selection.activeObject = asset;
             selectedAnimation = asset;
+            InitializeReorderableList();
             EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + newAnimName, "OK");
         }
     }

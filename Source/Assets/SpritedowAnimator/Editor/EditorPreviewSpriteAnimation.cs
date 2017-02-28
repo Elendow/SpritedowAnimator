@@ -35,7 +35,8 @@ namespace Elendow.SpritedowAnimator
         private GUIContent loopIconActive;
 
 		private GameObject go;
-		private Camera pc;
+        private GameObject cameraGO;
+        private Camera pc;
 		private SpriteRenderer sr;
 
         private void OnEnable()
@@ -46,31 +47,38 @@ namespace Elendow.SpritedowAnimator
             EditorApplication.update += Update;
             init = false;
 
-			go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer), typeof(Camera));
-			sr = go.GetComponent<SpriteRenderer>();
-			pc = go.GetComponent<Camera>();
+            // Setup preview object and camera
+			go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
+            cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
+            sr = go.GetComponent<SpriteRenderer>();
+			pc = cameraGO.GetComponent<Camera>();
 			pc.cameraType = CameraType.Preview;
 			pc.clearFlags = CameraClearFlags.Depth;
 			pc.backgroundColor = Color.clear;
 			pc.orthographic = true;
-			pc.orthographicSize = 2;
+			pc.orthographicSize = 3;
 			pc.nearClipPlane = -10;
 			pc.farClipPlane = 10;
 			pc.targetDisplay = -1;
 			pc.depth = -999;
-		}
+        }
 
 		private void OnDisable()
 		{
 			EditorApplication.update -= Update;
 			if(go != null)
 				DestroyImmediate(go);
+            if (cameraGO != null)
+                DestroyImmediate(cameraGO);
 		}
 
         private void Update()
         {
             if (animation == null || animation.FramesCount == 0)
                 return;
+
+            // Center camera
+            cameraGO.transform.position = sr.bounds.center;
 
             // Check if playing and use the editor time to change frames
             if (isPlaying)
@@ -111,24 +119,27 @@ namespace Elendow.SpritedowAnimator
 
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
         {
-			//sr.sprite = animation.Frames[currentFrame];
-
 			if (animation != null && animation.FramesCount > 0 && currentFrame < animation.FramesCount)
             {
+                // Draw Camera
 				sr.sprite = animation.Frames[currentFrame];
 				Handles.DrawCamera(r, pc);
 
-				/*
-				Texture2D texture = AssetPreview.GetAssetPreview(go);
-                //Texture2D texture = AssetPreview.GetAssetPreview(animation.Frames[currentFrame]);
-                if (texture != null)
+                // Check Events
+                Event evt = Event.current;
+                switch (evt.type)
                 {
-                    // Use the filtermode of the texture to preview the sprite as ingame
-                    texture.filterMode = animation.Frames[currentFrame].texture.filterMode;
-                    //EditorGUI.DrawTextureTransparent(r, texture, ScaleMode.ScaleToFit);
-					EditorGUI.DrawPreviewTexture(r, texture);
+                    // Zoom preview window with scrollwheel
+                    case EventType.ScrollWheel:
+                        Vector2 mpos = Event.current.mousePosition;
+                        if (mpos.x >= r.x && mpos.x <= r.x + r.width &&
+                            mpos.y >= r.y && mpos.y <= r.y + r.height)
+                        {
+                            Repaint();
+                            Zoom = -evt.delta.y;
+                        }
+                        break;
                 }
-                */
             }
         }
 
@@ -205,6 +216,22 @@ namespace Elendow.SpritedowAnimator
         {
             get { return loop; }
             set { loop = value; }
+        }
+
+        public float Zoom
+        {
+            set
+            {
+                if(pc != null)
+                {
+                    float z = value / 50f;
+                    if (pc.orthographicSize + z >= 1 &&
+                        pc.orthographicSize + z <= 10)
+                    {
+                        pc.orthographicSize += z;
+                    }
+                }
+            }
         }
     }
 }

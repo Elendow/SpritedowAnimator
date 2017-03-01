@@ -1,6 +1,7 @@
 ﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
 // https://github.com/Elendow/SpritedowAnimator
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -48,22 +49,32 @@ namespace Elendow.SpritedowAnimator
             init = false;
 
             // Setup preview object and camera
-			go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
+            go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
             cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
             sr = go.GetComponent<SpriteRenderer>();
 			pc = cameraGO.GetComponent<Camera>();
-			pc.cameraType = CameraType.Preview;
-			pc.clearFlags = CameraClearFlags.Depth;
-			pc.backgroundColor = Color.clear;
-			pc.orthographic = true;
-			pc.orthographicSize = 3;
-			pc.nearClipPlane = -10;
-			pc.farClipPlane = 10;
-			pc.targetDisplay = -1;
-			pc.depth = -999;
+            pc.cameraType = CameraType.Preview;
+            pc.clearFlags = CameraClearFlags.Depth;
+            pc.backgroundColor = Color.clear;
+            pc.orthographic = true;
+            pc.orthographicSize = 3;
+            pc.nearClipPlane = -10;
+            pc.farClipPlane = 10;
+            pc.targetDisplay = -1;
+            pc.depth = -999;
+
+            // Get preview culling layer in order to render only the preview object and nothing more
+            BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;
+            PropertyInfo propInfo = typeof(Camera).GetProperty("PreviewCullingLayer", flags);
+            int previewLayer = (int)propInfo.GetValue(null, new object[0]);
+            pc.cullingMask = 1 << previewLayer;
+            go.layer = previewLayer;
+
+            // Also, disable the object to prevent render on scene/game views
+            go.SetActive(false);
         }
 
-		private void OnDisable()
+        private void OnDisable()
 		{
 			EditorApplication.update -= Update;
 			if(go != null)
@@ -122,8 +133,10 @@ namespace Elendow.SpritedowAnimator
 			if (animation != null && animation.FramesCount > 0 && currentFrame < animation.FramesCount)
             {
                 // Draw Camera
-				sr.sprite = animation.Frames[currentFrame];
+                sr.sprite = animation.Frames[currentFrame];
+                go.SetActive(true);
 				Handles.DrawCamera(r, pc);
+                go.SetActive(false);
 
                 // Check Events
                 Event evt = Event.current;

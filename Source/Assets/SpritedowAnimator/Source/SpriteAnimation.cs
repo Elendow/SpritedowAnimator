@@ -1,6 +1,6 @@
 ﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
-// https://github.com/Elendow/SpritedowAnimator
+
 using UnityEngine;
 using System.Collections.Generic;
 

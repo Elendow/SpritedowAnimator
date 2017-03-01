@@ -1,6 +1,5 @@
 ﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
-// https://github.com/Elendow/SpritedowAnimator
 
 namespace Elendow.SpritedowAnimator
 {

@@ -10,8 +10,6 @@ TestAssets/
 /[Bb]uilds/
 /[Pp]rojectSettings/
 /[Tt]estAssets/
-Source/Assets/AssetStoreTools/*
-Source/Assets/Sprites/*
 ExportedObj/
 *.csproj
 *.unityproj
@@ -25,6 +23,3 @@ ExportedObj/
 *.svd
 *.meta
 sysinfo.txt
-*.asset
-*.unity
-*.png

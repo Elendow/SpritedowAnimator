@@ -1,6 +1,6 @@
 ﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
-// https://github.com/Elendow/SpritedowAnimator
+
 using UnityEngine;
 
 namespace Elendow.SpritedowAnimator
@@ -8,7 +8,7 @@ namespace Elendow.SpritedowAnimator
     /// <summary>
     /// Animator for Sprite Renderers.
     /// </summary>
-    [AddComponentMenu("Elendow Tools/Sprite Animator")]
+    [AddComponentMenu("Spritedow/Sprite Animator")]
     [RequireComponent(typeof(SpriteRenderer))]
     public class SpriteAnimator : BaseAnimator
     {
@@ -33,6 +33,8 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public override void SetActiveRenderer(bool active)
         {
+            if (spriteRenderer == null)
+                spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.enabled = active;
         }
 

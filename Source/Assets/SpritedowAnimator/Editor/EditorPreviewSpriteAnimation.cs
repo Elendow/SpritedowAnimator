@@ -100,10 +100,6 @@ namespace Elendow.SpritedowAnimator
                 lastFrameEditorTime = timeSinceStartup;
                 animationTimer += deltaTime;
 
-                // Double check out of bounds, sometimes the preview on the editor may desynchronize and get errors
-                if (currentFrame >= animation.FramesCount)
-                        currentFrame = 0;
-
                 if (1f / framesPerSecond < animationTimer)
                 {
                     frameDurationCounter++;

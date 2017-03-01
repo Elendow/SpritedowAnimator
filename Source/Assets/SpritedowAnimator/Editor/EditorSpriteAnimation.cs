@@ -21,7 +21,7 @@ namespace Elendow.SpritedowAnimator
 
         private bool init = false;
         private int frameListSelectedIndex = -1;
-        private string newAnimName = "Animation";
+        private string newAnimName = "New Animation";
         private Texture2D clockIcon = null;
         private SpriteAnimation selectedAnimation = null;
         private Vector2 scrollWindowPosition = Vector2.zero;
@@ -49,6 +49,23 @@ namespace Elendow.SpritedowAnimator
         private static void ShowWindow()
         {
             GetWindow(typeof(EditorSpriteAnimation), false, "Sprite Animation");
+        }
+
+        [MenuItem("Assets/Create/Spritedow/Sprite Animation")]
+        public static void CreateAsset()
+        {
+            SpriteAnimation asset = CreateInstance<SpriteAnimation>();
+            string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+            if (path == "")
+                path = "Assets";
+            else if (System.IO.Path.GetExtension(path) != "")
+                path = path.Replace(System.IO.Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
+            string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/New Animation.asset");
+            AssetDatabase.CreateAsset(asset, assetPathAndName);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = asset;
         }
 
         private void OnEnable()
@@ -255,7 +272,6 @@ namespace Elendow.SpritedowAnimator
             // Kill suscribers of the previous list
             if (frameList != null)
             {
-                Debug.Log("hi");
                 frameList.drawHeaderCallback -= DrawFrameListHeader;
                 frameList.drawElementCallback -= DrawFrameListElement;
                 frameList.onAddCallback -= AddFrameListItem;

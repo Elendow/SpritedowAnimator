@@ -1,6 +1,6 @@
 ﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
-// https://github.com/Elendow/SpritedowAnimator
+
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
@@ -51,7 +51,9 @@ namespace Elendow.SpritedowAnimator
             // Why an animator without animation?
             if (animations.Count == 0)
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogError("Sprite animator without animations.", gameObject);
+#endif
                 enabled = false;
                 return;
             }
@@ -74,12 +76,8 @@ namespace Elendow.SpritedowAnimator
 
                 if (1f / framesPerSecond < animationTimer)
                 {
-                    // Next Frame!
+                    // Check frames duration
                     frameDurationCounter++;
-                    ChangeFrame(currentAnimation.GetFrame(animationIndex));
-                    SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, animationIndex);
-                    if (customEvents != null && customEvents.ContainsKey(frameInfo))
-                        customEvents[frameInfo].Invoke(this);
                     animationTimer = 0;
 
                     if (frameDurationCounter >= currentAnimation.FramesDuration[animationIndex])
@@ -87,14 +85,23 @@ namespace Elendow.SpritedowAnimator
                         // Change frame only if have passed the desired frames
                         animationIndex = (backwards) ? animationIndex - 1 : animationIndex + 1;
                         frameDurationCounter = 0;
-                    }
 
-                    if (animationIndex >= framesInAnimation)
-                    {
-                        // Last frame, reset index and stop if is one shot
-                        animationIndex = (backwards) ? framesInAnimation - 1 : 0;
-                        onFinish.Invoke();
-                        if (oneShot) Stop();
+                        // Check last or first frame
+                        if (animationIndex >= framesInAnimation || animationIndex < 0)
+                        {
+                            // Last frame, reset index and stop if is one shot
+                            animationIndex = (backwards) ? framesInAnimation - 1 : 0;
+                            onFinish.Invoke();
+                            if (oneShot) Stop();
+                        }
+
+                        // Change sprite
+                        ChangeFrame(currentAnimation.GetFrame(animationIndex));
+
+                        // Check events
+                        SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, animationIndex);
+                        if (customEvents != null && customEvents.ContainsKey(frameInfo))
+                            customEvents[frameInfo].Invoke(this);
                     }
                 }
             }
@@ -140,7 +147,9 @@ namespace Elendow.SpritedowAnimator
                 // Check if the animation have frames. Show warning if not.
                 if (currentAnimation.FramesCount == 0)
                 {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                     Debug.LogWarning("Animation '" + name + "' has no frames.", gameObject);
+#endif
                     playing = false;
                     return;
                 }
@@ -151,8 +160,10 @@ namespace Elendow.SpritedowAnimator
                 framesInAnimation = currentAnimation.FramesCount;
                 ChangeFrame(currentAnimation.GetFrame(animationIndex));
             }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
                 Debug.LogError("Animation '" + name + "' not found.", gameObject);
+#endif
         }
 
         /// <summary>
@@ -206,7 +217,7 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
-        /// Adds a custom event to specified nimation on the list on a certain frame.
+        /// Adds a custom event to specified animation on the list on a certain frame.
         /// </summary>
         /// <returns>
         /// The event created. Null if the animation is not found or doesn't have enough frames.
@@ -236,6 +247,9 @@ namespace Elendow.SpritedowAnimator
         /// </returns>  
         public SpriteAnimatorEvent GetCustomEvent(int frame)
         {
+            if (animations.Count == 0)
+                return null;
+
             return GetCustomEvent(animations[0].Name, frame);
         }
 
@@ -247,6 +261,9 @@ namespace Elendow.SpritedowAnimator
         /// </returns>  
         public SpriteAnimatorEvent GetCustomEvent(string animation, int frame)
         {
+            if (animations.Count == 0)
+                return null;
+
             SpriteAnimation anim = GetAnimation(animation);
             if (anim == null || anim.FramesCount <= frame)
                 return null;
@@ -270,7 +287,7 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
-        /// Changes the sprite to the given sprite
+        /// Changes the renderer to the given sprite
         /// </summary>
         protected virtual void ChangeFrame(Sprite frame) { }
 

@@ -1,0 +1,587 @@
+fileFormatVersion: 2
+guid: fe5a641aeafb9a345ad9cf8a1164be1a
+timeCreated: 1488494804
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: Slimedow_0
+    21300002: Slimedow_1
+    21300004: Slimedow_2
+    21300006: Slimedow_3
+    21300008: Slimedow_4
+    21300010: Slimedow_5
+    21300012: Slimedow_6
+    21300014: Slimedow_7
+    21300016: Slimedow_8
+    21300018: Slimedow_9
+    21300020: Slimedow_10
+    21300022: Slimedow_11
+    21300024: Slimedow_12
+    21300026: Slimedow_13
+    21300028: Slimedow_14
+    21300030: Slimedow_15
+    21300032: Slimedow_16
+    21300034: Slimedow_17
+    21300036: Slimedow_18
+    21300038: Slimedow_19
+    21300040: Slimedow_20
+    21300042: Slimedow_21
+    21300044: Slimedow_22
+    21300046: Slimedow_23
+    21300048: Slimedow_24
+    21300050: Slimedow_25
+    21300052: Slimedow_26
+    21300054: Slimedow_27
+    21300056: Slimedow_28
+    21300058: Slimedow_29
+    21300060: Slimedow_30
+    21300062: Slimedow_31
+    21300064: Slimedow_32
+    21300066: Slimedow_33
+    21300068: Slimedow_34
+    21300070: Slimedow_35
+    21300072: Slimedow_36
+    21300074: Slimedow_37
+    21300076: Slimedow_38
+    21300078: Slimedow_39
+  serializedVersion: 4
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: -1
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  platformSettings:
+  - buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+  - buildTarget: Standalone
+    maxTextureSize: 2048
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+  - buildTarget: Android
+    maxTextureSize: 2048
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+  - buildTarget: WebGL
+    maxTextureSize: 2048
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Slimedow_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_1
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_2
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_3
+      rect:
+        serializedVersion: 2
+        x: 594
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_4
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_5
+      rect:
+        serializedVersion: 2
+        x: 990
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_6
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_7
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_8
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_9
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 779
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_11
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_12
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_13
+      rect:
+        serializedVersion: 2
+        x: 594
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_14
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_15
+      rect:
+        serializedVersion: 2
+        x: 990
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_16
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_17
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_18
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_19
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 532
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_21
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_22
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_23
+      rect:
+        serializedVersion: 2
+        x: 594
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_24
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_25
+      rect:
+        serializedVersion: 2
+        x: 990
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_26
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_27
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_28
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_29
+      rect:
+        serializedVersion: 2
+        x: 1782
+        y: 285
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 38
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_31
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 38
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_32
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 38
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_33
+      rect:
+        serializedVersion: 2
+        x: 594
+        y: 38
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Slimedow_34
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 38
+        width: 196
+        height: 245
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

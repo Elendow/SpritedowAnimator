@@ -3,6 +3,7 @@ Library/
 Build/
 ProjectSettings/
 TestAssets/
+AssetStoreTools/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -10,6 +11,7 @@ TestAssets/
 /[Bb]uilds/
 /[Pp]rojectSettings/
 /[Tt]estAssets/
+/Assets/[Aa]ssetStoreTools/
 ExportedObj/
 *.csproj
 *.unityproj
@@ -21,5 +23,4 @@ ExportedObj/
 *.pidb
 *.booproj
 *.svd
-*.meta
 sysinfo.txt

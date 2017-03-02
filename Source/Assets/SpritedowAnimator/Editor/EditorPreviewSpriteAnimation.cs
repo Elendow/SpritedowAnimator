@@ -88,8 +88,9 @@ namespace Elendow.SpritedowAnimator
             if (animation == null || animation.FramesCount == 0)
                 return;
 
-            // Center camera
-            cameraGO.transform.position = sr.bounds.center;
+            // Center camera only on the first frame (this allows animations with different pivot points)
+            if(currentFrame == 0)
+                cameraGO.transform.position = sr.bounds.center;
 
             // Check if playing and use the editor time to change frames
             if (isPlaying)

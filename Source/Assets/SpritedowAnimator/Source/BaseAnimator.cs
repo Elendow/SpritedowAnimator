@@ -32,9 +32,14 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public UnityEvent onPlay;
 
-        private bool playing;
+        [SerializeField]
         private bool oneShot;
+        [SerializeField]
         private bool backwards;
+        [SerializeField]
+        private bool randomAnimation = false;
+
+        private bool playing;
         private bool disableRenderer;
         private int animationIndex;
         private int framesInAnimation;
@@ -58,13 +63,20 @@ namespace Elendow.SpritedowAnimator
             }
 
             // Play the first animation if play on awake
-            if (playOnAwake) Play(startAnimation);
+            if (playOnAwake)
+            {
+                if (!randomAnimation)
+                    Play(startAnimation, oneShot, backwards);
+                else
+                    PlayRandom(oneShot, backwards);
+            }
         }
 
         private void Update()
         {
             // We do nothing if FPS <= 0
-            if (currentAnimation.FPS <= 0) return;
+            if (currentAnimation == null || currentAnimation.FPS <= 0)
+                return;
 
             if (playing)
             {
@@ -91,7 +103,10 @@ namespace Elendow.SpritedowAnimator
                             // Last frame, reset index and stop if is one shot
                             animationIndex = (backwards) ? framesInAnimation - 1 : 0;
                             onFinish.Invoke();
-                            if (oneShot) Stop();
+                            if (oneShot)
+                                Stop();
+                            else if (randomAnimation)
+                                PlayRandom(oneShot, backwards);
                         }
 
                         // Change sprite
@@ -200,7 +215,7 @@ namespace Elendow.SpritedowAnimator
         public void Restart()
         {
             animationTimer = 0;
-            animationIndex = 0;
+            animationIndex = (backwards) ? currentAnimation.FramesCount - 1 : 0;
             frameDurationCounter = 0;
         }
 
@@ -316,6 +331,15 @@ namespace Elendow.SpritedowAnimator
         public bool DisableRendererOnFinish
         {
             set { disableRenderer = value; }
+        }
+
+
+        /// <summary>
+        /// If true the animator will get a random animation after every loop cicle
+        /// </summary>
+        public bool RandomAnimation
+        {
+            set { randomAnimation = value; }
         }
 
         /// <summary>

@@ -106,8 +106,11 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         private void OnUndoOrRedo()
         {
-            InitializeReorderableList();
-            Repaint();
+            if (selectedAnimation != null)
+            {
+                InitializeReorderableList();
+                Repaint();
+            }
         }
 
         private void OnSelectionChange()
@@ -227,7 +230,9 @@ namespace Elendow.SpritedowAnimator
                                     selectedAnimation.FramesCount > 0 &&
                                     frameList.HasKeyboardControl() &&
                                     frameListSelectedIndex != -1)
+                                {
                                     RemoveFrameListItem(frameList);
+                                }
                                 break;
                             // Zoom preview window with scrollwheel
                             case EventType.ScrollWheel:
@@ -311,18 +316,27 @@ namespace Elendow.SpritedowAnimator
             EditorGUILayout.LabelField("Create Animation");
 			EditorGUILayout.BeginHorizontal(box);
             {
+                // Submit if return is pressed with the new animation input focused
+                bool createAnimation = false;
+                Event evt = Event.current;
+                switch (evt.type)
+                {
+                    case EventType.KeyDown:
+                        createAnimation = (Event.current.keyCode == KeyCode.Return &&
+                                           GUI.GetNameOfFocusedControl().Equals("newAnimation"));
+                        break;
+                }
+
                 // New animation name field
+                GUI.SetNextControlName("newAnimation");
                 newAnimName = EditorGUILayout.TextField("Name", newAnimName);
 
                 // New animaton button
-                if (GUILayout.Button("New Animation"))
+                if (createAnimation || GUILayout.Button("New Animation"))
                 {
                     string folder = EditorUtility.OpenFolderPanel("New Animation", "Assets", "");
                     if (folder != "")
-                    {
-                        EditorGUILayout.BeginHorizontal();
                         CreateAnimation(folder);
-                    }
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -340,7 +354,7 @@ namespace Elendow.SpritedowAnimator
                     return;
 
                 // Reset preview and list if we select a new animation
-                if(newSpriteAnimation != selectedAnimation)
+                if (newSpriteAnimation != selectedAnimation)
                 {
                     selectedAnimation = newSpriteAnimation;
                     InitializeReorderableList();

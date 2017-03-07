@@ -16,7 +16,7 @@ namespace Elendow.SpritedowAnimator
         private bool init = false;
         private bool isPlaying = false;
         private bool forceRepaint = false;
-        private bool loop = false;
+        private bool loop = true;
         private int currentFrame = 0;
         private int framesPerSecond = 30;
         private int frameDurationCounter = 0;
@@ -53,6 +53,8 @@ namespace Elendow.SpritedowAnimator
             cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
             sr = go.GetComponent<SpriteRenderer>();
 			pc = cameraGO.GetComponent<Camera>();
+
+            // Set camera
             pc.cameraType = CameraType.Preview;
             pc.clearFlags = CameraClearFlags.Depth;
             pc.backgroundColor = Color.clear;
@@ -62,6 +64,13 @@ namespace Elendow.SpritedowAnimator
             pc.farClipPlane = 10;
             pc.targetDisplay = -1;
             pc.depth = -999;
+
+            // Set renderer
+            if(animation != null && animation.FramesCount > 0)
+            {
+                sr.sprite = animation.Frames[0];
+                cameraGO.transform.position = sr.bounds.center;
+            }
 
             // Get preview culling layer in order to render only the preview object and nothing more
             BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;

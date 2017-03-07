@@ -11,6 +11,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d77f76fefc0e73d4184cf86fd1488e0f, type: 3}
   m_Name: Slimedow
   m_EditorClassIdentifier: 
+  fps: 30
   animationName: Slimedow
   frames:
   - {fileID: 21300000, guid: fe5a641aeafb9a345ad9cf8a1164be1a, type: 3}

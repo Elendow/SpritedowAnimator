@@ -10,13 +10,12 @@ namespace Elendow.SpritedowAnimator
     /// <summary>
     /// Base class for the animation system. Controls the sprites and events.
     /// </summary>
-    [AddComponentMenu("")]
+    [AddComponentMenu("")] // This makes this class invisible on the components menu
     public class BaseAnimator : MonoBehaviour
     {
         #region Attributes
         public bool playOnAwake = false;
         public bool ignoreTimeScale = false;
-        public int framesPerSecond = 30;
         public string startAnimation;
         public List<SpriteAnimation> animations;
 
@@ -65,7 +64,7 @@ namespace Elendow.SpritedowAnimator
         private void Update()
         {
             // We do nothing if FPS <= 0
-            if (framesPerSecond <= 0) return;
+            if (currentAnimation.FPS <= 0) return;
 
             if (playing)
             {
@@ -74,7 +73,7 @@ namespace Elendow.SpritedowAnimator
                 else
                     animationTimer += Time.unscaledDeltaTime;
 
-                if (1f / framesPerSecond < animationTimer)
+                if (1f / currentAnimation.FPS < animationTimer)
                 {
                     // Check frames duration
                     frameDurationCounter++;

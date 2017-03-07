@@ -35,9 +35,6 @@ namespace Elendow.SpritedowAnimator
                 EditorUtility.SetDirty(targetAnimator);
             }
 
-            targetAnimator.framesPerSecond = EditorGUILayout.IntField("FPS", targetAnimator.framesPerSecond);
-            if (targetAnimator.framesPerSecond < 0) targetAnimator.framesPerSecond = 0;
-
             EditorGUILayout.PropertyField(animations, true);
 
             if (GUI.changed)

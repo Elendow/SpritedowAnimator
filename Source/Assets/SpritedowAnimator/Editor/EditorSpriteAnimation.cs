@@ -187,6 +187,8 @@ namespace Elendow.SpritedowAnimator
 					// Config settings
 					ConfigBox();
 
+                    EditorGUILayout.Space();
+
                     EditorGUILayout.BeginHorizontal();
 					{
                         // Preview window setup
@@ -194,14 +196,26 @@ namespace Elendow.SpritedowAnimator
                         PreviewBox(previewRect);
 						EditorGUILayout.EndVertical();
 
-						scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition);
-						{
-                            // Individual frames
-                            frameList.displayRemove = (selectedAnimation.FramesCount > 0);
-                            frameList.DoLayoutList();
+                        EditorGUILayout.BeginVertical();
+                        {
+                            // FPS 
+                            selectedAnimation.FPS = EditorGUILayout.IntField("FPS", selectedAnimation.FPS);
+                            if (selectedAnimation.FPS < 0) selectedAnimation.FPS = 0;
+
                             EditorGUILayout.Space();
-						}
-						EditorGUILayout.EndScrollView();
+
+                            scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition);
+                            {
+                                // Individual frames
+                                frameList.displayRemove = (selectedAnimation.FramesCount > 0);
+                                frameList.DoLayoutList();
+                                EditorGUILayout.Space();
+                            }
+                            EditorGUILayout.EndScrollView();
+
+                            EditorGUILayout.Space();
+                        }
+                        EditorGUILayout.EndVertical();
 
                         // Check Events
                         Event evt = Event.current;
@@ -269,7 +283,7 @@ namespace Elendow.SpritedowAnimator
             for (int i = 0; i < selectedAnimation.FramesCount; i++)
                 frames.Add(new AnimationFrame(selectedAnimation.Frames[i], selectedAnimation.FramesDuration[i]));
 
-            // Kill suscribers of the previous list
+            // Kill listener of the previous list
             if (frameList != null)
             {
                 frameList.drawHeaderCallback -= DrawFrameListHeader;
@@ -325,6 +339,7 @@ namespace Elendow.SpritedowAnimator
                 if (newSpriteAnimation == null)
                     return;
 
+                // Reset preview and list if we select a new animation
                 if(newSpriteAnimation != selectedAnimation)
                 {
                     selectedAnimation = newSpriteAnimation;

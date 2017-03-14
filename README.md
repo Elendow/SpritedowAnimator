@@ -9,17 +9,22 @@ Simply copy the files on your project or use the UnityPackage included.
 Use the animation editor to create new animation files. You can open it selecting **Sprite Animation Editor** on **Elendow Tools** tab.
 - Give a name to the animation. This will be also the asset name. This name will be the one used to play the animations.
 - Select the folder to save.
+- Select the framerate of the animation.
 - Add frames manually or dropping the sprite to the Drag&Drop box.
   - If you drop a Texture instead of a sprite to the Drag&Drop box, the plugin will take all the sprites on that Texture
   - You can change the duration of each frame, 1 by default, to any number greater than 0.
+  - You can sort the frames.
 - Any change is automatically saved.
-- If your animation has more than 40 frames, the editor will paginate it to avoid memory problems.
+- You can preview the animation.
+  - The speed and loop settings of the preview window are only for that window.
 
 # Inspector properties
-- **Play on Awake** will start playing the **Start Animation** when the object awakes.
 - **Ignore TimeScale** will set the animation to ignore the game TimeScale.
-- **Start Animation** is the animation that will plays when **Play on Awake** is true.
-- **FPS** is the speed of the animation, <= 0 will pause the animation.
+- **Play on Awake** will start playing when the object awakes.
+  - **One Shot** if false the animation will loop infinite times.
+  - **Backwards** if true the animation will play backwards.
+  - **Random Animation** if true the start animation will be random, and the animation will randomly change after every loop cicle.
+  - **Start Animation** is the animation that will plays when **Play on Awake** is true.
 - **Animations** is a list with all the animations.
 
 # Using the animations
@@ -52,6 +57,7 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **IsPlaying { get; }** returns true if the animation is playing and false if not.
 - **CurrentAnimation { get; }** returns a string with the current animation name.
 - **DisableRenderOnFinish { set; }** sets the disableRenderer attribute. This will disable the renderer when the animation ends.
+- **RandomAnimation { set; }** if true the animator will get a random animation after every loop cicle
 
 # Events
 - You can suscribe to the animation events using the AddListener(Listener) method of the UnityEvent class.

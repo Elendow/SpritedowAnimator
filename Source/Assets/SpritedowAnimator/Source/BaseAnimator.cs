@@ -101,12 +101,17 @@ namespace Elendow.SpritedowAnimator
                         if (animationIndex >= framesInAnimation || animationIndex < 0)
                         {
                             // Last frame, reset index and stop if is one shot
-                            animationIndex = (backwards) ? framesInAnimation - 1 : 0;
                             onFinish.Invoke();
+
                             if (oneShot)
+                            {
                                 Stop();
+                                return;
+                            }
                             else if (randomAnimation)
                                 PlayRandom(oneShot, backwards);
+                            else
+                                animationIndex = (backwards) ? framesInAnimation - 1 : 0;
                         }
 
                         // Change sprite

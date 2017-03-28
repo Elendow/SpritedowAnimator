@@ -91,6 +91,10 @@ namespace Elendow.SpritedowAnimator
                     frameDurationCounter++;
                     animationTimer = 0;
 
+                    // Double check animation frame index 
+                    if (animationIndex > framesInAnimation - 1 || animationIndex < 0)
+                        Restart();
+
                     if (frameDurationCounter >= currentAnimation.FramesDuration[animationIndex])
                     {
                         // Change frame only if have passed the desired frames
@@ -98,7 +102,7 @@ namespace Elendow.SpritedowAnimator
                         frameDurationCounter = 0;
 
                         // Check last or first frame
-                        if (animationIndex >= framesInAnimation || animationIndex < 0)
+                        if (animationIndex > framesInAnimation - 1 || animationIndex < 0)
                         {
                             // Last frame, reset index and stop if is one shot
                             onFinish.Invoke();
@@ -109,7 +113,10 @@ namespace Elendow.SpritedowAnimator
                                 return;
                             }
                             else if (randomAnimation)
+                            {
                                 PlayRandom(oneShot, backwards);
+                                return;
+                            }
                             else
                                 animationIndex = (backwards) ? framesInAnimation - 1 : 0;
                         }
@@ -155,7 +162,10 @@ namespace Elendow.SpritedowAnimator
                 return;
             }
             else if (currentAnimation != null && currentAnimation.Name == name && playing)
+            {
+                Restart();
                 return;
+            }
             // Look for the animation only if its new or current animation is null
             else if (currentAnimation == null || currentAnimation.Name != name)
                 currentAnimation = GetAnimation(name);
@@ -163,8 +173,10 @@ namespace Elendow.SpritedowAnimator
             // If we have an animation to play, flag as playing, reset timer and take frame count
             if (currentAnimation != null)
             {
+                framesInAnimation = currentAnimation.FramesCount;
+
                 // Check if the animation have frames. Show warning if not.
-                if (currentAnimation.FramesCount == 0)
+                if (framesInAnimation == 0)
                 {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     Debug.LogWarning("Animation '" + name + "' has no frames.", gameObject);
@@ -172,12 +184,9 @@ namespace Elendow.SpritedowAnimator
                     playing = false;
                     return;
                 }
-
-                onPlay.Invoke();
                 Restart();
+                onPlay.Invoke();
                 playing = true;
-                animationIndex = (backwards) ? framesInAnimation - 1 : 0;
-                framesInAnimation = currentAnimation.FramesCount;
                 ChangeFrame(currentAnimation.GetFrame(animationIndex));
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -221,7 +230,7 @@ namespace Elendow.SpritedowAnimator
         public void Restart()
         {
             animationTimer = 0;
-            animationIndex = (backwards) ? currentAnimation.FramesCount - 1 : 0;
+            animationIndex = (backwards) ? framesInAnimation - 1 : 0;
             frameDurationCounter = 0;
         }
 

@@ -35,6 +35,31 @@ namespace Elendow.SpritedowAnimator
                 EditorGUI.indentLevel++;
 
                 EditorGUILayout.PropertyField(oneShot);
+                if (!oneShot.boolValue)
+                {
+                    EditorGUI.indentLevel++;
+
+                    targetAnimator.delayBetweenLoops = EditorGUILayout.BeginToggleGroup("Delay", targetAnimator.delayBetweenLoops);
+                    {
+                        EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+                        EditorGUIUtility.labelWidth = 65;
+                        targetAnimator.minDelayBetweenLoops = EditorGUILayout.FloatField("Min", targetAnimator.minDelayBetweenLoops);
+                        targetAnimator.maxDelayBetweenLoops = EditorGUILayout.FloatField("Max", targetAnimator.maxDelayBetweenLoops);
+                        EditorGUIUtility.labelWidth = 0;
+                        EditorGUILayout.EndHorizontal();
+                    }
+                    EditorGUILayout.EndToggleGroup();
+
+                    if (targetAnimator.minDelayBetweenLoops < 0)
+                        targetAnimator.minDelayBetweenLoops = 0;
+
+                    if (targetAnimator.maxDelayBetweenLoops < targetAnimator.minDelayBetweenLoops)
+                        targetAnimator.maxDelayBetweenLoops = targetAnimator.minDelayBetweenLoops;
+
+                    EditorGUI.indentLevel--;
+                }
+
+                targetAnimator.DisableRendererOnFinish = EditorGUILayout.Toggle("Disable Render on Finish", targetAnimator.DisableRendererOnFinish);
                 EditorGUILayout.PropertyField(backwards);
                 EditorGUILayout.PropertyField(randomAnimation);
 
@@ -53,6 +78,7 @@ namespace Elendow.SpritedowAnimator
                         EditorGUILayout.LabelField("Start animation", "No animations");
                     }
                 }
+
                 EditorGUI.indentLevel--;
             }
 

@@ -500,9 +500,10 @@ namespace Elendow.SpritedowAnimator
 
             if (i >= selectedAnimation.FramesCount)
             {
-                frameList.index = -1;
-                frameListSelectedIndex = -1;
-                frameList.ReleaseKeyboardFocus();
+                frameList.index -= 1;
+                frameListSelectedIndex -= 1;
+                spritePreview.CurrentFrame = frameListSelectedIndex;
+                frameList.GrabKeyboardFocus();
             }
 
             EditorUtility.SetDirty(selectedAnimation);
@@ -575,7 +576,7 @@ namespace Elendow.SpritedowAnimator
             // Check if animation already exists
             if (AssetDatabase.LoadAssetAtPath<SpriteAnimation>(relativeFolder + newAnimName + ".asset") != null)
             {
-                if (!EditorUtility.DisplayDialog("Sprite Animation Already Exist", "An Sprite Animation already exist on that folder with that name.\n Do you want to overwrite it?", "Yes", "No"))
+                if (!EditorUtility.DisplayDialog("Sprite Animation Already Exist", "An Sprite Animation already exist on that folder with that name.\nDo you want to overwrite it?", "Yes", "No"))
                     return;
             }
 
@@ -583,10 +584,12 @@ namespace Elendow.SpritedowAnimator
             AssetDatabase.CreateAsset(asset, relativeFolder + newAnimName + ".asset");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Selection.activeObject = asset;
-            selectedAnimation = asset;
-            InitializeReorderableList();
-            EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + newAnimName, "OK");
+            if (EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + newAnimName, "OK"))
+            {
+                EditorUtility.FocusProjectWindow();
+                Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(relativeFolder + newAnimName + ".asset");
+                InitializeReorderableList();
+            }
         }
     }
 }

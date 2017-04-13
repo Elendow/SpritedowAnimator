@@ -16,6 +16,9 @@ namespace Elendow.SpritedowAnimator
         #region Attributes
         public bool playOnAwake = false;
         public bool ignoreTimeScale = false;
+        public bool delayBetweenLoops = false;
+        public float minDelayBetweenLoops = 0f;
+        public float maxDelayBetweenLoops = 2f;
         public string startAnimation;
         public List<SpriteAnimation> animations;
 
@@ -38,13 +41,14 @@ namespace Elendow.SpritedowAnimator
         private bool backwards;
         [SerializeField]
         private bool randomAnimation = false;
-
         private bool playing;
         private bool disableRenderer;
+        private bool waitingLoop;
         private int animationIndex;
         private int framesInAnimation;
         private int frameDurationCounter;
         private float animationTimer;
+        private float loopTimer;
         private SpriteAnimation currentAnimation;
         private Dictionary<SpriteAnimatorEventInfo, SpriteAnimatorEvent> customEvents;
         #endregion
@@ -65,6 +69,20 @@ namespace Elendow.SpritedowAnimator
             // Play the first animation if play on awake
             if (playOnAwake)
             {
+                if(!oneShot)
+                {
+                    waitingLoop = true;
+                    if (delayBetweenLoops)
+                    {
+                        if (maxDelayBetweenLoops == minDelayBetweenLoops)
+                            loopTimer = minDelayBetweenLoops;
+                        else
+                            loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
+                    }
+                    else
+                        loopTimer = 0;
+                }
+
                 if (!randomAnimation)
                     Play(startAnimation, oneShot, backwards);
                 else
@@ -85,7 +103,7 @@ namespace Elendow.SpritedowAnimator
                 else
                     animationTimer += Time.unscaledDeltaTime;
 
-                if (1f / currentAnimation.FPS < animationTimer)
+                if (!waitingLoop && 1f / currentAnimation.FPS < animationTimer)
                 {
                     // Check frames duration
                     frameDurationCounter++;
@@ -112,13 +130,16 @@ namespace Elendow.SpritedowAnimator
                                 Stop();
                                 return;
                             }
-                            else if (randomAnimation)
-                            {
-                                PlayRandom(oneShot, backwards);
-                                return;
-                            }
                             else
-                                animationIndex = (backwards) ? framesInAnimation - 1 : 0;
+                            {
+                                // Check delay between loops
+                                waitingLoop = true;
+
+                                if (maxDelayBetweenLoops > 0)
+                                    loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
+                                else
+                                    loopTimer = 0;
+                            }
                         }
 
                         // Change sprite
@@ -128,6 +149,22 @@ namespace Elendow.SpritedowAnimator
                         SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, animationIndex);
                         if (customEvents != null && customEvents.ContainsKey(frameInfo))
                             customEvents[frameInfo].Invoke(this);
+                    }
+                }
+                else if (waitingLoop)
+                {
+                    // Continue looping if enought time have passed
+                    loopTimer -= Time.deltaTime;
+                    if (loopTimer <= 0)
+                    {
+                        waitingLoop = false;
+                        if (randomAnimation)
+                        {
+                            PlayRandom(oneShot, backwards);
+                            return;
+                        }
+                        else
+                            animationIndex = (backwards) ? framesInAnimation - 1 : 0;
                     }
                 }
             }
@@ -187,7 +224,8 @@ namespace Elendow.SpritedowAnimator
                 Restart();
                 onPlay.Invoke();
                 playing = true;
-                ChangeFrame(currentAnimation.GetFrame(animationIndex));
+                if(!waitingLoop)
+                    ChangeFrame(currentAnimation.GetFrame(animationIndex));
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -329,6 +367,26 @@ namespace Elendow.SpritedowAnimator
         /// Flip the sprite on the X axis
         /// </summary>
         public virtual void FlipSpriteX(bool flip) { }
+
+        /// <summary>
+        /// Sets a random delay between loops
+        /// </summary>
+        public void SetRandomDelayBetweenLoops(float min, float max)
+        {
+            delayBetweenLoops = true;
+            minDelayBetweenLoops = min;
+            maxDelayBetweenLoops = max;
+        }
+
+        /// <summary>
+        /// Sets a delay between loops
+        /// </summary>
+        public void SetDelayBetweenLoops(float delay)
+        {
+            delayBetweenLoops = true;
+            minDelayBetweenLoops = delay;
+            maxDelayBetweenLoops = delay;
+        }
         #endregion
 
         #region Properties
@@ -345,9 +403,9 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public bool DisableRendererOnFinish
         {
+            get { return disableRenderer; }
             set { disableRenderer = value; }
         }
-
 
         /// <summary>
         /// If true the animator will get a random animation after every loop cicle
@@ -355,6 +413,14 @@ namespace Elendow.SpritedowAnimator
         public bool RandomAnimation
         {
             set { randomAnimation = value; }
+        }
+
+        /// <summary>
+        /// If true a delay will be made between loops
+        /// </summary>
+        public bool DelayBetweenLoops
+        {
+            set { delayBetweenLoops = value; }
         }
 
         /// <summary>

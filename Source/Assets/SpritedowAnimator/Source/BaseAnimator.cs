@@ -41,8 +41,10 @@ namespace Elendow.SpritedowAnimator
         private bool backwards;
         [SerializeField]
         private bool randomAnimation = false;
+        [SerializeField]
+        private bool disableRendererOnFinish;
+
         private bool playing;
-        private bool disableRenderer;
         private bool waitingLoop;
         private int animationIndex;
         private int framesInAnimation;
@@ -88,6 +90,8 @@ namespace Elendow.SpritedowAnimator
                 else
                     PlayRandom(oneShot, backwards);
             }
+
+            SetActiveRenderer(!disableRendererOnFinish);
         }
 
         private void Update()
@@ -132,18 +136,23 @@ namespace Elendow.SpritedowAnimator
                             }
                             else
                             {
-                                // Check delay between loops
-                                waitingLoop = true;
-
-                                if (maxDelayBetweenLoops > 0)
-                                    loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
-                                else
-                                    loopTimer = 0;
+                                if (!waitingLoop)
+                                {
+                                    // Check delay between loops
+                                    waitingLoop = true;
+                                    SetActiveRenderer(!disableRendererOnFinish);
+                                    if (maxDelayBetweenLoops > 0)
+                                        loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
+                                    else
+                                        loopTimer = 0;
+                                }
                             }
                         }
-
-                        // Change sprite
-                        ChangeFrame(currentAnimation.GetFrame(animationIndex));
+                        else
+                        {
+                            // Change sprite
+                            ChangeFrame(currentAnimation.GetFrame(animationIndex));
+                        }
 
                         // Check events
                         SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, animationIndex);
@@ -164,7 +173,10 @@ namespace Elendow.SpritedowAnimator
                             return;
                         }
                         else
+                        {
+                            SetActiveRenderer(true);
                             animationIndex = (backwards) ? framesInAnimation - 1 : 0;
+                        }
                     }
                 }
             }
@@ -259,7 +271,7 @@ namespace Elendow.SpritedowAnimator
         {
             playing = false;
             onStop.Invoke();
-            SetActiveRenderer(!disableRenderer);
+            SetActiveRenderer(!disableRendererOnFinish);
         }
 
         /// <summary>
@@ -403,8 +415,8 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public bool DisableRendererOnFinish
         {
-            get { return disableRenderer; }
-            set { disableRenderer = value; }
+            get { return disableRendererOnFinish; }
+            set { disableRendererOnFinish = value; }
         }
 
         /// <summary>

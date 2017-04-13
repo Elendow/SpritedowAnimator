@@ -25,6 +25,7 @@ namespace Elendow.SpritedowAnimator
             SerializedProperty oneShot = serializedObject.FindProperty("oneShot");
             SerializedProperty backwards = serializedObject.FindProperty("backwards");
             SerializedProperty randomAnimation = serializedObject.FindProperty("randomAnimation");
+            SerializedProperty disableRendererOnFinish = serializedObject.FindProperty("disableRendererOnFinish");
 
             targetAnimator.ignoreTimeScale = EditorGUILayout.Toggle("Ignore TimeScale", targetAnimator.ignoreTimeScale);
 
@@ -59,7 +60,7 @@ namespace Elendow.SpritedowAnimator
                     EditorGUI.indentLevel--;
                 }
 
-                targetAnimator.DisableRendererOnFinish = EditorGUILayout.Toggle("Disable Render on Finish", targetAnimator.DisableRendererOnFinish);
+                EditorGUILayout.PropertyField(disableRendererOnFinish);
                 EditorGUILayout.PropertyField(backwards);
                 EditorGUILayout.PropertyField(randomAnimation);
 

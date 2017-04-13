@@ -22,9 +22,13 @@ Use the animation editor to create new animation files. You can open it selectin
 - **Ignore TimeScale** will set the animation to ignore the game TimeScale.
 - **Play on Awake** will start playing when the object awakes.
   - **One Shot** if false the animation will loop infinite times.
+    - **Delay** if true a delay between loops will be made
+      - **Min** minimum delay time
+      - **Max** maximum delay time
+  - **Disable Renderer On Finish** will disable the renderer after every loop cycle if there’s a delay specified or will disable the renderer after the animation ends if it’s not looping.
   - **Backwards** if true the animation will play backwards.
-  - **Random Animation** if true the start animation will be random, and the animation will randomly change after every loop cicle.
-  - **Start Animation** is the animation that will plays when **Play on Awake** is true.
+  - **Random Animation** if true the start animation will be random, and the animation will randomly change after every loop cycle.
+  - **Start Animation** is the animation that will plays when **Play on Awake** is true. This is disabled if Random Animation is selected.
 - **Animations** is a list with all the animations.
 
 # Using the animations
@@ -52,12 +56,14 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **GetCustomEvent (int frame)** returns the event of the first animation of the animation list at the specific frame. Returns null if there's no event on that frame and animation.
 - **GetCustomEvent (string animation, int frame)** returns the event of the animation at the specific frame. Returns null if there's no event on that frame and animation.
   * If the animation name is empty, it will get the first animation of the list.
+- **SetRandomDelayBetweenLoops(float min, float max)** sets a random delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
+- **SetDelayBetweenLoops(float delay)** sets a fixed delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 
 # Properties
 - **IsPlaying { get; }** returns true if the animation is playing and false if not.
 - **CurrentAnimation { get; }** returns a string with the current animation name.
 - **DisableRenderOnFinish { set; }** sets the disableRenderer attribute. This will disable the renderer when the animation ends.
-- **RandomAnimation { set; }** if true the animator will get a random animation after every loop cicle
+- **RandomAnimation { set; }** if true the animator will get a random animation after every loop cycle
 
 # Events
 - You can suscribe to the animation events using the AddListener(Listener) method of the UnityEvent class.

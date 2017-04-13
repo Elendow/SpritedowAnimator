@@ -141,11 +141,15 @@ namespace Elendow.SpritedowAnimator
                                 {
                                     // Check delay between loops
                                     waitingLoop = true;
-                                    SetActiveRenderer(!disableRendererOnFinish);
-                                    if (maxDelayBetweenLoops > 0)
-                                        loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
-                                    else
-                                        loopTimer = 0;
+
+                                    if (delayBetweenLoops)
+                                    {
+                                        SetActiveRenderer(!disableRendererOnFinish);
+                                        if (maxDelayBetweenLoops > 0)
+                                            loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
+                                        else
+                                            loopTimer = 0;
+                                    }
                                 }
                             }
                         }
@@ -161,7 +165,8 @@ namespace Elendow.SpritedowAnimator
                             customEvents[frameInfo].Invoke(this);
                     }
                 }
-                else if (waitingLoop)
+
+                if (waitingLoop)
                 {
                     // Continue looping if enought time have passed
                     loopTimer -= Time.deltaTime;
@@ -416,7 +421,6 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public bool DisableRendererOnFinish
         {
-            get { return disableRendererOnFinish; }
             set { disableRendererOnFinish = value; }
         }
 

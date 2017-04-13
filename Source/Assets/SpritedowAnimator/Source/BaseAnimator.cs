@@ -91,7 +91,8 @@ namespace Elendow.SpritedowAnimator
                     PlayRandom(oneShot, backwards);
             }
 
-            SetActiveRenderer(!disableRendererOnFinish);
+            if(disableRendererOnFinish)
+                SetActiveRenderer(!disableRendererOnFinish);
         }
 
         private void Update()

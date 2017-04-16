@@ -97,6 +97,10 @@ namespace Elendow.SpritedowAnimator
             if (animation == null || animation.FramesCount == 0)
                 return;
 
+            // Check animation bounds
+            if (currentFrame < 0) currentFrame = 0;
+            else if (currentFrame > animation.FramesCount) currentFrame = animation.FramesCount - 1;
+
             // Center camera only on the first frame (this allows animations with different pivot points)
             if(currentFrame == 0)
                 cameraGO.transform.position = sr.bounds.center;
@@ -136,7 +140,10 @@ namespace Elendow.SpritedowAnimator
 
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
         {
-			if (animation != null && animation.FramesCount > 0 && currentFrame < animation.FramesCount)
+			if (currentFrame >= 0 &&
+                animation != null && 
+                animation.FramesCount > 0 && 
+                currentFrame < animation.FramesCount)
             {
                 // Draw Camera
                 sr.sprite = animation.Frames[currentFrame];

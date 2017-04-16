@@ -285,6 +285,10 @@ namespace Elendow.SpritedowAnimator
                 frames = new List<AnimationFrame>();
 
             frames.Clear();
+
+            if (selectedAnimation == null)
+                return;
+
             for (int i = 0; i < selectedAnimation.FramesCount; i++)
                 frames.Add(new AnimationFrame(selectedAnimation.Frames[i], selectedAnimation.FramesDuration[i]));
 

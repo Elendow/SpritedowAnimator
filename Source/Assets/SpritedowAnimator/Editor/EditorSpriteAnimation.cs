@@ -32,6 +32,7 @@ namespace Elendow.SpritedowAnimator
 
         // Styles
         private GUIStyle box;
+		private GUIStyle dragAndDropBox;
         private GUIStyle lowPaddingBox;
         private GUIStyle buttonStyle;
         private GUIStyle sliderStyle;
@@ -277,6 +278,9 @@ namespace Elendow.SpritedowAnimator
 			lowPaddingBox.stretchHeight = true;
             previewToolBar = new GUIStyle("RectangleToolHBar");
             preview = new GUIStyle("CurveEditorBackground");
+
+			dragAndDropBox = new GUIStyle("box");
+			dragAndDropBox.richText = true;
         }
 
         private void InitializeReorderableList()
@@ -381,7 +385,7 @@ namespace Elendow.SpritedowAnimator
             // Drag and drop box for sprite frames
 			Rect dropArea = GUILayoutUtility.GetRect(0f, DROP_AREA_HEIGHT, GUILayout.ExpandWidth(true));
             Event evt = Event.current;
-            GUI.Box(dropArea, "\nDrop sprites to add frames automatically.", box);
+			GUI.Box(dropArea, "\nDrop sprites <b>HERE</b> to add frames automatically.", dragAndDropBox);
             switch (evt.type)
             {
                 case EventType.DragUpdated:
@@ -396,6 +400,7 @@ namespace Elendow.SpritedowAnimator
                         if (DragAndDrop.objectReferences.Length > 0)
                         {
                             DragAndDrop.AcceptDrag();
+							draggedSprites.Clear();
                             foreach (Object draggedObject in DragAndDrop.objectReferences)
                             {
                                 // Get dragged sprites
@@ -412,6 +417,8 @@ namespace Elendow.SpritedowAnimator
                                         Sprite[] spritesInTexture = AssetDatabase.LoadAllAssetsAtPath(texturePath).OfType<Sprite>().ToArray();
                                         for (int i = 0; i < spritesInTexture.Length; i++)
                                             draggedSprites.Add(spritesInTexture[i]);
+
+										draggedSprites.Sort((x, y) => x.name.CompareTo(y.name));
                                     }
                                 }
                             }

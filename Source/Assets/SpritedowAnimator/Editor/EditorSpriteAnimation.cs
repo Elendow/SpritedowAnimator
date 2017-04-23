@@ -396,6 +396,7 @@ namespace Elendow.SpritedowAnimator
                         if (DragAndDrop.objectReferences.Length > 0)
                         {
                             DragAndDrop.AcceptDrag();
+							draggedSprites.Clear();
                             foreach (Object draggedObject in DragAndDrop.objectReferences)
                             {
                                 // Get dragged sprites
@@ -412,6 +413,8 @@ namespace Elendow.SpritedowAnimator
                                         Sprite[] spritesInTexture = AssetDatabase.LoadAllAssetsAtPath(texturePath).OfType<Sprite>().ToArray();
                                         for (int i = 0; i < spritesInTexture.Length; i++)
                                             draggedSprites.Add(spritesInTexture[i]);
+
+										draggedSprites.Sort((x, y) => x.name.CompareTo(y.name));
                                     }
                                 }
                             }

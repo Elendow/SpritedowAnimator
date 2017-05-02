@@ -417,10 +417,13 @@ namespace Elendow.SpritedowAnimator
                                         Sprite[] spritesInTexture = AssetDatabase.LoadAllAssetsAtPath(texturePath).OfType<Sprite>().ToArray();
                                         for (int i = 0; i < spritesInTexture.Length; i++)
                                             draggedSprites.Add(spritesInTexture[i]);
-
-										draggedSprites.Sort((x, y) => x.name.CompareTo(y.name));
                                     }
                                 }
+                            }
+
+                            if (DragAndDrop.objectReferences.Length > 1)
+                            {
+                                draggedSprites.Sort(new SpriteSorter());
                             }
                         }
                     }

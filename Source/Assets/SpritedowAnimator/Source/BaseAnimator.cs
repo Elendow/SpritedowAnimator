@@ -139,16 +139,15 @@ namespace Elendow.SpritedowAnimator
                             {
                                 if (!waitingLoop)
                                 {
-                                    // Check delay between loops
                                     waitingLoop = true;
+                                    loopTimer = 0;
 
+                                    // Check delay between loops
                                     if (delayBetweenLoops)
                                     {
                                         SetActiveRenderer(!disableRendererOnFinish);
                                         if (maxDelayBetweenLoops > 0)
                                             loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
-                                        else
-                                            loopTimer = 0;
                                     }
                                 }
                             }
@@ -182,6 +181,7 @@ namespace Elendow.SpritedowAnimator
                         {
                             SetActiveRenderer(true);
                             animationIndex = (backwards) ? framesInAnimation - 1 : 0;
+                            ChangeFrame(currentAnimation.GetFrame(animationIndex));
                         }
                     }
                 }

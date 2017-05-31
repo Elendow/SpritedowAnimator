@@ -213,6 +213,7 @@ namespace Elendow.SpritedowAnimator
                 {
                     Restart();
                     Resume();
+                    ChangeFrame(currentAnimation.GetFrame(animationIndex));
                 }
                 return;
             }
@@ -286,8 +287,8 @@ namespace Elendow.SpritedowAnimator
         public void Restart()
         {
             animationTimer = 0;
-            animationIndex = (backwards) ? framesInAnimation - 1 : 0;
             frameDurationCounter = 0;
+            animationIndex = (backwards) ? framesInAnimation - 1 : 0;
         }
 
         /// <summary>

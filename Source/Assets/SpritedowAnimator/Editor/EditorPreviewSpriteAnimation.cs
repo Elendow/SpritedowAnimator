@@ -163,14 +163,17 @@ namespace Elendow.SpritedowAnimator
             animation.name = EditorGUILayout.TextField("Name", animation.name);
 			animation.FPS = EditorGUILayout.IntField("FPS", animation.FPS);
 
-			scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition);
-			{
-				// Individual frames
-				frameList.displayRemove = (animation.FramesCount > 0);
-				frameList.DoLayoutList();
-				EditorGUILayout.Space();
-			}    
-            EditorGUILayout.EndScrollView();
+            if (frameList != null)
+            {
+                scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition);
+
+                // Individual frames
+                frameList.displayRemove = (animation.FramesCount > 0);
+                frameList.DoLayoutList();
+                EditorGUILayout.Space();
+
+                EditorGUILayout.EndScrollView();
+            }
         }
 
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
@@ -289,14 +292,14 @@ namespace Elendow.SpritedowAnimator
             if (i < animation.FramesCount)
             {
                 EditorGUI.BeginChangeCheck();
-                {
-                    string spriteName = (animation.Frames[i] != null) ? animation.Frames[i].name : "No sprite selected";
-                    EditorGUIUtility.labelWidth = r.width - 105;
-                    animation.Frames[i] = EditorGUI.ObjectField(new Rect(r.x + 10, r.y + 1, r.width - 85, r.height - 4), spriteName, animation.Frames[i], typeof(Sprite), false) as Sprite;
 
-                    EditorGUIUtility.labelWidth = 20;
-                    animation.FramesDuration[i] = EditorGUI.IntField(new Rect(r.x + r.width - 50, r.y + 1, 50, r.height - 4), speedScale, animation.FramesDuration[i]);
-                }
+                string spriteName = (animation.Frames[i] != null) ? animation.Frames[i].name : "No sprite selected";
+                EditorGUIUtility.labelWidth = r.width - 105;
+                animation.Frames[i] = EditorGUI.ObjectField(new Rect(r.x + 10, r.y + 1, r.width - 85, r.height - 4), spriteName, animation.Frames[i], typeof(Sprite), false) as Sprite;
+
+                EditorGUIUtility.labelWidth = 20;
+                animation.FramesDuration[i] = EditorGUI.IntField(new Rect(r.x + r.width - 50, r.y + 1, 50, r.height - 4), speedScale, animation.FramesDuration[i]);
+
                 if (EditorGUI.EndChangeCheck())
                     EditorUtility.SetDirty(animation);
             }

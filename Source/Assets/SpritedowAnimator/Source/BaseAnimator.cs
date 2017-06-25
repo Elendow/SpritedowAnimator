@@ -14,12 +14,7 @@ namespace Elendow.SpritedowAnimator
     public class BaseAnimator : MonoBehaviour
     {
         #region Attributes
-        public bool playOnAwake = false;
-        public bool ignoreTimeScale = false;
-        public bool delayBetweenLoops = false;
-        public float minDelayBetweenLoops = 0f;
-        public float maxDelayBetweenLoops = 2f;
-        public string startAnimation;
+        // Still don't know how to serialize correctly a list without making it public...
         public List<SpriteAnimation> animations;
 
         /// <summary>
@@ -35,15 +30,29 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public UnityEvent onPlay;
 
+        // Fields used in the inspector
         [SerializeField]
-        private bool oneShot;
+        private bool playOnAwake = false;
         [SerializeField]
-        private bool backwards;
+        private bool ignoreTimeScale = false;
+        [SerializeField]
+        private bool delayBetweenLoops = false;
+        [SerializeField]
+        private bool oneShot = false;
+        [SerializeField]
+        private bool backwards = false;
         [SerializeField]
         private bool randomAnimation = false;
         [SerializeField]
         private bool disableRendererOnFinish;
+        [SerializeField]
+        private float minDelayBetweenLoops = 0f;
+        [SerializeField]
+        private float maxDelayBetweenLoops = 2f;
+        [SerializeField]
+        private string startAnimation = "";
 
+        // Fields used at runtime
         private bool playing;
         private bool waitingLoop;
         private int animationIndex;
@@ -85,6 +94,7 @@ namespace Elendow.SpritedowAnimator
                         loopTimer = 0;
                 }
 
+                // Pick the selected animation or a random one.
                 if (!randomAnimation)
                     Play(startAnimation, oneShot, backwards);
                 else
@@ -98,91 +108,90 @@ namespace Elendow.SpritedowAnimator
         private void Update()
         {
             // We do nothing if FPS <= 0
-            if (currentAnimation == null || currentAnimation.FPS <= 0)
+            if (currentAnimation == null || currentAnimation.FPS <= 0 || !playing)
                 return;
 
-            if (playing)
+            if (!ignoreTimeScale)
+                animationTimer += Time.deltaTime;
+            else
+                animationTimer += Time.unscaledDeltaTime;
+
+            if (!waitingLoop && 1f / currentAnimation.FPS < animationTimer)
             {
-                if (!ignoreTimeScale)
-                    animationTimer += Time.deltaTime;
-                else
-                    animationTimer += Time.unscaledDeltaTime;
+                // Check frames duration
+                frameDurationCounter++;
+                animationTimer = 0;
 
-                if (!waitingLoop && 1f / currentAnimation.FPS < animationTimer)
+                // Double check animation frame index 
+                if (animationIndex > framesInAnimation - 1 || animationIndex < 0)
+                    Restart();
+
+                if (frameDurationCounter >= currentAnimation.FramesDuration[animationIndex])
                 {
-                    // Check frames duration
-                    frameDurationCounter++;
-                    animationTimer = 0;
+                    // Change frame only if have passed the desired frames
+                    animationIndex = (backwards) ? animationIndex - 1 : animationIndex + 1;
+                    frameDurationCounter = 0;
 
-                    // Double check animation frame index 
+                    // Check last or first frame
                     if (animationIndex > framesInAnimation - 1 || animationIndex < 0)
-                        Restart();
-
-                    if (frameDurationCounter >= currentAnimation.FramesDuration[animationIndex])
                     {
-                        // Change frame only if have passed the desired frames
-                        animationIndex = (backwards) ? animationIndex - 1 : animationIndex + 1;
-                        frameDurationCounter = 0;
+                        // Last frame, reset index and stop if is one shot
+                        onFinish.Invoke();
 
-                        // Check last or first frame
-                        if (animationIndex > framesInAnimation - 1 || animationIndex < 0)
+                        if (oneShot)
                         {
-                            // Last frame, reset index and stop if is one shot
-                            onFinish.Invoke();
-
-                            if (oneShot)
-                            {
-                                Stop();
-                                return;
-                            }
-                            else
-                            {
-                                if (!waitingLoop)
-                                {
-                                    waitingLoop = true;
-                                    loopTimer = 0;
-
-                                    // Check delay between loops
-                                    if (delayBetweenLoops)
-                                    {
-                                        SetActiveRenderer(!disableRendererOnFinish);
-                                        if (maxDelayBetweenLoops > 0)
-                                            loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Change sprite
-                            ChangeFrame(currentAnimation.GetFrame(animationIndex));
-                        }
-
-                        // Check events
-                        SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, animationIndex);
-                        if (customEvents != null && customEvents.ContainsKey(frameInfo))
-                            customEvents[frameInfo].Invoke(this);
-                    }
-                }
-
-                if (waitingLoop)
-                {
-                    // Continue looping if enought time have passed
-                    loopTimer -= Time.deltaTime;
-                    if (loopTimer <= 0)
-                    {
-                        waitingLoop = false;
-                        if (randomAnimation)
-                        {
-                            PlayRandom(oneShot, backwards);
+                            Stop();
                             return;
                         }
                         else
                         {
-                            SetActiveRenderer(true);
-                            animationIndex = (backwards) ? framesInAnimation - 1 : 0;
-                            ChangeFrame(currentAnimation.GetFrame(animationIndex));
+                            if (!waitingLoop)
+                            {
+                                waitingLoop = true;
+                                loopTimer = 0;
+
+                                // Check delay between loops
+                                if (delayBetweenLoops)
+                                {
+                                    SetActiveRenderer(!disableRendererOnFinish);
+                                    if (maxDelayBetweenLoops > 0)
+                                        loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
+                                }
+                            }
                         }
+                    }
+                    else
+                    {
+                        // Change sprite
+                        ChangeFrame(currentAnimation.GetFrame(animationIndex));
+                    }
+
+                    // Check events
+                    SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, animationIndex);
+                    if (customEvents != null && customEvents.ContainsKey(frameInfo))
+                        customEvents[frameInfo].Invoke(this);
+                }
+            }
+
+            if (waitingLoop)
+            {
+                // Continue looping if enought time have passed
+                loopTimer -= Time.deltaTime;
+                if (loopTimer <= 0)
+                {
+                    waitingLoop = false;
+                    if (randomAnimation)
+                    {
+                        // Pick a random animation
+                        PlayRandom(oneShot, backwards);
+                        return;
+                    }
+                    else
+                    {
+                        // Continue playing the same animation
+                        SetActiveRenderer(true);
+                        animationIndex = (backwards) ? framesInAnimation - 1 : 0;
+                        ChangeFrame(currentAnimation.GetFrame(animationIndex));
                     }
                 }
             }
@@ -213,7 +222,6 @@ namespace Elendow.SpritedowAnimator
                 {
                     Restart();
                     Resume();
-                    ChangeFrame(currentAnimation.GetFrame(animationIndex));
                 }
                 return;
             }
@@ -257,7 +265,7 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public void PlayRandom(bool playOneShot = false, bool playBackwards = false)
         {
-            // Get a random animation a plays it
+            // Get a random animation and plays it
             int animIndex = Random.Range(0, animations.Count);
             Play(animations[animIndex].Name, playOneShot, playBackwards);
         }
@@ -287,8 +295,8 @@ namespace Elendow.SpritedowAnimator
         public void Restart()
         {
             animationTimer = 0;
-            frameDurationCounter = 0;
             animationIndex = (backwards) ? framesInAnimation - 1 : 0;
+            frameDurationCounter = 0;
         }
 
         /// <summary>

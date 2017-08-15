@@ -46,6 +46,8 @@ namespace Elendow.SpritedowAnimator
         [SerializeField]
         private bool disableRendererOnFinish;
         [SerializeField]
+        private bool startAtRandomFrame = false;
+        [SerializeField]
         private float minDelayBetweenLoops = 0f;
         [SerializeField]
         private float maxDelayBetweenLoops = 2f;
@@ -55,7 +57,8 @@ namespace Elendow.SpritedowAnimator
         // Fields used at runtime
         private bool playing;
         private bool waitingLoop;
-        private int animationIndex;
+        private bool randomStartFrameApplied;
+        private int frameIndex;
         private int framesInAnimation;
         private int frameDurationCounter;
         private float animationTimer;
@@ -68,7 +71,7 @@ namespace Elendow.SpritedowAnimator
         protected virtual void Awake()
         {
             // Why an animator without animation?
-            if (animations.Count == 0)
+            if (animations == null || animations.Count == 0)
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogError("Sprite animator without animations.", gameObject);
@@ -77,21 +80,29 @@ namespace Elendow.SpritedowAnimator
                 return;
             }
 
+            // Event check for runtime instantiation
+            if (onPlay == null) onPlay = new UnityEvent();
+            if (onFinish == null) onFinish = new UnityEvent();
+            if (onStop == null) onStop = new UnityEvent();
+
             // Play the first animation if play on awake
             if (playOnAwake)
             {
                 if(!oneShot)
                 {
-                    waitingLoop = true;
                     if (delayBetweenLoops)
                     {
+                        waitingLoop = true;
                         if (maxDelayBetweenLoops == minDelayBetweenLoops)
                             loopTimer = minDelayBetweenLoops;
                         else
                             loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
                     }
                     else
+                    {
+                        waitingLoop = false;
                         loopTimer = 0;
+                    }
                 }
 
                 // Pick the selected animation or a random one.
@@ -103,6 +114,15 @@ namespace Elendow.SpritedowAnimator
 
             if(disableRendererOnFinish)
                 SetActiveRenderer(!disableRendererOnFinish);
+        }
+
+        public void Initialize(bool playOnAwake, List<SpriteAnimation> animations, string startAnimation)
+        {
+            this.animations = new List<SpriteAnimation>(animations);
+            this.playOnAwake = playOnAwake;
+            this.startAnimation = startAnimation;
+
+            Awake();
         }
 
         private void Update()
@@ -123,17 +143,17 @@ namespace Elendow.SpritedowAnimator
                 animationTimer = 0;
 
                 // Double check animation frame index 
-                if (animationIndex > framesInAnimation - 1 || animationIndex < 0)
+                if (frameIndex > framesInAnimation - 1 || frameIndex < 0)
                     Restart();
 
-                if (frameDurationCounter >= currentAnimation.FramesDuration[animationIndex])
+                if (frameDurationCounter >= currentAnimation.FramesDuration[frameIndex])
                 {
                     // Change frame only if have passed the desired frames
-                    animationIndex = (backwards) ? animationIndex - 1 : animationIndex + 1;
+                    frameIndex = (backwards) ? frameIndex - 1 : frameIndex + 1;
                     frameDurationCounter = 0;
 
                     // Check last or first frame
-                    if (animationIndex > framesInAnimation - 1 || animationIndex < 0)
+                    if (frameIndex > framesInAnimation - 1 || frameIndex < 0)
                     {
                         // Last frame, reset index and stop if is one shot
                         onFinish.Invoke();
@@ -163,11 +183,11 @@ namespace Elendow.SpritedowAnimator
                     else
                     {
                         // Change sprite
-                        ChangeFrame(currentAnimation.GetFrame(animationIndex));
+                        ChangeFrame(currentAnimation.GetFrame(frameIndex));
                     }
 
                     // Check events
-                    SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, animationIndex);
+                    SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, frameIndex);
                     if (customEvents != null && customEvents.ContainsKey(frameInfo))
                         customEvents[frameInfo].Invoke(this);
                 }
@@ -190,8 +210,8 @@ namespace Elendow.SpritedowAnimator
                     {
                         // Continue playing the same animation
                         SetActiveRenderer(true);
-                        animationIndex = (backwards) ? framesInAnimation - 1 : 0;
-                        ChangeFrame(currentAnimation.GetFrame(animationIndex));
+                        frameIndex = (backwards) ? framesInAnimation - 1 : 0;
+                        ChangeFrame(currentAnimation.GetFrame(frameIndex));
                     }
                 }
             }
@@ -223,12 +243,10 @@ namespace Elendow.SpritedowAnimator
                     Restart();
                     Resume();
                 }
-                return;
-            }
-            else if (currentAnimation != null && currentAnimation.Name == name && playing)
-            {
-                Restart();
-                return;
+                else
+                {
+                    Restart();
+                }
             }
             // Look for the animation only if its new or current animation is null
             else if (currentAnimation == null || currentAnimation.Name != name)
@@ -248,11 +266,21 @@ namespace Elendow.SpritedowAnimator
                     playing = false;
                     return;
                 }
+
                 Restart();
+
+                // The first loop will have a random start frame if desired
+                if(startAtRandomFrame && !randomStartFrameApplied)
+                {
+                    randomStartFrameApplied = true;
+                    frameIndex = Random.Range(0, framesInAnimation - 1);
+                }
+
                 onPlay.Invoke();
                 playing = true;
-                if(!waitingLoop)
-                    ChangeFrame(currentAnimation.GetFrame(animationIndex));
+
+                if (!waitingLoop)
+                    ChangeFrame(currentAnimation.GetFrame(frameIndex));
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -284,6 +312,7 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public void Stop()
         {
+            randomStartFrameApplied = false;
             playing = false;
             onStop.Invoke();
             SetActiveRenderer(!disableRendererOnFinish);
@@ -295,7 +324,7 @@ namespace Elendow.SpritedowAnimator
         public void Restart()
         {
             animationTimer = 0;
-            animationIndex = (backwards) ? framesInAnimation - 1 : 0;
+            frameIndex = (backwards) ? framesInAnimation - 1 : 0;
             frameDurationCounter = 0;
         }
 
@@ -396,6 +425,11 @@ namespace Elendow.SpritedowAnimator
         public virtual void FlipSpriteX(bool flip) { }
 
         /// <summary>
+        /// Flip the sprite on the Y axis
+        /// </summary>
+        public virtual void FlipSpriteY(bool flip) { }
+
+        /// <summary>
         /// Sets a random delay between loops
         /// </summary>
         public void SetRandomDelayBetweenLoops(float min, float max)
@@ -447,6 +481,22 @@ namespace Elendow.SpritedowAnimator
         public bool DelayBetweenLoops
         {
             set { delayBetweenLoops = value; }
+        }
+
+        /// <summary>
+        /// If true, the timescale of the game will be ignored
+        /// </summary>
+        public bool IgnoreTimeScale
+        {
+            set { ignoreTimeScale = value; }
+        }
+
+        /// <summary>
+        /// The current frame of the animation.
+        /// </summary>
+        public int CurrentFrame
+        {
+            get { return frameIndex; }
         }
 
         /// <summary>

@@ -45,5 +45,21 @@ namespace Elendow.SpritedowAnimator
         {
             spriteRenderer.flipX = flip;
         }
+
+        /// <summary>
+        /// Flip the sprite on the Y axis
+        /// </summary>
+        public override void FlipSpriteY(bool flip)
+        {
+            spriteRenderer.flipY = flip;
+        }
+
+        /// <summary>
+        /// The bounds of the Sprite Renderer
+        /// </summary>
+        public Bounds SpriteBounds
+        {
+            get { return spriteRenderer.bounds; }
+        }
     }
 }

@@ -62,7 +62,7 @@ namespace Elendow.SpritedowAnimator
 
             // Set camera
             pc.cameraType = CameraType.Preview;
-            pc.clearFlags = CameraClearFlags.Color;
+            pc.clearFlags = CameraClearFlags.Depth;
             pc.backgroundColor = Color.clear;
             pc.orthographic = true;
             pc.orthographicSize = 3;
@@ -79,11 +79,8 @@ namespace Elendow.SpritedowAnimator
             }
 
             // Get preview culling layer in order to render only the preview object and nothing more
-            BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;
-            PropertyInfo propInfo = typeof(Camera).GetProperty("PreviewCullingLayer", flags);
-            int previewLayer = (int)propInfo.GetValue(null, new object[0]);
-            pc.cullingMask = 1 << previewLayer;
-            go.layer = previewLayer;
+            pc.cullingMask = -2147483648;
+            go.layer = 0x1f;
 
             // Also, disable the object to prevent render on scene/game views
             go.SetActive(false);

@@ -20,6 +20,7 @@ namespace Elendow.SpritedowAnimator
         private SerializedProperty backwards;
         private SerializedProperty randomAnimation;
         private SerializedProperty disableRendererOnFinish;
+        private SerializedProperty startAtRandomFrame;
 
         protected int startAnimationIndex = 0;
         protected string[] animationNames;
@@ -41,11 +42,13 @@ namespace Elendow.SpritedowAnimator
             backwards = serializedObject.FindProperty("backwards");
             randomAnimation = serializedObject.FindProperty("randomAnimation");
             disableRendererOnFinish = serializedObject.FindProperty("disableRendererOnFinish");
+            startAtRandomFrame = serializedObject.FindProperty("startAtRandomFrame");
 
             if (animationNames == null)
                 GetAnimationNames(targetAnimator);
 
             EditorGUILayout.PropertyField(ignoreTimeScale);
+            EditorGUILayout.PropertyField(startAtRandomFrame);
             EditorGUILayout.PropertyField(playOnAwake);
 
             if (playOnAwake.boolValue)

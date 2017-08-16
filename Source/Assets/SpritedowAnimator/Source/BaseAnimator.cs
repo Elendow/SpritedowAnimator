@@ -406,7 +406,7 @@ namespace Elendow.SpritedowAnimator
         /// </returns>  
         private SpriteAnimation GetAnimation(string name)
         {
-            return animations.Find(x => x.Name.Contains(name));
+            return animations.Find(x => x.Name.Equals(name));
         }
 
         /// <summary>

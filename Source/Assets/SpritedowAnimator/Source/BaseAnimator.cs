@@ -244,9 +244,7 @@ namespace Elendow.SpritedowAnimator
                     Resume();
                 }
                 else
-                {
-                    Restart();
-                }
+                    return;
             }
             // Look for the animation only if its new or current animation is null
             else if (currentAnimation == null || currentAnimation.Name != name)

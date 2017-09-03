@@ -4,10 +4,19 @@ namespace Elendow.SpritedowAnimator.Examples
 {
     public class PlayerPlatformer : MonoBehaviour
     {
-        private SpriteAnimator spriteAnimator;
-        private Rigidbody2D rigidBody;
+        [SpriteAnimationField]
+        public string duckAnimation;
+		[SpriteAnimationField]
+		public string standAnimation;
+		[SpriteAnimationField]
+		public string jumpAnimation;
+		[SpriteAnimationField]
+		public string walkAnimation;
 
-        private void Awake()
+		private SpriteAnimator spriteAnimator;
+		private Rigidbody2D rigidBody;
+
+		private void Awake()
         {
             spriteAnimator = GetComponent<SpriteAnimator>();
             rigidBody = GetComponent<Rigidbody2D>();
@@ -27,11 +36,11 @@ namespace Elendow.SpritedowAnimator.Examples
             }
             else if(Input.GetKey(KeyCode.DownArrow) && rigidBody.velocity.y == 0)
             {
-                spriteAnimator.Play("AlienDuck");
+                spriteAnimator.Play(duckAnimation);
             }
             else
             {
-                spriteAnimator.Play("AlienStand");
+                spriteAnimator.Play(standAnimation);
             }
 
             if (Input.GetKeyDown(KeyCode.Space))
@@ -39,15 +48,15 @@ namespace Elendow.SpritedowAnimator.Examples
                 rigidBody.AddForce(Vector2.up * 500);
             }
 
-            if (!spriteAnimator.CurrentAnimation.Equals("AlienDuck"))
+            if (!spriteAnimator.CurrentAnimation.Equals(duckAnimation))
             {
                 if (rigidBody.velocity.y != 0)
                 {
-                    spriteAnimator.Play("AlienJump");
+                    spriteAnimator.Play(jumpAnimation);
                 }
                 else if (rigidBody.velocity.x != 0)
                 {
-                    spriteAnimator.Play("AlienWalk");
+                    spriteAnimator.Play(walkAnimation);
                 }
             }
         }

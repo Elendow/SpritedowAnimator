@@ -20,6 +20,7 @@ Use the animation editor to create new animation files. You can open it selectin
 
 # Inspector properties
 - **Ignore TimeScale** will set the animation to ignore the game TimeScale.
+- **Start At Random Frame** will set the animation to start at random frame when “Play” is called.
 - **Play on Awake** will start playing when the object awakes.
   - **One Shot** if false the animation will loop infinite times.
     - **Delay** if true a delay between loops will be made
@@ -49,6 +50,8 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **SetActiveRenderer (bool active)** enable/disables the renderer.
 - **FlipSpriteX (bool flip)** flips the sprite on the X axis.
   * Not working on UIAnimator yet.
+- **FlipSpriteY (bool flip)** flips the sprite on the Y axis.
+  * Not working on UIAnimator yet.
 - **AddCustomEvent (int frame)** adds an event to a specific frame of the first animation of the animation list and returns it.
 - **AddCustomEvent (string animation, int frame)** adds an event to a specific frame of an animation and returns it.
   * If the animation name is empty, it will get the first animation of the list.
@@ -58,12 +61,16 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
   * If the animation name is empty, it will get the first animation of the list.
 - **SetRandomDelayBetweenLoops(float min, float max)** sets a random delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **SetDelayBetweenLoops(float delay)** sets a fixed delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
+- **Initialize(bool playOnAwake, List\<SpriteAnimation\> animations, string startAnimation)** manually initialize the animator. Useful and **NECESSARY** if the animator was instanced on runtime.
 
 # Properties
 - **IsPlaying { get; }** returns true if the animation is playing and false if not.
 - **CurrentAnimation { get; }** returns a string with the current animation name.
+- **CurrentFrame { get; }** returns the current frame of the animation.
 - **DisableRenderOnFinish { set; }** sets the disableRenderer attribute. This will disable the renderer when the animation ends.
 - **RandomAnimation { set; }** if true the animator will get a random animation after every loop cycle
+- **StartAtRandomFrame { set; }** if true the animator will start the animations at a random frame instead of the first one. Cool if you want to desynchronize animations.
+Events
 
 # Events
 - You can suscribe to the animation events using the AddListener(Listener) method of the UnityEvent class.
@@ -73,6 +80,9 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - You can add an event to a specific frame of an animation using the method **AddCustomEvent(string animation, int frame)**.
   * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
   * Ex: animation.AddCustomEvent("Walk", 3).AddListener(StepFrame). Now on the frame 3 of the animation "Walk" the method StepFrame will be called.
+  
+# Editor Utils
+- **[SpriteAnimationField]** : Use this attribute to transform a string field in a animation list field. This is useful to avoid human errors when setting animations from the inspector.
 
 # License
 MIT

@@ -1,3 +1,6 @@
+// Spritedow Animation Plugin by Elendow
+// http://elendow.com
+
 using UnityEngine;
 using System.Collections;
 using UnityEditor;
@@ -10,9 +13,9 @@ namespace Elendow.SpritedowAnimator
     [CustomPropertyDrawer(typeof(SpriteAnimationFieldAttribute))]
     public class SpriteAnimationFieldDrawer : PropertyDrawer
     {
-        int selectedAnim;
-        string[] animations;
-        BaseAnimator animator;
+        private int selectedAnim;
+        private string[] animations;
+        private BaseAnimator animator;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -22,9 +25,9 @@ namespace Elendow.SpritedowAnimator
             {
                 MonoBehaviour go = (MonoBehaviour)GetParent(property);
                 animator = go.GetComponentInChildren<BaseAnimator>();
-				EditorGUI.LabelField(position, "No animator detected in this object.");
 			}
-            else
+
+            if (animator != null)
             {
 				if (animations == null || animations.Length != animator.animations.Count)
 				{
@@ -40,12 +43,13 @@ namespace Elendow.SpritedowAnimator
 				property.stringValue = animations[selectedAnim];
 
 			}
+            else
+                EditorGUI.LabelField(position, "No animator detected in this object.");
 
-			EditorGUI.EndProperty();
+            EditorGUI.EndProperty();
 		}
 
-
-		public object GetParent(SerializedProperty prop)
+		private object GetParent(SerializedProperty prop)
 		{
 			var path = prop.propertyPath.Replace(".Array.data[", "[");
 			object obj = prop.serializedObject.targetObject;
@@ -66,7 +70,7 @@ namespace Elendow.SpritedowAnimator
 			return obj;
 		}
 
-		public object GetValue(object source, string name)
+        private object GetValue(object source, string name)
 		{
 			if (source == null)
 				return null;
@@ -82,7 +86,7 @@ namespace Elendow.SpritedowAnimator
 			return f.GetValue(source);
 		}
 
-		public object GetValue(object source, string name, int index)
+        private object GetValue(object source, string name, int index)
 		{
 			var enumerable = GetValue(source, name) as IEnumerable;
 			var enm = enumerable.GetEnumerator();

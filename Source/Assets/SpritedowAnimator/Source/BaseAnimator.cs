@@ -116,6 +116,12 @@ namespace Elendow.SpritedowAnimator
                 SetActiveRenderer(!disableRendererOnFinish);
         }
 
+        /// <summary>
+        /// Manually initialize the animator. Useful and NECESSARY if the animator was instanced on runtime.
+        /// </summary>
+        /// <param name="playOnAwake">Will play after this init?</param>
+        /// <param name="animations">Animation list</param>
+        /// <param name="startAnimation">Start animation to play if play on awake is true</param>
         public void Initialize(bool playOnAwake, List<SpriteAnimation> animations, string startAnimation)
         {
             this.animations = new List<SpriteAnimation>(animations);
@@ -503,6 +509,14 @@ namespace Elendow.SpritedowAnimator
         public string CurrentAnimation
         {
             get { return currentAnimation.Name; }
+        }
+
+        /// <summary>
+        /// The animation will start at a random frame if this is true
+        /// </summary>
+        public bool StartAtRandomFrame
+        {
+            set { startAtRandomFrame = value; }
         }
         #endregion
     }

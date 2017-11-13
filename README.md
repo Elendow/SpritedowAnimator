@@ -60,10 +60,12 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **AddCustomEventAtEnd (string animation)** adds an event to the last frame of an animation and returns it.
   * If the animation name is empty, it will get the first animation of the list.
   * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
-- **GetCustomEvent (int frame)** returns the event of the first animation of the animation list at the specific frame. Returns null if there's no event on that frame and animation.
-- **GetCustomEvent (string animation, int frame)** returns the event of the animation at the specific frame. Returns null if there's no event on that frame and animation.
-- **GetCustomEventAtEnd (string animation)** returns the event of the animation at the last frame. Returns null if there's no event on that frame and animation.
-  * If the animation name is empty, it will get the first animation of the list.
+- **GetCustomEvent (int frame)** returns the event of the first animation of the animation list at the specific frame.
+  * Returns null if there's no event on that frame and animation.
+- **GetCustomEvent (string animation, int frame)** returns the event of the animation at the specific frame.
+  * Returns null if there's no event on that frame and animation.
+- **GetCustomEventAtEnd (string animation)** returns the event of the animation at the last frame.
+  * Returns null if there's no event on that frame and animation.
 - **SetRandomDelayBetweenLoops(float min, float max)** sets a random delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **SetDelayBetweenLoops(float delay)** sets a fixed delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **Initialize(bool playOnAwake, List\<SpriteAnimation\> animations, string startAnimation)** manually initialize the animator. Useful and **NECESSARY** if the animator was instanced on runtime.

@@ -53,11 +53,16 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **FlipSpriteY (bool flip)** flips the sprite on the Y axis.
   * Not working on UIAnimator yet.
 - **AddCustomEvent (int frame)** adds an event to a specific frame of the first animation of the animation list and returns it.
+    * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
 - **AddCustomEvent (string animation, int frame)** adds an event to a specific frame of an animation and returns it.
+  * If the animation name is empty, it will get the first animation of the list.
+  * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
+- **AddCustomEventAtEnd (string animation)** adds an event to the last frame of an animation and returns it.
   * If the animation name is empty, it will get the first animation of the list.
   * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
 - **GetCustomEvent (int frame)** returns the event of the first animation of the animation list at the specific frame. Returns null if there's no event on that frame and animation.
 - **GetCustomEvent (string animation, int frame)** returns the event of the animation at the specific frame. Returns null if there's no event on that frame and animation.
+- **GetCustomEventAtEnd (string animation)** returns the event of the animation at the last frame. Returns null if there's no event on that frame and animation.
   * If the animation name is empty, it will get the first animation of the list.
 - **SetRandomDelayBetweenLoops(float min, float max)** sets a random delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **SetDelayBetweenLoops(float delay)** sets a fixed delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
@@ -80,7 +85,7 @@ Events
 - You can add an event to a specific frame of an animation using the method **AddCustomEvent(string animation, int frame)**.
   * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
   * Ex: animation.AddCustomEvent("Walk", 3).AddListener(StepFrame). Now on the frame 3 of the animation "Walk" the method StepFrame will be called.
-  
+
 # Editor Utils
 - **[SpriteAnimationField]** : Use this attribute to transform a string field in a animation list field. This is useful to avoid human errors when setting animations from the inspector.
 

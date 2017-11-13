@@ -25,3 +25,4 @@ ExportedObj/
 *.svd
 sysinfo.txt
 Source/Assets/AssetStoreTools.meta
+.vs/

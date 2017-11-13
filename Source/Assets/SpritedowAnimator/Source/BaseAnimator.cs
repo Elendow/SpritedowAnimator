@@ -367,6 +367,20 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
+        /// Adds a custom event to specified animation on the list on the last frame.
+        /// </summary>
+        /// <returns>
+        /// The event created. Null if the animation is not found or doesn't have enough frames.
+        /// </returns>  
+        public SpriteAnimatorEvent AddCustomEventAtEnd(string animation)
+        {
+            SpriteAnimation anim = GetAnimation(animation);
+            if (anim == null)
+                return null;
+            return AddCustomEvent(animation, anim.FramesCount - 1);
+        }
+
+        /// <summary>
         /// Gets the custom event of the first animation on the list on a certain frame.
         /// </summary>
         /// <returns>
@@ -400,6 +414,24 @@ namespace Elendow.SpritedowAnimator
                 return customEvents[eventInfo];
             else
                 return null;
+        }
+
+        /// <summary>
+        /// Gets the custom event of an animation on the last frame.
+        /// </summary>
+        /// <returns>
+        /// The event of the specified animation on the last frame. Null if not found.
+        /// </returns>  
+        public SpriteAnimatorEvent GetCustomEventAtEnd(string animation)
+        {
+            if (animations.Count == 0)
+                return null;
+
+            SpriteAnimation anim = GetAnimation(animation);
+            if (anim == null)
+                return null;
+
+            return GetCustomEvent(animation, anim.FramesCount - 1);
         }
 
         /// <summary>

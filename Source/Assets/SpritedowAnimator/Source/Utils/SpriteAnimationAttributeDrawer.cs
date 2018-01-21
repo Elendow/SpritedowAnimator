@@ -1,6 +1,7 @@
 // Spritedow Animation Plugin by Elendow
 // http://elendow.com
 
+#if UNITY_EDITOR
 using UnityEngine;
 using System.Collections;
 using UnityEditor;
@@ -96,3 +97,4 @@ namespace Elendow.SpritedowAnimator
 		}
     }
 }
+#endif

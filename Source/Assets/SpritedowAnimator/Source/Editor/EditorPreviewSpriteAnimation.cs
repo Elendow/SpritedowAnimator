@@ -15,11 +15,14 @@ namespace Elendow.SpritedowAnimator
     [CustomEditor(typeof(SpriteAnimation))]
     public class EditorPreviewSpriteAnimation : Editor
     {
+        private const string FPS_EDITOR_PREFS = "spritedowFPSpreviewWindow";
+
         private bool init = false;
         private bool isPlaying = false;
         private bool forceRepaint = false;
         private bool loop = true;
         private int currentFrame = 0;
+        private int loadedFPS = 30;
         private int framesPerSecond = 30;
         private int frameDurationCounter = 0;
         private int frameListSelectedIndex = -1;
@@ -53,6 +56,9 @@ namespace Elendow.SpritedowAnimator
 
             EditorApplication.update += Update;
             init = false;
+
+            // Load last used settings
+            loadedFPS = framesPerSecond = EditorPrefs.GetInt(FPS_EDITOR_PREFS, 30);
 
             // Setup preview object and camera
             go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
@@ -152,6 +158,13 @@ namespace Elendow.SpritedowAnimator
                         forceRepaint = true;
                     }
                 }
+            }
+
+            // Save preview FPS value on the editorPrefs
+            if (framesPerSecond != loadedFPS)
+            {
+                loadedFPS = framesPerSecond;
+                EditorPrefs.SetInt(FPS_EDITOR_PREFS, framesPerSecond);
             }
         }
 

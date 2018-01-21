@@ -53,13 +53,13 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **FlipSpriteY (bool flip)** flips the sprite on the Y axis.
   * Not working on UIAnimator yet.
 - **AddCustomEvent (int frame)** adds an event to a specific frame of the first animation of the animation list and returns it.
-    * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
+    * The event subscriber must have this structure **MethodName(BaseAnimator caller){}**
 - **AddCustomEvent (string animation, int frame)** adds an event to a specific frame of an animation and returns it.
   * If the animation name is empty, it will get the first animation of the list.
-  * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
+  * The event subscriber must have this structure **MethodName(BaseAnimator caller){}**
 - **AddCustomEventAtEnd (string animation)** adds an event to the last frame of an animation and returns it.
   * If the animation name is empty, it will get the first animation of the list.
-  * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
+  * The event subscriber must have this structure **MethodName(BaseAnimator caller){}**
 - **GetCustomEvent (int frame)** returns the event of the first animation of the animation list at the specific frame.
   * Returns null if there's no event on that frame and animation.
 - **GetCustomEvent (string animation, int frame)** returns the event of the animation at the specific frame.

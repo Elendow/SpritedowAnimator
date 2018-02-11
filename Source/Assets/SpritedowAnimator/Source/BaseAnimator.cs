@@ -61,6 +61,7 @@ namespace Elendow.SpritedowAnimator
         private int frameIndex;
         private int framesInAnimation;
         private int frameDurationCounter;
+        private int startingFrame;
         private float animationTimer;
         private float loopTimer;
         private SpriteAnimation currentAnimation;
@@ -279,6 +280,18 @@ namespace Elendow.SpritedowAnimator
                     randomStartFrameApplied = true;
                     frameIndex = Random.Range(0, framesInAnimation - 1);
                 }
+                else if(startingFrame != -1)
+                {
+                    frameIndex = startingFrame;
+                    if (frameIndex >= framesInAnimation - 1)
+                    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogWarning("Starting frame out of bounds.", gameObject);
+#endif
+                        frameIndex = 0;
+                    }
+                    startingFrame = -1;
+                }
 
                 onPlay.Invoke();
                 playing = true;
@@ -300,6 +313,24 @@ namespace Elendow.SpritedowAnimator
             // Get a random animation and plays it
             int animIndex = Random.Range(0, animations.Count);
             Play(animations[animIndex].Name, playOneShot, playBackwards);
+        }
+
+        /// <summary>
+        /// Plays an animation starting at the specified frame.
+        /// </summary>
+        public void PlayStartingAtFrame(string name, int frame, bool playOneShot = false, bool playBackwards = false)
+        {
+            startingFrame = frame;
+            Play(name, playOneShot, playBackwards);
+        }
+
+        /// <summary>
+        /// Plays the first animation of the animation list starting at the specified frame. 
+        /// </summary>
+        public void PlayStartingAtFrame(int frame, bool playOneShot = false, bool playBackwards = false)
+        {
+            startingFrame = frame;
+            Play(playOneShot, playBackwards);
         }
 
         /// <summary>

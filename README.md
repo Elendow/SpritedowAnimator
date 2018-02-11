@@ -43,7 +43,9 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
   * If the animation is the same that is playing, nothing will happend but the **oneShot** attribute will update.
   * If the animation is the same that was playing but its not playing now, the animation will **Reset** and **Resume** and the **oneShot** attribute will update.
   * If the animation is different, it will play the new animation from the start.
-- **PlayRandom (bool playOneShot = false, bool backwards = false))** plays a random animation from the animation list.
+- **PlayRandom (bool playOneShot = false, bool backwards = false)** plays a random animation from the animation list.
+- **PlayStartingAtFrame(string name, int frame, ool playOneShot = false, bool backwards = false)** plays an animation starting at the specified frame.
+- **PlayStartingAtFrame(int frame, bool playOneShot = false, bool playBackwards = false)** plays the first animation of the animation list starting at the specified frame. 
 - **Resume ()** resumes the current animation.
 - **Stop ()** stops the current animation.
 - **Reset ()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.

@@ -1,7 +1,6 @@
 ﻿// Spritedow Animation Plugin by Elendow
 // http://elendow.com
 
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using UnityEditorInternal;
@@ -15,6 +14,7 @@ namespace Elendow.SpritedowAnimator
     [CustomEditor(typeof(SpriteAnimation))]
     public class EditorPreviewSpriteAnimation : Editor
     {
+        private const float PANNING_SPEED = 0.005f;
         private const string FPS_EDITOR_PREFS = "spritedowFPSpreviewWindow";
 
         private bool init = false;
@@ -81,7 +81,7 @@ namespace Elendow.SpritedowAnimator
             if (animation != null && animation.FramesCount > 0)
             {
                 sr.sprite = animation.Frames[0];
-                cameraGO.transform.position = sr.bounds.center;
+                cameraGO.transform.position = Vector2.zero;
             }
 
             // Get preview culling layer in order to render only the preview object and nothing more
@@ -123,10 +123,6 @@ namespace Elendow.SpritedowAnimator
             // Check animation bounds
             if (currentFrame < 0) currentFrame = 0;
             else if (currentFrame > animation.FramesCount) currentFrame = animation.FramesCount - 1;
-
-            // Center camera only on the first frame (this allows animations with different pivot points)
-            if (currentFrame == 0)
-                cameraGO.transform.position = sr.bounds.center;
 
             // Check if playing and use the editor time to change frames
             if (isPlaying)
@@ -201,18 +197,33 @@ namespace Elendow.SpritedowAnimator
 
                 // Check Events
                 Event evt = Event.current;
-                switch (evt.type)
+
+                // Zoom preview window with scrollwheel
+                if (evt.type == EventType.ScrollWheel)
                 {
-                    // Zoom preview window with scrollwheel
-                    case EventType.ScrollWheel:
-                        Vector2 mpos = Event.current.mousePosition;
-                        if (mpos.x >= r.x && mpos.x <= r.x + r.width &&
-                            mpos.y >= r.y && mpos.y <= r.y + r.height)
-                        {
-                            Repaint();
-                            Zoom = -evt.delta.y;
-                        }
-                        break;
+                    Vector2 mpos = Event.current.mousePosition;
+                    if (mpos.x >= r.x && mpos.x <= r.x + r.width &&
+                        mpos.y >= r.y && mpos.y <= r.y + r.height)
+                    {
+                        Repaint();
+                        Zoom = -evt.delta.y;
+                    }
+                }
+                // Pan the camera with mouse drag
+                else if (evt.type == EventType.MouseDrag)
+                {
+                    Vector2 panning = Vector2.zero;
+                    panning.x += Event.current.delta.x;
+                    panning.y += Event.current.delta.y;
+                    cameraGO.transform.Translate(panning * PANNING_SPEED);
+                }
+                // Reset camera pressing F
+                else if (evt.type == EventType.KeyDown)
+                {
+                    if (evt.keyCode == KeyCode.F)
+                    {
+                        cameraGO.transform.position = Vector2.zero;
+                    }
                 }
             }
         }

@@ -133,7 +133,9 @@ namespace Elendow.SpritedowAnimator
         private void Update()
         {
             // Only force repaint on update if the preview is playing and has changed the frame
-            if (spritePreview != null && spritePreview.IsPlaying && spritePreview.ForceRepaint)
+            if (spritePreview != null && 
+               (spritePreview.IsPlaying || spritePreview.IsPanning) &&
+                spritePreview.ForceRepaint)
             {
                 spritePreview.ForceRepaint = false;
                 Repaint();

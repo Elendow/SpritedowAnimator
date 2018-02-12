@@ -14,13 +14,14 @@ namespace Elendow.SpritedowAnimator
     [CustomEditor(typeof(SpriteAnimation))]
     public class EditorPreviewSpriteAnimation : Editor
     {
-        private const float PANNING_SPEED = 0.005f;
+        private const float PANNING_SPEED = 0.5f;
         private const string FPS_EDITOR_PREFS = "spritedowFPSpreviewWindow";
 
         private bool init = false;
         private bool isPlaying = false;
         private bool forceRepaint = false;
         private bool loop = true;
+        private bool isPanning = false;
         private int currentFrame = 0;
         private int loadedFPS = 30;
         private int framesPerSecond = 30;
@@ -28,6 +29,7 @@ namespace Elendow.SpritedowAnimator
         private int frameListSelectedIndex = -1;
         private float animationTimer = 0;
         private float lastFrameEditorTime = 0;
+        private float deltaTime;
         private Vector2 scrollWindowPosition;
         private SpriteAnimation animation = null;
         private ReorderableList frameList;
@@ -108,12 +110,18 @@ namespace Elendow.SpritedowAnimator
 
             if (go != null)
                 DestroyImmediate(go);
+
             if (cameraGO != null)
                 DestroyImmediate(cameraGO);
         }
 
         private void Update()
         {
+            // Calculate deltaTime
+            float timeSinceStartup = (float)EditorApplication.timeSinceStartup;
+            deltaTime = timeSinceStartup - lastFrameEditorTime;
+            lastFrameEditorTime = timeSinceStartup;
+
             if (animation == null || animation.FramesCount == 0)
                 return;
 
@@ -127,10 +135,6 @@ namespace Elendow.SpritedowAnimator
             // Check if playing and use the editor time to change frames
             if (isPlaying)
             {
-                // Calculate deltaTime
-                float timeSinceStartup = (float)EditorApplication.timeSinceStartup;
-                float deltaTime = timeSinceStartup - lastFrameEditorTime;
-                lastFrameEditorTime = timeSinceStartup;
                 animationTimer += deltaTime;
 
                 if (1f / framesPerSecond < animationTimer)
@@ -205,9 +209,10 @@ namespace Elendow.SpritedowAnimator
                     if (mpos.x >= r.x && mpos.x <= r.x + r.width &&
                         mpos.y >= r.y && mpos.y <= r.y + r.height)
                     {
-                        Repaint();
                         Zoom = -evt.delta.y;
                     }
+                    forceRepaint = true;
+                    Repaint();
                 }
                 // Pan the camera with mouse drag
                 else if (evt.type == EventType.MouseDrag)
@@ -215,15 +220,18 @@ namespace Elendow.SpritedowAnimator
                     Vector2 panning = Vector2.zero;
                     panning.x += Event.current.delta.x;
                     panning.y += Event.current.delta.y;
-                    cameraGO.transform.Translate(panning * PANNING_SPEED);
+                    cameraGO.transform.Translate(panning * PANNING_SPEED * deltaTime);
+                    forceRepaint = true;
+                    isPanning = true;
+                    Repaint();
                 }
                 // Reset camera pressing F
-                else if (evt.type == EventType.KeyDown)
+                else if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.F)
                 {
-                    if (evt.keyCode == KeyCode.F)
-                    {
-                        cameraGO.transform.position = Vector2.zero;
-                    }
+                    cameraGO.transform.position = Vector2.zero;
+                    forceRepaint = true;
+                    isPanning = true;
+                    Repaint();
                 }
             }
         }
@@ -434,6 +442,12 @@ namespace Elendow.SpritedowAnimator
                     }
                 }
             }
+        }
+
+        public bool IsPanning
+        {
+            get { return isPanning; }
+            set { isPanning = value; }
         }
         #endregion
     }

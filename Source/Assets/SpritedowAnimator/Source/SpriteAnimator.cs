@@ -61,5 +61,13 @@ namespace Elendow.SpritedowAnimator
         {
             get { return spriteRenderer.bounds; }
         }
+
+        /// <summary>
+        /// The Sprite Renderer used to render
+        /// </summary>
+        public SpriteRenderer SpriteRenderer
+        {
+            get { return spriteRenderer; }
+        }
     }
 }

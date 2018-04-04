@@ -170,7 +170,6 @@ namespace Elendow.SpritedowAnimator
 
         public override void OnInspectorGUI()
         {
-            animation.name = EditorGUILayout.TextField("Name", animation.name);
 			animation.FPS = EditorGUILayout.IntField("FPS", animation.FPS);
 
             if (frameList != null)
@@ -218,7 +217,7 @@ namespace Elendow.SpritedowAnimator
                 else if (evt.type == EventType.MouseDrag)
                 {
                     Vector2 panning = Vector2.zero;
-                    panning.x += Event.current.delta.x;
+                    panning.x -= Event.current.delta.x;
                     panning.y += Event.current.delta.y;
                     cameraGO.transform.Translate(panning * PANNING_SPEED * deltaTime);
                     forceRepaint = true;
@@ -318,6 +317,9 @@ namespace Elendow.SpritedowAnimator
 
         private void DrawFrameListElement(Rect r, int i, bool active, bool focused)
         {
+            if(speedScale == null)
+                speedScale = EditorGUIUtility.IconContent("SpeedScale");
+
             if (i < animation.FramesCount)
             {
                 EditorGUI.BeginChangeCheck();
@@ -435,8 +437,8 @@ namespace Elendow.SpritedowAnimator
                 if (pc != null)
                 {
                     float z = value / 50f;
-                    if (pc.orthographicSize + z >= 1 &&
-                        pc.orthographicSize + z <= 10)
+                    if (pc.orthographicSize + z >= 0.1f &&
+                        pc.orthographicSize + z <= 100)
                     {
                         pc.orthographicSize += z;
                     }

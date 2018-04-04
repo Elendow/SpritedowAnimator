@@ -361,6 +361,7 @@ namespace Elendow.SpritedowAnimator
             animationTimer = 0;
             frameIndex = (backwards) ? framesInAnimation - 1 : 0;
             frameDurationCounter = 0;
+            ChangeFrame(currentAnimation.GetFrame(frameIndex));
         }
 
         /// <summary>

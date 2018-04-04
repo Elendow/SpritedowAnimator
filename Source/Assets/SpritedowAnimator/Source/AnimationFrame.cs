@@ -13,10 +13,10 @@ namespace Elendow.SpritedowAnimator
         private Sprite frame;
 
         public AnimationFrame() { }
-        public AnimationFrame(Sprite s, int d)
+        public AnimationFrame(Sprite frame, int duration)
         {
-            duration = d;
-            frame = s;
+            this.duration = duration;
+            this.frame = frame;
         }
 
         public int Duration

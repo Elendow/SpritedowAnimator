@@ -20,8 +20,8 @@ namespace Elendow.SpritedowAnimator
         private const float MIN_WINDOW_HEIGHT = 200f;
 
         private bool init = false;
+        private bool justCreatedAnim = false;
         private int frameListSelectedIndex = -1;
-        private string newAnimName = "New Animation";
         private Texture2D clockIcon = null;
         private SpriteAnimation selectedAnimation = null;
         private Vector2 scrollWindowPosition = Vector2.zero;
@@ -65,8 +65,6 @@ namespace Elendow.SpritedowAnimator
             AssetDatabase.CreateAsset(asset, assetPathAndName);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            EditorUtility.FocusProjectWindow();
-            Selection.activeObject = asset;
         }
 
         private void OnEnable()
@@ -152,12 +150,16 @@ namespace Elendow.SpritedowAnimator
             }
 
             // Create animation box
-            EditorGUILayout.Space();
             NewAnimationBox();
+
+            if(justCreatedAnim)
+            {
+                justCreatedAnim = false;
+                return;
+            }
 
             // Edit animation box
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Edit Animation");
             EditorGUILayout.BeginVertical();
             {
                 // Animation asset field
@@ -309,6 +311,7 @@ namespace Elendow.SpritedowAnimator
                 frameList.onReorderCallback -= ReorderFrameListItem;
             }
 
+
             frameList = new ReorderableList(frames, typeof(AnimationFrame));
             frameList.drawHeaderCallback += DrawFrameListHeader;
             frameList.drawElementCallback += DrawFrameListElement;
@@ -323,30 +326,14 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         private void NewAnimationBox()
         {
-            EditorGUILayout.LabelField("Create Animation");
-			EditorGUILayout.BeginHorizontal(box);
+			EditorGUILayout.BeginHorizontal(EditorStyles.toolbar, GUILayout.ExpandWidth(true));
             {
-                // Submit if return is pressed with the new animation input focused
-                bool createAnimation = false;
-                Event evt = Event.current;
-                switch (evt.type)
-                {
-                    case EventType.KeyDown:
-                        createAnimation = (Event.current.keyCode == KeyCode.Return &&
-                                           GUI.GetNameOfFocusedControl().Equals("newAnimation"));
-                        break;
-                }
-
-                // New animation name field
-                GUI.SetNextControlName("newAnimation");
-                newAnimName = EditorGUILayout.TextField("Name", newAnimName);
+                GUILayout.FlexibleSpace();
 
                 // New animaton button
-                if (createAnimation || GUILayout.Button("New Animation"))
+                if (GUILayout.Button("Create Animation", EditorStyles.toolbarButton, GUILayout.ExpandWidth(false)))
                 {
-                    string folder = EditorUtility.OpenFolderPanel("New Animation", "Assets", "");
-                    if (folder != "")
-                        CreateAnimation(folder);
+                    CreateAnimation();
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -372,7 +359,6 @@ namespace Elendow.SpritedowAnimator
                 }
 
                 // Name field
-                selectedAnimation.Name = EditorGUILayout.TextField("Name", selectedAnimation.Name);
                 EditorGUILayout.Space();
                 DragAndDropBox();
             }
@@ -477,24 +463,21 @@ namespace Elendow.SpritedowAnimator
         private void DrawFrameListHeader(Rect r)
         {
             GUI.Label(r, "Frame List");
+            //listToolSelected = GUI.Toolbar(r, listToolSelected, LIST_TITLES);
         }
 
         private void DrawFrameListElement(Rect r, int i, bool active, bool focused)
         {
-            if (i < selectedAnimation.FramesCount)
+            EditorGUI.BeginChangeCheck();
             {
-                EditorGUI.BeginChangeCheck();
-                {
-                    string spriteName = (selectedAnimation.Frames[i] != null) ? selectedAnimation.Frames[i].name : "No sprite selected";
-                    EditorGUIUtility.labelWidth = r.width - 105;
-                    selectedAnimation.Frames[i] = EditorGUI.ObjectField(new Rect(r.x + 10, r.y + 1, r.width - 85, r.height - 4), spriteName, selectedAnimation.Frames[i], typeof(Sprite), false) as Sprite;
-
-                    EditorGUIUtility.labelWidth = 20;
-                    selectedAnimation.FramesDuration[i] = EditorGUI.IntField(new Rect(r.x + r.width - 50, r.y + 1, 50, r.height - 4), speedScaleIcon, selectedAnimation.FramesDuration[i]);
-                }
-                if (EditorGUI.EndChangeCheck())
-                    EditorUtility.SetDirty(selectedAnimation);
+                string spriteName = (selectedAnimation.Frames[i] != null) ? selectedAnimation.Frames[i].name : "No sprite selected";
+                EditorGUI.LabelField(new Rect(r.x, r.y + 2, r.width, r.height), spriteName);
+                selectedAnimation.Frames[i] = EditorGUI.ObjectField(new Rect(r.x + r.width - 120, r.y + 1, 50, r.height - 4), "", selectedAnimation.Frames[i], typeof(Sprite), false) as Sprite;
+                EditorGUIUtility.labelWidth = 20;
+                selectedAnimation.FramesDuration[i] = EditorGUI.IntField(new Rect(r.x + r.width - 50, r.y + 1, 50, r.height - 4), speedScaleIcon, selectedAnimation.FramesDuration[i]);
             }
+            if (EditorGUI.EndChangeCheck())
+                EditorUtility.SetDirty(selectedAnimation);
         }
 
         private void AddFrameListItem(ReorderableList list)
@@ -571,40 +554,39 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
-        /// Creates the animation asset
+        /// Creates the animation asset with a prompt
         /// </summary>
-        /// <param name="folder">Folder for the asset</param>
-        private void CreateAnimation(string folder)
+        private void CreateAnimation()
         {
-            SpriteAnimation asset = CreateInstance<SpriteAnimation>();
-            string relativeFolder = "";
-            asset.Name = newAnimName;
+            string folder = EditorUtility.SaveFilePanel("New Animation", "Assets", "New Animation", "asset");
+            string relativeFolder = folder;
 
-            // Get path relative to assets folder
-            int folderPosition = folder.IndexOf("Assets/");
-            if (folderPosition > 0)
+            if (folder.Length > 0)
             {
-                relativeFolder = folder.Substring(folderPosition);
-                relativeFolder += "/";
-            }
-            else
-                relativeFolder = "Assets/";
-            // Check if animation already exists
-            if (AssetDatabase.LoadAssetAtPath<SpriteAnimation>(relativeFolder + newAnimName + ".asset") != null)
-            {
-                if (!EditorUtility.DisplayDialog("Sprite Animation Already Exist", "An Sprite Animation already exist on that folder with that name.\nDo you want to overwrite it?", "Yes", "No"))
-                    return;
-            }
+                int folderPosition = folder.IndexOf("Assets/", System.StringComparison.InvariantCulture);
+                if (folderPosition > 0)
+                {
+                    relativeFolder = folder.Substring(folderPosition);
 
-            // Create the animation
-            AssetDatabase.CreateAsset(asset, relativeFolder + newAnimName + ".asset");
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            if (EditorUtility.DisplayDialog("Sprite Animation Created", "Sprite Animation saved to " + relativeFolder + newAnimName, "OK"))
-            {
-                EditorUtility.FocusProjectWindow();
-                Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(relativeFolder + newAnimName + ".asset");
-                InitializeReorderableList();
+                    // Create the animation
+                    SpriteAnimation asset = CreateInstance<SpriteAnimation>();
+                    AssetDatabase.CreateAsset(asset, relativeFolder);
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+
+                    selectedAnimation = AssetDatabase.LoadAssetAtPath<SpriteAnimation>(relativeFolder);
+                    InitializeReorderableList();
+                    justCreatedAnim = true;
+
+                    string[] aux = relativeFolder.Split('/');
+
+                    string spriteName = aux[aux.Length - 1].Replace(".asset", "");
+                    selectedAnimation.Name = spriteName;
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Invalid Path", "Select a path inside the Assets folder", "OK");
+                }
             }
         }
     }

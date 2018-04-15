@@ -14,8 +14,6 @@ namespace Elendow.SpritedowAnimator
         [SerializeField]
         private int fps = 30;
         [SerializeField]
-        private string animationName;
-        [SerializeField]
         private List<Sprite> frames;
         [SerializeField]
         private List<int> framesDuration;
@@ -50,8 +48,7 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public string Name
         {
-            get { return animationName; }
-            set { animationName = value; }
+            get { return name; }
         }
 
         /// <summary>

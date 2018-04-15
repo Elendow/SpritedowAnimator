@@ -577,11 +577,6 @@ namespace Elendow.SpritedowAnimator
                     selectedAnimation = AssetDatabase.LoadAssetAtPath<SpriteAnimation>(relativeFolder);
                     InitializeReorderableList();
                     justCreatedAnim = true;
-
-                    string[] aux = relativeFolder.Split('/');
-
-                    string spriteName = aux[aux.Length - 1].Replace(".asset", "");
-                    selectedAnimation.Name = spriteName;
                 }
                 else
                 {

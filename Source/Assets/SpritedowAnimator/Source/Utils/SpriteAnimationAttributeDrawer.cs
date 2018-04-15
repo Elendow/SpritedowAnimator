@@ -30,9 +30,26 @@ namespace Elendow.SpritedowAnimator
 
             if (animator != null)
             {
-				if (animations == null || animations.Length != animator.animations.Count)
+                bool refresh = animations == null || animations.Length != animator.animations.Count;
+
+                if (!refresh)
+                {
+                    if (animations.Length > 0 && animations.Length == animator.animations.Count)
+                    {
+                        for (int i = 0; i < animator.animations.Count; i++)
+                        {
+                            if (!animations[i].Equals(animator.animations[i]))
+                            {
+                                refresh = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (refresh)
 				{
-					animations = new string[animator.animations.Count];
+                    animations = new string[animator.animations.Count];
                     for (int i = 0; i < animations.Length; i++)
                     {
                         animations[i] = animator.animations[i].Name;
@@ -40,9 +57,17 @@ namespace Elendow.SpritedowAnimator
                             selectedAnim = i;
                     }
 				}
-				selectedAnim = EditorGUI.Popup(position, label.text, selectedAnim, animations);
-				property.stringValue = animations[selectedAnim];
 
+                if (animations.Length > 0)
+                {
+                    selectedAnim = EditorGUI.Popup(position, label.text, selectedAnim, animations);
+                    property.stringValue = animations[selectedAnim];
+                }
+                else
+                {
+                    selectedAnim = -1;
+                    EditorGUI.LabelField(position, "Animator without animations");
+                }
 			}
             else
                 EditorGUI.LabelField(position, "No animator detected in this object.");

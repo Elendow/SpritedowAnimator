@@ -94,7 +94,7 @@ namespace Elendow.SpritedowAnimator
                     if (delayBetweenLoops)
                     {
                         waitingLoop = true;
-                        if (maxDelayBetweenLoops == minDelayBetweenLoops)
+                        if (maxDelayBetweenLoops.Equals(minDelayBetweenLoops))
                             loopTimer = minDelayBetweenLoops;
                         else
                             loopTimer = Random.Range(minDelayBetweenLoops, maxDelayBetweenLoops);
@@ -283,7 +283,7 @@ namespace Elendow.SpritedowAnimator
                 else if(startingFrame != -1)
                 {
                     frameIndex = startingFrame;
-                    if (frameIndex >= framesInAnimation - 1)
+                    if (frameIndex > framesInAnimation - 1)
                     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogWarning("Starting frame out of bounds.", gameObject);
@@ -472,9 +472,9 @@ namespace Elendow.SpritedowAnimator
         /// <returns>
         /// The animation. Null if not found.
         /// </returns>  
-        private SpriteAnimation GetAnimation(string name)
+        private SpriteAnimation GetAnimation(string animationName)
         {
-            return animations.Find(x => x.Name.Equals(name));
+            return animations.Find(x => x.Name.Equals(animationName));
         }
 
         /// <summary>
@@ -572,7 +572,7 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public string CurrentAnimation
         {
-            get { return currentAnimation.Name; }
+            get { return (currentAnimation != null) ? currentAnimation.Name : string.Empty; }
         }
 
         /// <summary>

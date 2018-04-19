@@ -22,56 +22,71 @@ namespace Elendow.SpritedowAnimator
         {
 			EditorGUI.BeginProperty(position, label, property);
 
-			if (animator == null)
+            if (animator == null)
             {
                 MonoBehaviour go = (MonoBehaviour)GetParent(property);
                 animator = go.GetComponentInChildren<BaseAnimator>();
-			}
 
-            if (animator != null)
-            {
-                bool refresh = animations == null || animations.Length != animator.animations.Count;
-
-                if (!refresh)
+                if (animator == null)
                 {
-                    if (animations.Length > 0 && animations.Length == animator.animations.Count)
-                    {
-                        for (int i = 0; i < animator.animations.Count; i++)
-                        {
-                            if (!animations[i].Equals(animator.animations[i]))
-                            {
-                                refresh = true;
-                                break;
-                            }
-                        }
-                    }
+                    EditorGUI.LabelField(position, "No animator detected in this object.");
                 }
-
-                if (refresh)
-				{
-                    animations = new string[animator.animations.Count];
-                    for (int i = 0; i < animations.Length; i++)
-                    {
-                        animations[i] = animator.animations[i].Name;
-                        if (animations[i] == property.stringValue)
-                            selectedAnim = i;
-                    }
-				}
-
-                if (animations.Length > 0)
+            }
+            else
+            {
+                if (animator.animations == null || animator.animations.Count == 0)
                 {
-                    selectedAnim = EditorGUI.Popup(position, label.text, selectedAnim, animations);
-                    property.stringValue = animations[selectedAnim];
+                    EditorGUI.LabelField(position, "Animator without animations");
                 }
                 else
                 {
-                    selectedAnim = -1;
-                    EditorGUI.LabelField(position, "Animator without animations");
-                }
-			}
-            else
-                EditorGUI.LabelField(position, "No animator detected in this object.");
+                    bool refresh = animations == null || animations.Length != animator.animations.Count;
 
+                    if (!refresh)
+                    {
+                        if (animations.Length > 0 && animations.Length == animator.animations.Count)
+                        {
+                            for (int i = 0; i < animator.animations.Count; i++)
+                            {
+                                if (!animations[i].Equals(animator.animations[i]))
+                                {
+                                    refresh = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (refresh)
+                    {
+                        animations = new string[animator.animations.Count];
+                        for (int i = 0; i < animations.Length; i++)
+                        {
+                            if (animator.animations[i] != null)
+                            {
+                                animations[i] = animator.animations[i].Name;
+                                if (animations[i] == property.stringValue)
+                                    selectedAnim = i;
+                            }
+                            else
+                            {
+                                animations[i] = "{null}";
+                            }
+                        }
+                    }
+
+                    if (animations.Length > 0)
+                    {
+                        selectedAnim = EditorGUI.Popup(position, label.text, selectedAnim, animations);
+                        property.stringValue = animations[selectedAnim];
+                    }
+                    else
+                    {
+                        selectedAnim = -1;
+                        EditorGUI.LabelField(position, "Animator without animations");
+                    }
+                }
+            }
             EditorGUI.EndProperty();
 		}
 

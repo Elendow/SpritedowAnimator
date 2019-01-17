@@ -213,16 +213,27 @@ namespace Elendow.SpritedowAnimator
                     forceRepaint = true;
                     Repaint();
                 }
+                // Stop panning on mouse up
+                else if (evt.type == EventType.MouseUp)
+                {
+                    isPanning = false;
+                }
                 // Pan the camera with mouse drag
                 else if (evt.type == EventType.MouseDrag)
                 {
-                    Vector2 panning = Vector2.zero;
-                    panning.x -= Event.current.delta.x;
-                    panning.y += Event.current.delta.y;
-                    cameraGO.transform.Translate(panning * PANNING_SPEED * deltaTime);
-                    forceRepaint = true;
-                    isPanning = true;
-                    Repaint();
+                    Vector2 mpos = Event.current.mousePosition;
+                    if ((mpos.x >= r.x && mpos.x <= r.x + r.width &&
+                        mpos.y >= r.y && mpos.y <= r.y + r.height) ||
+                        isPanning)
+                    {
+                        Vector2 panning = Vector2.zero;
+                        panning.x -= Event.current.delta.x;
+                        panning.y += Event.current.delta.y;
+                        cameraGO.transform.Translate(panning * PANNING_SPEED * deltaTime);
+                        forceRepaint = true;
+                        isPanning = true;
+                        Repaint();
+                    }
                 }
                 // Reset camera pressing F
                 else if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.F)

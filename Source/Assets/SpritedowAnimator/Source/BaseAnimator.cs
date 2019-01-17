@@ -53,6 +53,8 @@ namespace Elendow.SpritedowAnimator
         private float maxDelayBetweenLoops = 2f;
         [SerializeField]
         private string startAnimation = "";
+        [SerializeField]
+        private LoopType loopType = LoopType.repeat;
 
         // Fields used at runtime
         private bool playing;
@@ -105,6 +107,9 @@ namespace Elendow.SpritedowAnimator
                         loopTimer = 0;
                     }
                 }
+
+                if (startAnimation.Contains("null") || startAnimation.Equals(""))
+                    startAnimation = animations[0].Name;
 
                 // Pick the selected animation or a random one.
                 if (!randomAnimation)
@@ -206,6 +211,9 @@ namespace Elendow.SpritedowAnimator
                 loopTimer -= Time.deltaTime;
                 if (loopTimer <= 0)
                 {
+                    if (loopType == LoopType.yoyo)
+                        backwards = !backwards;
+
                     waitingLoop = false;
                     if (randomAnimation)
                     {
@@ -227,7 +235,7 @@ namespace Elendow.SpritedowAnimator
         /// <summary>
         /// Plays the first animation of the animation list.
         /// </summary>
-        public void Play(bool playOneShot = false, bool playBackwards = false)
+        public void Play(bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             Play(animations[0].Name, playOneShot, playBackwards);
         }
@@ -235,7 +243,7 @@ namespace Elendow.SpritedowAnimator
         /// <summary>
         /// Plays an animation.
         /// </summary>
-        public void Play(string name, bool playOneShot = false, bool playBackwards = false)
+        public void Play(string name, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             SetActiveRenderer(true);
 
@@ -308,7 +316,7 @@ namespace Elendow.SpritedowAnimator
         /// <summary>
         /// Plays a random animation of the animation list.
         /// </summary>
-        public void PlayRandom(bool playOneShot = false, bool playBackwards = false)
+        public void PlayRandom(bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             // Get a random animation and plays it
             int animIndex = Random.Range(0, animations.Count);
@@ -318,7 +326,7 @@ namespace Elendow.SpritedowAnimator
         /// <summary>
         /// Plays an animation starting at the specified frame.
         /// </summary>
-        public void PlayStartingAtFrame(string name, int frame, bool playOneShot = false, bool playBackwards = false)
+        public void PlayStartingAtFrame(string name, int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             startingFrame = frame;
             Play(name, playOneShot, playBackwards);
@@ -327,7 +335,7 @@ namespace Elendow.SpritedowAnimator
         /// <summary>
         /// Plays the first animation of the animation list starting at the specified frame. 
         /// </summary>
-        public void PlayStartingAtFrame(int frame, bool playOneShot = false, bool playBackwards = false)
+        public void PlayStartingAtFrame(int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             startingFrame = frame;
             Play(playOneShot, playBackwards);
@@ -581,6 +589,15 @@ namespace Elendow.SpritedowAnimator
         public bool StartAtRandomFrame
         {
             set { startAtRandomFrame = value; }
+        }
+
+        /// <summary>
+        /// The animation to play with Play On Awake active and Random Animation disabled
+        /// </summary>
+        public string StartAnimation
+        {
+            get { return startAnimation; }
+            set { startAnimation = value; }
         }
         #endregion
     }

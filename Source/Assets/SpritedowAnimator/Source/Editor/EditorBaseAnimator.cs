@@ -3,27 +3,92 @@
 
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace Elendow.SpritedowAnimator
 {
     [CustomEditor(typeof(BaseAnimator))]
     public class EditorBaseAnimator : Editor
     {
+        private static readonly string SHOW_ANIMATION_LIST_KEY = "ShowAnimationList";
+        private static bool showAnimationList;
+
+        private bool init;
+
         private SerializedProperty playOnAwake;
         private SerializedProperty ignoreTimeScale;
         private SerializedProperty delayBetweenLoops;
         private SerializedProperty minDelayBetweenLoops;
         private SerializedProperty maxDelayBetweenLoops;
-        private SerializedProperty startAnimation;
-        private SerializedProperty animations;
         private SerializedProperty oneShot;
         private SerializedProperty backwards;
         private SerializedProperty randomAnimation;
         private SerializedProperty disableRendererOnFinish;
         private SerializedProperty startAtRandomFrame;
+        private SerializedProperty loopType;
 
-        protected int startAnimationIndex = 0;
-        protected string[] animationNames;
+        private GUIStyle dragAndDropStyle;
+        private GUIContent emptyContent;
+        private GUIContent arrowContent;
+        private List<SpriteAnimation> draggedAnimations;
+        
+        /// <summary>
+        /// Initialize again on enable
+        /// </summary>
+        private void OnEnable()
+        {
+            init = false;
+        }
+
+        /// <summary>
+        /// Draws a common inspector
+        /// </summary>
+        private void Init(BaseAnimator targetAnimator)
+        {
+            init = true;
+
+            playOnAwake = serializedObject.FindProperty("playOnAwake");
+            ignoreTimeScale = serializedObject.FindProperty("ignoreTimeScale");
+            delayBetweenLoops = serializedObject.FindProperty("delayBetweenLoops");
+            minDelayBetweenLoops = serializedObject.FindProperty("minDelayBetweenLoops");
+            maxDelayBetweenLoops = serializedObject.FindProperty("maxDelayBetweenLoops");
+            oneShot = serializedObject.FindProperty("oneShot");
+            backwards = serializedObject.FindProperty("backwards");
+            randomAnimation = serializedObject.FindProperty("randomAnimation");
+            disableRendererOnFinish = serializedObject.FindProperty("disableRendererOnFinish");
+            startAtRandomFrame = serializedObject.FindProperty("startAtRandomFrame");
+            loopType = serializedObject.FindProperty("loopType");
+
+            if (targetAnimator.animations == null)
+                targetAnimator.animations = new List<SpriteAnimation>();
+
+            dragAndDropStyle = new GUIStyle(EditorStyles.helpBox);
+            dragAndDropStyle.richText = true;
+            dragAndDropStyle.alignment = TextAnchor.MiddleCenter;
+
+            emptyContent = new GUIContent("");
+            arrowContent = new GUIContent(EditorGUIUtility.IconContent("UpArrow"));
+
+            draggedAnimations = new List<SpriteAnimation>();
+
+            if (!targetAnimator.StartAnimation.Equals(""))
+            {
+                int startAnimationIndex = -1;
+                for (int i = 0; i < targetAnimator.animations.Count; i++)
+                {
+                    if (targetAnimator.animations[i] != null &&
+                        targetAnimator.animations[i].Name.Equals(targetAnimator.StartAnimation))
+                        startAnimationIndex = i;
+                }
+
+                if (startAnimationIndex != -1)
+                    MoveStartingAnimationToTop(targetAnimator, startAnimationIndex);
+                else
+                    targetAnimator.StartAnimation = "";
+            }
+
+            showAnimationList = EditorPrefs.GetBool(SHOW_ANIMATION_LIST_KEY, true);
+        }
 
         /// <summary>
         /// Draws a common inspector
@@ -31,108 +96,223 @@ namespace Elendow.SpritedowAnimator
         /// <param name="targetAnimator"></param>
         protected void DrawInspector(BaseAnimator targetAnimator)
         {
-            playOnAwake = serializedObject.FindProperty("playOnAwake");
-            ignoreTimeScale = serializedObject.FindProperty("ignoreTimeScale");
-            delayBetweenLoops = serializedObject.FindProperty("delayBetweenLoops");
-            minDelayBetweenLoops = serializedObject.FindProperty("minDelayBetweenLoops");
-            maxDelayBetweenLoops = serializedObject.FindProperty("maxDelayBetweenLoops");
-            startAnimation = serializedObject.FindProperty("startAnimation");
-            animations = serializedObject.FindProperty("animations");
-            oneShot = serializedObject.FindProperty("oneShot");
-            backwards = serializedObject.FindProperty("backwards");
-            randomAnimation = serializedObject.FindProperty("randomAnimation");
-            disableRendererOnFinish = serializedObject.FindProperty("disableRendererOnFinish");
-            startAtRandomFrame = serializedObject.FindProperty("startAtRandomFrame");
+            if (!init)
+                Init(targetAnimator);
 
-            if (animationNames == null)
-                GetAnimationNames(targetAnimator);
+            EditorGUILayout.Space();
 
-            EditorGUILayout.PropertyField(ignoreTimeScale);
-            EditorGUILayout.PropertyField(startAtRandomFrame);
-            EditorGUILayout.PropertyField(playOnAwake);
+            EditorGUILayout.LabelField("Basic Settings");
 
-            if (playOnAwake.boolValue)
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             {
-                EditorGUI.indentLevel++;
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Ignore time scale", GUILayout.ExpandWidth(false));
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.PropertyField(ignoreTimeScale, emptyContent, GUILayout.ExpandWidth(false));
+                EditorGUILayout.EndHorizontal();
 
-                EditorGUILayout.PropertyField(oneShot);
-                if (!oneShot.boolValue)
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Start at random frame", GUILayout.ExpandWidth(false));
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.PropertyField(startAtRandomFrame, emptyContent, GUILayout.ExpandWidth(false));
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Play on awake", GUILayout.ExpandWidth(false));
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.PropertyField(playOnAwake, emptyContent, GUILayout.ExpandWidth(false));
+                EditorGUILayout.EndHorizontal();
+
+                if (playOnAwake.boolValue)
                 {
                     EditorGUI.indentLevel++;
 
-                    delayBetweenLoops.boolValue = EditorGUILayout.BeginToggleGroup("Delay", delayBetweenLoops.boolValue);
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("One shot", GUILayout.ExpandWidth(false));
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.PropertyField(oneShot, emptyContent, GUILayout.ExpandWidth(false));
+                    EditorGUILayout.EndHorizontal();
+
+                    if (!oneShot.boolValue)
                     {
-                        EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
-                        EditorGUIUtility.labelWidth = 65;
-                        EditorGUILayout.PropertyField(minDelayBetweenLoops);
-                        EditorGUILayout.PropertyField(maxDelayBetweenLoops);
-                        EditorGUIUtility.labelWidth = 0;
-                        EditorGUILayout.EndHorizontal();
+                        EditorGUI.indentLevel++;
+                        EditorGUILayout.PropertyField(loopType);
+                        delayBetweenLoops.boolValue = EditorGUILayout.BeginToggleGroup("Delay", delayBetweenLoops.boolValue);
+                        {
+                            EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+                            EditorGUIUtility.labelWidth = 65;
+                            EditorGUILayout.PropertyField(minDelayBetweenLoops, new GUIContent("Min"));
+                            EditorGUILayout.PropertyField(maxDelayBetweenLoops, new GUIContent("Max"));
+                            EditorGUIUtility.labelWidth = 0;
+                            EditorGUILayout.EndHorizontal();
+                        }
+                        EditorGUILayout.EndToggleGroup();
+
+                        if (minDelayBetweenLoops.floatValue < 0)
+                            minDelayBetweenLoops.floatValue = 0;
+
+                        if (maxDelayBetweenLoops.floatValue < minDelayBetweenLoops.floatValue)
+                            maxDelayBetweenLoops.floatValue = minDelayBetweenLoops.floatValue;
+
+                        EditorGUI.indentLevel--;
                     }
-                    EditorGUILayout.EndToggleGroup();
 
-                    if (minDelayBetweenLoops.floatValue < 0)
-                        minDelayBetweenLoops.floatValue = 0;
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("Disable render on finish", GUILayout.ExpandWidth(false));
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.PropertyField(disableRendererOnFinish, emptyContent, GUILayout.ExpandWidth(false));
+                    EditorGUILayout.EndHorizontal();
 
-                    if (maxDelayBetweenLoops.floatValue < minDelayBetweenLoops.floatValue)
-                        maxDelayBetweenLoops.floatValue = minDelayBetweenLoops.floatValue;
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("Backwards", GUILayout.ExpandWidth(false));
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.PropertyField(backwards, emptyContent, GUILayout.ExpandWidth(false));
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("Random animation", GUILayout.ExpandWidth(false));
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.PropertyField(randomAnimation, emptyContent, GUILayout.ExpandWidth(false));
+                    EditorGUILayout.EndHorizontal();
 
                     EditorGUI.indentLevel--;
                 }
+            }
+            EditorGUILayout.EndVertical();
 
-                EditorGUILayout.PropertyField(disableRendererOnFinish);
-                EditorGUILayout.PropertyField(backwards);
-                EditorGUILayout.PropertyField(randomAnimation);
+            EditorGUILayout.Space();
 
-                if (!randomAnimation.boolValue)
-                {
-                    if (animationNames != null && animationNames.Length > 0)
-                    {
-                        if (startAnimationIndex >= animationNames.Length)
-                            startAnimationIndex = animationNames.Length - 1;
+            showAnimationList = EditorGUI.Foldout(GUILayoutUtility.GetRect(40f, 40f, 16f, 16f), showAnimationList, "Animation List", true);
 
-                        startAnimationIndex = EditorGUILayout.Popup("Start Animation", startAnimationIndex, animationNames);
-                        startAnimation.stringValue = animationNames[startAnimationIndex];
-                    }
-                    else
-                    {
-                        EditorGUILayout.LabelField("Start animation", "No animations");
-                    }
-                }
+            DragAndDropBox(targetAnimator);
 
-                EditorGUI.indentLevel--;
+            if (showAnimationList)
+                DrawAnimationList(targetAnimator);
+            else
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.EndVertical();
             }
 
-            EditorGUILayout.PropertyField(animations, true);
+            if (draggedAnimations != null && draggedAnimations.Count > 0)
+            {
+                showAnimationList = true;
+                for (int i = 0; i < draggedAnimations.Count; i++)
+                {
+                    targetAnimator.animations.Add(draggedAnimations[i]);
+                    if (targetAnimator.animations.Count == 1 && targetAnimator.animations[0] != null)
+                        targetAnimator.StartAnimation = targetAnimator.animations[0].Name;
+                }
+
+                draggedAnimations.Clear();
+            }
 
             if (GUI.changed)
             {
+                EditorPrefs.SetBool(SHOW_ANIMATION_LIST_KEY, showAnimationList);
                 serializedObject.ApplyModifiedProperties();
                 EditorUtility.SetDirty(targetAnimator);
-                GetAnimationNames(targetAnimator);
             }
         }
 
-        /// <summary>
-        /// Fetch animations on the target animator
-        /// </summary>
-        /// <param name="targetAnimator"></param>
-        private void GetAnimationNames(BaseAnimator targetAnimator)
+        private void DrawAnimationList(BaseAnimator targetAnimator)
         {
-            if (targetAnimator.animations != null && targetAnimator.animations.Count > 0)
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             {
-                animationNames = new string[targetAnimator.animations.Count];
-                for (int i = 0; i < animationNames.Length; i++)
+                // Draw animation list
+                if (targetAnimator.animations != null && targetAnimator.animations.Count > 0)
                 {
-                    if (targetAnimator.animations[i])
+                    if (targetAnimator.animations[0] != null)
+                        targetAnimator.StartAnimation = targetAnimator.animations[0].Name;
+
+                    int toRemove = -1;
+                    int toFirst = -1;
+                    for (int i = 0; i < targetAnimator.animations.Count; i++)
                     {
-                        animationNames[i] = targetAnimator.animations[i].Name;
-                        if (targetAnimator.animations[i].Name == startAnimation.stringValue)
-                            startAnimationIndex = i;
+                        EditorGUILayout.BeginVertical(i == 0 ? EditorStyles.helpBox : EditorStyles.inspectorDefaultMargins);
+                        {
+                            if (i == 0)
+                                EditorGUILayout.LabelField("Starting Animation", EditorStyles.miniLabel);
+
+                            EditorGUILayout.BeginHorizontal();
+                            {
+                                targetAnimator.animations[i] = EditorGUILayout.ObjectField("", targetAnimator.animations[i], typeof(SpriteAnimation), false) as SpriteAnimation;
+
+                                // Make this animation the first one
+                                if (i != 0 && GUILayout.Button(arrowContent, GUILayout.Width(30), GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.ExpandWidth(false)))
+                                {
+                                    toFirst = i;
+                                    targetAnimator.StartAnimation = targetAnimator.animations[i].Name;
+                                }
+                                
+                                // Remove animation
+                                if (GUILayout.Button("-", GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.ExpandWidth(false)))
+                                    toRemove = i;
+                            }
+                            EditorGUILayout.EndHorizontal();
+                        }
+                        EditorGUILayout.EndVertical();
                     }
-                    else
-                        animationNames[i] = "null" + i;
+
+                    if (toRemove != -1)
+                    {
+                        targetAnimator.animations.RemoveAt(toRemove);
+                        if (targetAnimator.animations.Count == 0)
+                            targetAnimator.StartAnimation = "";
+                    }
+
+                    if (toFirst != -1)
+                        MoveStartingAnimationToTop(targetAnimator, toFirst);
                 }
+                else
+                    targetAnimator.StartAnimation = "";
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void MoveStartingAnimationToTop(BaseAnimator targetAnimator, int startAnimationIndex)
+        {
+            List<SpriteAnimation> auxList = new List<SpriteAnimation>(targetAnimator.animations);
+            targetAnimator.animations.Clear();
+            targetAnimator.animations.Add(auxList[startAnimationIndex]);
+            for (int i = 0; i < auxList.Count; i++)
+            {
+                if (i != startAnimationIndex)
+                    targetAnimator.animations.Add(auxList[i]);
+            }
+        }
+
+        private void DragAndDropBox(BaseAnimator targetAnimator)
+        {
+            // Drag and drop box for sprite frames
+            Rect dropArea = GUILayoutUtility.GetRect(0f, 50, GUILayout.ExpandWidth(true));
+            Event evt = Event.current;
+            GUI.Box(dropArea, "Drop animations <b>HERE</b>.", dragAndDropStyle);
+            switch (evt.type)
+            {
+                case EventType.DragUpdated:
+                case EventType.DragPerform:
+                    if (!dropArea.Contains(evt.mousePosition))
+                        return;
+
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                    if (evt.type == EventType.DragPerform)
+                    {
+                        if (DragAndDrop.objectReferences.Length > 0)
+                        {
+                            DragAndDrop.AcceptDrag();
+                            draggedAnimations.Clear();
+                            foreach (Object draggedObject in DragAndDrop.objectReferences)
+                            {
+                                // Get dragged sprites
+                                SpriteAnimation s = draggedObject as SpriteAnimation;
+                                if (s != null)
+                                    draggedAnimations.Add(s);
+                            }
+                        }
+                    }
+                    break;
             }
         }
     }

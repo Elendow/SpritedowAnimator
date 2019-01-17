@@ -46,7 +46,7 @@ namespace Elendow.SpritedowAnimator
         private GUIContent loopIcon;
         private GUIContent loopIconActive;
 
-        [MenuItem("Elendow Tools/Sprite Animation Editor", false, 0)]
+        [MenuItem("Tools/Spritedow/Sprite Animation Editor", false, 0)]
         private static void ShowWindow()
         {
             GetWindow(typeof(EditorSpriteAnimation), false, "Sprite Animation");
@@ -270,21 +270,22 @@ namespace Elendow.SpritedowAnimator
             sliderStyle = new GUIStyle("preSlider");
             sliderThumbStyle = new GUIStyle("preSliderThumb");
             labelStyle = new GUIStyle("preLabel");
-            box = new GUIStyle("box");
+            box = new GUIStyle(EditorStyles.helpBox);
             playButtonContent = EditorGUIUtility.IconContent("PlayButton");
             pauseButtonContent = EditorGUIUtility.IconContent("PauseButton");
             speedScaleIcon = EditorGUIUtility.IconContent("SpeedScale");
             loopIcon = EditorGUIUtility.IconContent("RotateTool");
             loopIconActive = EditorGUIUtility.IconContent("RotateTool On");
-            lowPaddingBox = new GUIStyle("box");
+            lowPaddingBox = new GUIStyle(EditorStyles.helpBox);
             lowPaddingBox.padding = new RectOffset(1, 1, 1, 1);
 			lowPaddingBox.stretchWidth = true;
 			lowPaddingBox.stretchHeight = true;
             previewToolBar = new GUIStyle("RectangleToolHBar");
             preview = new GUIStyle("CurveEditorBackground");
 
-			dragAndDropBox = new GUIStyle("box");
+			dragAndDropBox = new GUIStyle(EditorStyles.helpBox);
 			dragAndDropBox.richText = true;
+            dragAndDropBox.alignment = TextAnchor.MiddleCenter;
         }
 
         private void InitializeReorderableList()
@@ -358,7 +359,6 @@ namespace Elendow.SpritedowAnimator
                     spritePreview = (EditorPreviewSpriteAnimation)Editor.CreateEditor(selectedAnimation, typeof(EditorPreviewSpriteAnimation));
                 }
 
-                // Name field
                 EditorGUILayout.Space();
                 DragAndDropBox();
             }
@@ -373,7 +373,7 @@ namespace Elendow.SpritedowAnimator
             // Drag and drop box for sprite frames
 			Rect dropArea = GUILayoutUtility.GetRect(0f, DROP_AREA_HEIGHT, GUILayout.ExpandWidth(true));
             Event evt = Event.current;
-			GUI.Box(dropArea, "\nDrop sprites <b>HERE</b> to add frames automatically.", dragAndDropBox);
+			GUI.Box(dropArea, "Drop sprites <b>HERE</b> to add frames automatically.", dragAndDropBox);
             switch (evt.type)
             {
                 case EventType.DragUpdated:

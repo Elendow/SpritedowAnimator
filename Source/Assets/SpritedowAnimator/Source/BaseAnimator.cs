@@ -57,15 +57,15 @@ namespace Elendow.SpritedowAnimator
         private LoopType loopType = LoopType.repeat;
 
         // Fields used at runtime
-        private bool playing;
-        private bool waitingLoop;
-        private bool randomStartFrameApplied;
-        private int frameIndex;
-        private int framesInAnimation;
-        private int frameDurationCounter;
-        private int startingFrame;
-        private float animationTimer;
-        private float loopTimer;
+        private bool playing = false;
+        private bool waitingLoop = false;
+        private bool randomStartFrameApplied = false;
+        private int frameIndex = 0;
+        private int framesInAnimation = 0;
+        private int frameDurationCounter = 0;
+        private int startingFrame = -1;
+        private float animationTimer = 0f;
+        private float loopTimer = 0f;
         private SpriteAnimation currentAnimation;
         private Dictionary<SpriteAnimatorEventInfo, SpriteAnimatorEvent> customEvents;
         #endregion
@@ -113,9 +113,9 @@ namespace Elendow.SpritedowAnimator
 
                 // Pick the selected animation or a random one.
                 if (!randomAnimation)
-                    Play(startAnimation, oneShot, backwards);
+                    Play(startAnimation, oneShot, backwards, loopType);
                 else
-                    PlayRandom(oneShot, backwards);
+                    PlayRandom(oneShot, backwards, loopType);
             }
 
             if(disableRendererOnFinish)
@@ -155,7 +155,7 @@ namespace Elendow.SpritedowAnimator
                 animationTimer = 0;
 
                 // Double check animation frame index 
-                if (frameIndex > framesInAnimation - 1 || frameIndex < 0)
+                if (CheckLastFrame())
                     Restart();
 
                 if (frameDurationCounter >= currentAnimation.FramesDuration[frameIndex])
@@ -165,7 +165,7 @@ namespace Elendow.SpritedowAnimator
                     frameDurationCounter = 0;
 
                     // Check last or first frame
-                    if (frameIndex > framesInAnimation - 1 || frameIndex < 0)
+                    if (CheckLastFrame())
                     {
                         // Last frame, reset index and stop if is one shot
                         onFinish.Invoke();
@@ -251,7 +251,7 @@ namespace Elendow.SpritedowAnimator
             backwards = playBackwards;
 
             // If it's the same animation but not playing, reset it, if playing, do nothing.
-            if (currentAnimation != null && currentAnimation.Name == name)
+            if (currentAnimation != null && currentAnimation.Name.Equals(name))
             {
                 if (!playing)
                 {
@@ -262,7 +262,7 @@ namespace Elendow.SpritedowAnimator
                     return;
             }
             // Look for the animation only if its new or current animation is null
-            else if (currentAnimation == null || currentAnimation.Name != name)
+            else if (currentAnimation == null || !currentAnimation.Name.Equals(name))
                 currentAnimation = GetAnimation(name);
 
             // If we have an animation to play, flag as playing, reset timer and take frame count
@@ -283,7 +283,7 @@ namespace Elendow.SpritedowAnimator
                 Restart();
 
                 // The first loop will have a random start frame if desired
-                if(startAtRandomFrame && !randomStartFrameApplied)
+                if (startAtRandomFrame && !randomStartFrameApplied)
                 {
                     randomStartFrameApplied = true;
                     frameIndex = Random.Range(0, framesInAnimation - 1);
@@ -291,7 +291,7 @@ namespace Elendow.SpritedowAnimator
                 else if(startingFrame != -1)
                 {
                     frameIndex = startingFrame;
-                    if (frameIndex > framesInAnimation - 1)
+                    if (CheckLastFrame())
                     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogWarning("Starting frame out of bounds.", gameObject);
@@ -523,6 +523,14 @@ namespace Elendow.SpritedowAnimator
             delayBetweenLoops = true;
             minDelayBetweenLoops = delay;
             maxDelayBetweenLoops = delay;
+        }
+
+        /// <summary>
+        /// Check the last frame (backwards or not)
+        /// </summary>
+        private bool CheckLastFrame()
+        {
+            return (!backwards && frameIndex > framesInAnimation - 1) || (backwards && frameIndex < 0);
         }
         #endregion
 

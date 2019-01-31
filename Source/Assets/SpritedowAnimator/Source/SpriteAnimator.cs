@@ -35,7 +35,6 @@ namespace Elendow.SpritedowAnimator
         {
             if (spriteRenderer == null)
                 spriteRenderer = GetComponent<SpriteRenderer>();
-            Debug.Log("hi" + active);
             spriteRenderer.enabled = active;
         }
 

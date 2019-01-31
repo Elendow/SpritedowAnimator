@@ -88,6 +88,8 @@ namespace Elendow.SpritedowAnimator
             if (onFinish == null) onFinish = new UnityEvent();
             if (onStop == null) onStop = new UnityEvent();
 
+            SetActiveRenderer(false);
+
             // Play the first animation if play on awake
             if (playOnAwake)
             {
@@ -117,9 +119,6 @@ namespace Elendow.SpritedowAnimator
                 else
                     PlayRandom(oneShot, backwards, loopType);
             }
-
-            if(disableRendererOnFinish)
-                SetActiveRenderer(!disableRendererOnFinish);
         }
 
         /// <summary>
@@ -199,9 +198,12 @@ namespace Elendow.SpritedowAnimator
                     }
 
                     // Check events
-                    SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, frameIndex);
-                    if (customEvents != null && customEvents.ContainsKey(frameInfo))
-                        customEvents[frameInfo].Invoke(this);
+                    if(customEvents != null)
+                    {
+                        SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, frameIndex);
+                        if (customEvents.ContainsKey(frameInfo))
+                            customEvents[frameInfo].Invoke(this);
+                    }
                 }
             }
 

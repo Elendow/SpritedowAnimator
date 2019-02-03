@@ -88,8 +88,6 @@ namespace Elendow.SpritedowAnimator
             if (onFinish == null) onFinish = new UnityEvent();
             if (onStop == null) onStop = new UnityEvent();
 
-            SetActiveRenderer(false);
-
             // Play the first animation if play on awake
             if (playOnAwake)
             {

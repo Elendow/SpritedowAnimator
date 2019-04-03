@@ -61,6 +61,7 @@ namespace Elendow.SpritedowAnimator
         private bool waitingLoop = false;
         private bool randomStartFrameApplied = false;
         private int frameIndex = 0;
+        private int stopAtFrame = -1;
         private int framesInAnimation = 0;
         private int frameDurationCounter = 0;
         private int startingFrame = -1;
@@ -193,6 +194,11 @@ namespace Elendow.SpritedowAnimator
                     {
                         // Change sprite
                         ChangeFrame(currentAnimation.GetFrame(frameIndex));
+
+                        if(frameIndex == stopAtFrame)
+                        {
+                            Stop();
+                        }
                     }
 
                     // Check events
@@ -351,10 +357,19 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
+        /// Stops when reaches the desired frame. If the desired frame has already passed and the animation is not looped it will stop at the end of the animation anyway.
+        /// </summary>
+        public void StopAtFrame(int frame)
+        {
+            stopAtFrame = frame;
+        }
+
+        /// <summary>
         /// Stops the animation.
         /// </summary>
         public void Stop()
         {
+            stopAtFrame = -1;
             randomStartFrameApplied = false;
             playing = false;
             onStop.Invoke();

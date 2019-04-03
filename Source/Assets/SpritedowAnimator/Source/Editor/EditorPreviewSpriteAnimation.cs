@@ -53,6 +53,9 @@ namespace Elendow.SpritedowAnimator
 
         private void OnEnable()
         {
+            if (target == null)
+                return;
+
             if (animation == null)
                 animation = (SpriteAnimation)target;
 

@@ -55,6 +55,10 @@ namespace Elendow.SpritedowAnimator
         private string startAnimation = "";
         [SerializeField]
         private LoopType loopType = LoopType.repeat;
+        [SerializeField]
+        private SpriteAnimation fallbackAnimation;
+        [SerializeField]
+        private LoopType fallbackLoopType;
 
         // Fields used at runtime
         private bool playing = false;
@@ -374,6 +378,28 @@ namespace Elendow.SpritedowAnimator
             playing = false;
             onStop.Invoke();
             SetActiveRenderer(!disableRendererOnFinish);
+
+            if (fallbackAnimation != null)
+            {
+                Play(fallbackAnimation.Name, false, false, fallbackLoopType);
+            }
+        }
+
+        /// <summary>
+        /// Sets the fallback animation to play and its loop type
+        /// </summary>
+        public void SetFallbackAnimation(string animation, LoopType loopType)
+        {
+            fallbackAnimation = GetAnimation(animation);
+            fallbackLoopType = loopType;
+        }
+
+        /// <summary>
+        /// Removes the fallback animation
+        /// </summary>
+        public void RemoveFallbackAnimation()
+        {
+            fallbackAnimation = null;
         }
 
         /// <summary>
@@ -612,6 +638,12 @@ namespace Elendow.SpritedowAnimator
         public bool StartAtRandomFrame
         {
             set { startAtRandomFrame = value; }
+        }
+
+        public SpriteAnimation FallbackAnimation
+        {
+            get { return fallbackAnimation; }
+            set { fallbackAnimation = value; }
         }
 
         /// <summary>

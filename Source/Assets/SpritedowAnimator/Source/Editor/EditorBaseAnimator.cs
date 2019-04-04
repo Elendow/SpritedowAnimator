@@ -26,8 +26,10 @@ namespace Elendow.SpritedowAnimator
         private SerializedProperty disableRendererOnFinish;
         private SerializedProperty startAtRandomFrame;
         private SerializedProperty loopType;
+        private SerializedProperty fallbackLoopType;
 
         private GUIStyle dragAndDropStyle;
+        private GUIStyle animationBoxStyle;
         private GUIContent emptyContent;
         private GUIContent arrowContent;
         private List<SpriteAnimation> draggedAnimations;
@@ -58,6 +60,7 @@ namespace Elendow.SpritedowAnimator
             disableRendererOnFinish = serializedObject.FindProperty("disableRendererOnFinish");
             startAtRandomFrame = serializedObject.FindProperty("startAtRandomFrame");
             loopType = serializedObject.FindProperty("loopType");
+            fallbackLoopType = serializedObject.FindProperty("fallbackLoopType");
 
             if (targetAnimator.animations == null)
                 targetAnimator.animations = new List<SpriteAnimation>();
@@ -65,6 +68,9 @@ namespace Elendow.SpritedowAnimator
             dragAndDropStyle = new GUIStyle(EditorStyles.helpBox);
             dragAndDropStyle.richText = true;
             dragAndDropStyle.alignment = TextAnchor.MiddleCenter;
+
+            animationBoxStyle = new GUIStyle(EditorStyles.helpBox);
+            animationBoxStyle.margin.left += 10;
 
             emptyContent = new GUIContent("");
             arrowContent = new GUIContent(EditorGUIUtility.IconContent("UpArrow"));
@@ -93,7 +99,6 @@ namespace Elendow.SpritedowAnimator
         /// <summary>
         /// Draws a common inspector
         /// </summary>
-        /// <param name="targetAnimator"></param>
         protected void DrawInspector(BaseAnimator targetAnimator)
         {
             if (!init)
@@ -177,6 +182,21 @@ namespace Elendow.SpritedowAnimator
 
                     EditorGUI.indentLevel--;
                 }
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Fallback animation", GUILayout.ExpandWidth(false));
+                GUILayout.FlexibleSpace();
+                targetAnimator.FallbackAnimation = EditorGUILayout.ObjectField(targetAnimator.FallbackAnimation, typeof(SpriteAnimation), false) as SpriteAnimation;
+                EditorGUILayout.EndHorizontal();
+
+                if (targetAnimator.FallbackAnimation != null)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("Fallback animation loop type", GUILayout.ExpandWidth(false));
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.PropertyField(fallbackLoopType, emptyContent, GUILayout.ExpandWidth(false));
+                    EditorGUILayout.EndHorizontal();
+                }
             }
             EditorGUILayout.EndVertical();
 
@@ -210,6 +230,11 @@ namespace Elendow.SpritedowAnimator
             if (GUI.changed)
             {
                 EditorPrefs.SetBool(SHOW_ANIMATION_LIST_KEY, showAnimationList);
+
+                if (targetAnimator.FallbackAnimation != null)
+                    if (!targetAnimator.animations.Contains(targetAnimator.FallbackAnimation))
+                        targetAnimator.animations.Add(targetAnimator.FallbackAnimation);
+
                 serializedObject.ApplyModifiedProperties();
                 EditorUtility.SetDirty(targetAnimator);
             }
@@ -229,10 +254,22 @@ namespace Elendow.SpritedowAnimator
                     int toFirst = -1;
                     for (int i = 0; i < targetAnimator.animations.Count; i++)
                     {
-                        EditorGUILayout.BeginVertical(i == 0 ? EditorStyles.helpBox : EditorStyles.inspectorDefaultMargins);
+                        bool fallback = (targetAnimator.FallbackAnimation != null && targetAnimator.FallbackAnimation.Name.Equals(targetAnimator.animations[i].Name));
+
+                        EditorGUILayout.BeginVertical(i == 0 ? EditorStyles.helpBox : animationBoxStyle);
                         {
                             if (i == 0)
-                                EditorGUILayout.LabelField("Starting Animation", EditorStyles.miniLabel);
+                            {
+                                if(!fallback)
+                                    EditorGUILayout.LabelField("Starting Animation", EditorStyles.miniLabel);
+                                else
+                                    EditorGUILayout.LabelField("Starting and Fallback Animation", EditorStyles.miniLabel);
+                            }
+                            else
+                            {
+                                if (fallback)
+                                    EditorGUILayout.LabelField("Fallback Animation", EditorStyles.miniLabel);
+                            }
 
                             EditorGUILayout.BeginHorizontal();
                             {
@@ -307,7 +344,7 @@ namespace Elendow.SpritedowAnimator
                             {
                                 // Get dragged sprites
                                 SpriteAnimation s = draggedObject as SpriteAnimation;
-                                if (s != null)
+                                if (s != null && !targetAnimator.animations.Contains(s))
                                     draggedAnimations.Add(s);
                             }
                         }

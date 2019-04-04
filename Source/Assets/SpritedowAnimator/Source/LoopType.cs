@@ -1,4 +1,7 @@
-﻿namespace Elendow.SpritedowAnimator
+﻿// Spritedow Animation Plugin by Elendow
+// http://elendow.com
+
+namespace Elendow.SpritedowAnimator
 {
     public enum LoopType
     {

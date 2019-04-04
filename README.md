@@ -54,6 +54,8 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **Stop ()** stops the current animation.
 - **StopAtFrame(int frame)** Stops when reaches the desired frame. If the desired frame has already passed and the animation is not looped it will stop at the end of the animation anyway.
 - **Reset ()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.
+- **SetFallbackAnimation(string animation, LoopType loopType)** Sets the fallback animation to play and its loop type.
+- **RemoveFallbackAnimation()** Removes the fallback animation
 - **SetActiveRenderer (bool active)** enable/disables the renderer.
 - **FlipSpriteX (bool flip)** flips the sprite on the X axis.
   * Not working on UIAnimator yet.

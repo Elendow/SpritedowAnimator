@@ -64,6 +64,8 @@ namespace Elendow.SpritedowAnimator
         private bool playing = false;
         private bool waitingLoop = false;
         private bool randomStartFrameApplied = false;
+        private bool currentOneShot = false;
+        private bool currentBackwards = false;
         private int frameIndex = 0;
         private int stopAtFrame = -1;
         private int framesInAnimation = 0;
@@ -71,6 +73,7 @@ namespace Elendow.SpritedowAnimator
         private int startingFrame = -1;
         private float animationTimer = 0f;
         private float loopTimer = 0f;
+        private LoopType currentLoopType;
         private SpriteAnimation currentAnimation;
         private Dictionary<SpriteAnimatorEventInfo, SpriteAnimatorEvent> customEvents;
         #endregion
@@ -78,26 +81,20 @@ namespace Elendow.SpritedowAnimator
         #region Methods
         protected virtual void Awake()
         {
-            // Why an animator without animation?
-            if (animations == null || animations.Count == 0)
-            {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.LogError("Sprite animator without animations.", gameObject);
-#endif
-                enabled = false;
-                return;
-            }
-
             // Event check for runtime instantiation
             if (onPlay == null) onPlay = new UnityEvent();
             if (onFinish == null) onFinish = new UnityEvent();
             if (onStop == null) onStop = new UnityEvent();
 
             // Play the first animation if play on awake
-            if (playOnAwake)
+            if (playOnAwake && animations.Count > 0)
             {
-                if(!oneShot)
+                currentOneShot = oneShot;
+                currentBackwards = backwards;
+
+                if(!currentOneShot)
                 {
+                    currentLoopType = loopType;
                     if (delayBetweenLoops)
                     {
                         waitingLoop = true;
@@ -118,9 +115,9 @@ namespace Elendow.SpritedowAnimator
 
                 // Pick the selected animation or a random one.
                 if (!randomAnimation)
-                    Play(startAnimation, oneShot, backwards, loopType);
+                    Play(startAnimation, currentOneShot, currentBackwards, currentLoopType);
                 else
-                    PlayRandom(oneShot, backwards, loopType);
+                    PlayRandom(currentOneShot, currentBackwards, currentLoopType);
             }
         }
 
@@ -163,7 +160,7 @@ namespace Elendow.SpritedowAnimator
                 if (frameDurationCounter >= currentAnimation.FramesDuration[frameIndex])
                 {
                     // Change frame only if have passed the desired frames
-                    frameIndex = (backwards) ? frameIndex - 1 : frameIndex + 1;
+                    frameIndex = (currentBackwards) ? frameIndex - 1 : frameIndex + 1;
                     frameDurationCounter = 0;
 
                     // Check last or first frame
@@ -172,7 +169,7 @@ namespace Elendow.SpritedowAnimator
                         // Last frame, reset index and stop if is one shot
                         onFinish.Invoke();
 
-                        if (oneShot)
+                        if (currentOneShot)
                         {
                             Stop();
                             return;
@@ -221,25 +218,53 @@ namespace Elendow.SpritedowAnimator
                 loopTimer -= Time.deltaTime;
                 if (loopTimer <= 0)
                 {
-                    if (loopType == LoopType.yoyo)
-                        backwards = !backwards;
+                    if (currentLoopType == LoopType.yoyo)
+                        currentBackwards = !currentBackwards;
 
                     waitingLoop = false;
                     if (randomAnimation)
                     {
                         // Pick a random animation
-                        PlayRandom(oneShot, backwards);
+                        PlayRandom(currentOneShot, currentBackwards);
                         return;
                     }
                     else
                     {
                         // Continue playing the same animation
                         SetActiveRenderer(true);
-                        frameIndex = (backwards) ? framesInAnimation - 1 : 0;
+                        frameIndex = (currentBackwards) ? framesInAnimation - 1 : 0;
                         ChangeFrame(currentAnimation.GetFrame(frameIndex));
                     }
                 }
             }
+        }
+
+        public void Play(SpriteAnimation animation, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            SetActiveRenderer(true);
+
+            currentOneShot = playOneShot;
+            currentBackwards = playBackwards;
+            currentLoopType = loopType;
+
+            // If it's the same animation but not playing, reset it, if playing, do nothing.
+            if (currentAnimation != null && currentAnimation.Equals(animation))
+            {
+                if (!playing)
+                {
+                    Restart();
+                    Resume();
+                }
+                else
+                    return;
+            }
+            // If the animation is new, save it as current animation and play it
+            else
+            {
+                currentAnimation = animation;
+            }
+
+            StartPlay();
         }
 
         /// <summary>
@@ -247,7 +272,7 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public void Play(bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
-            Play(animations[0].Name, playOneShot, playBackwards);
+            Play(animations[0].Name, playOneShot, playBackwards, loopType);
         }
 
         /// <summary>
@@ -257,8 +282,9 @@ namespace Elendow.SpritedowAnimator
         {
             SetActiveRenderer(true);
 
-            oneShot = playOneShot;
-            backwards = playBackwards;
+            currentOneShot = playOneShot;
+            currentBackwards = playBackwards;
+            currentLoopType = loopType;
 
             // If it's the same animation but not playing, reset it, if playing, do nothing.
             if (currentAnimation != null && currentAnimation.Name.Equals(name))
@@ -275,6 +301,11 @@ namespace Elendow.SpritedowAnimator
             else if (currentAnimation == null || !currentAnimation.Name.Equals(name))
                 currentAnimation = GetAnimation(name);
 
+            StartPlay();
+        }
+
+        private void StartPlay()
+        {
             // If we have an animation to play, flag as playing, reset timer and take frame count
             if (currentAnimation != null)
             {
@@ -298,7 +329,7 @@ namespace Elendow.SpritedowAnimator
                     randomStartFrameApplied = true;
                     frameIndex = Random.Range(0, framesInAnimation - 1);
                 }
-                else if(startingFrame != -1)
+                else if (startingFrame != -1)
                 {
                     frameIndex = startingFrame;
                     if (CheckLastFrame())
@@ -408,7 +439,7 @@ namespace Elendow.SpritedowAnimator
         public void Restart()
         {
             animationTimer = 0;
-            frameIndex = (backwards) ? framesInAnimation - 1 : 0;
+            frameIndex = (currentBackwards) ? framesInAnimation - 1 : 0;
             frameDurationCounter = 0;
             ChangeFrame(currentAnimation.GetFrame(frameIndex));
         }
@@ -571,7 +602,7 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         private bool CheckLastFrame()
         {
-            return (!backwards && frameIndex > framesInAnimation - 1) || (backwards && frameIndex < 0);
+            return (!currentBackwards && frameIndex > framesInAnimation - 1) || (currentBackwards && frameIndex < 0);
         }
         #endregion
 

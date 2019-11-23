@@ -176,12 +176,16 @@ namespace Elendow.SpritedowAnimator
                         InitializeReorderableList();
 
                     // Add the frames dropped on the drag and drop box
-                    // TODO Record Undo/Redo for dragged sprites, currently not working, don't know why
                     if (draggedSprites != null && draggedSprites.Count > 0)
                     {
+                        // TODO Record Undo/Redo for dragged sprites, currently not working, don't know why
+                        //Undo.RecordObject(selectedAnimation, "Add Frames");
+
                         for (int i = 0; i < draggedSprites.Count; i++)
                             AddFrame(draggedSprites[i]);
                         draggedSprites.Clear();
+
+                        SaveFile(true);
                     }
 
                     // Retrocompatibility check for the new frames duration field
@@ -207,8 +211,18 @@ namespace Elendow.SpritedowAnimator
                         EditorGUILayout.BeginVertical();
                         {
                             // FPS 
-                            selectedAnimation.FPS = EditorGUILayout.IntField("FPS", selectedAnimation.FPS);
-                            if (selectedAnimation.FPS < 0) selectedAnimation.FPS = 0;
+                            int fps = selectedAnimation.FPS;
+                            EditorGUI.BeginChangeCheck();
+                            {
+                                fps = EditorGUILayout.IntField("FPS", selectedAnimation.FPS);
+                            }
+                            if (EditorGUI.EndChangeCheck())
+                            {
+                                Undo.RecordObject(selectedAnimation, "Change FPS");
+                                selectedAnimation.FPS = fps;
+                                if (selectedAnimation.FPS < 0)
+                                    selectedAnimation.FPS = 0;
+                            }
 
                             EditorGUILayout.Space();
 
@@ -260,7 +274,9 @@ namespace Elendow.SpritedowAnimator
             EditorGUILayout.EndVertical();
   
             if (GUI.changed && selectedAnimation != null)
-                EditorUtility.SetDirty(selectedAnimation);
+            {
+                SaveFile();
+            }
         }
 
         private void Initialize()
@@ -463,7 +479,6 @@ namespace Elendow.SpritedowAnimator
         private void DrawFrameListHeader(Rect r)
         {
             GUI.Label(r, "Frame List");
-            //listToolSelected = GUI.Toolbar(r, listToolSelected, LIST_TITLES);
         }
 
         private void DrawFrameListElement(Rect r, int i, bool active, bool focused)
@@ -477,14 +492,14 @@ namespace Elendow.SpritedowAnimator
                 selectedAnimation.FramesDuration[i] = EditorGUI.IntField(new Rect(r.x + r.width - 50, r.y + 1, 50, r.height - 4), speedScaleIcon, selectedAnimation.FramesDuration[i]);
             }
             if (EditorGUI.EndChangeCheck())
-                EditorUtility.SetDirty(selectedAnimation);
+                SaveFile(true);
         }
 
         private void AddFrameListItem(ReorderableList list)
         {
             Undo.RecordObject(selectedAnimation, "Add Frame");
             AddFrame();
-            EditorUtility.SetDirty(selectedAnimation);
+            SaveFile(true);
         }
 
         private void RemoveFrameListItem(ReorderableList list)
@@ -505,8 +520,8 @@ namespace Elendow.SpritedowAnimator
                 frameList.GrabKeyboardFocus();
             }
 
-            EditorUtility.SetDirty(selectedAnimation);
             Repaint();
+            SaveFile(true);
         }
 
         private void ReorderFrameListItem(ReorderableList list)
@@ -521,7 +536,7 @@ namespace Elendow.SpritedowAnimator
             selectedAnimation.FramesDuration.RemoveAt(frameListSelectedIndex);
             selectedAnimation.FramesDuration.Insert(list.index, i);
 
-            EditorUtility.SetDirty(selectedAnimation);
+            SaveFile(true);
         }
 
         private void SelectFrameListItem(ReorderableList list)
@@ -548,9 +563,9 @@ namespace Elendow.SpritedowAnimator
         /// <param name="s">Sprite to add</param>
         private void AddFrame(Sprite s)
         {
-            AddFrame();
-            selectedAnimation.Frames[selectedAnimation.Frames.Count - 1] = s;
-            frameList.list[selectedAnimation.Frames.Count - 1] = new AnimationFrame(s, 1);
+            frameList.list.Add(new AnimationFrame(s, 1));
+            selectedAnimation.Frames.Add(s);
+            selectedAnimation.FramesDuration.Add(1);
         }
 
         /// <summary>
@@ -569,7 +584,7 @@ namespace Elendow.SpritedowAnimator
                     relativeFolder = folder.Substring(folderPosition);
 
                     // Create the animation
-                    SpriteAnimation asset = CreateInstance<SpriteAnimation>();
+                    SpriteAnimation asset = CreateInstance<SpriteAnimation>(); 
                     AssetDatabase.CreateAsset(asset, relativeFolder);
                     AssetDatabase.SaveAssets();
                     AssetDatabase.Refresh();
@@ -583,6 +598,18 @@ namespace Elendow.SpritedowAnimator
                     EditorUtility.DisplayDialog("Invalid Path", "Select a path inside the Assets folder", "OK");
                 }
             }
+        }
+
+        /// <summary>
+        /// Forces serialization of the current animation
+        /// </summary>
+        /// <param name="toDisk">If true, it forces the asset database to save the file to disk. It causes little freeze, so I only use it on a few moments. Remember to save project before closing Unity!!</param>
+        private void SaveFile(bool toDisk = false)
+        {
+            EditorUtility.SetDirty(selectedAnimation);
+
+            if(toDisk)
+                AssetDatabase.SaveAssets();
         }
     }
 }

@@ -42,11 +42,12 @@ This component requires a SpriteRenderer or Image component to work. If the obje
 On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimator\>** to get the reference and start using it.
 
 # Methods
-- **Play (bool oneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list.
 - **Play (string animationName, bool oneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays the animation infinite times if oneShot = false with the loop selected type, only one time if true, fordward if backwards = false and backwards if its true.
   * If the animation is the same that is playing, nothing will happend but the **oneShot** attribute will update.
   * If the animation is the same that was playing but its not playing now, the animation will **Reset** and **Resume** and the **oneShot** attribute will update.
   * If the animation is different, it will play the new animation from the start.
+- **Play (SpriteAnimation animation, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the specified animation, this animation doesn't has to be on the animations list of the animator, yay!
+- **Play (bool oneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list.
 - **PlayRandom (bool playOneShot = false, bool backwards = false, LoopType = LoopType.repeat))** plays a random animation from the animation list.
 - **PlayStartingAtFrame (string name, int frame, ool playOneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays an animation starting at the specified frame.
 - **PlayStartingAtFrame (int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified frame.

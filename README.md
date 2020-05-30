@@ -36,61 +36,76 @@ Use the animation editor to create new animation files. You can open it selectin
   - The “-” button will remove the animation from the list.
   - The first animation will the one to play when **Play on Awake** is enabled.
 
+# UI Image Animator Inspector properties
+- **Adapt UI Pivot** with this option selected the pivot of the UI will move using the Sprite pivot. This is usefull if you have an animation with multiple canvas sizes but you want it static on one place.
+
 # Using the animations
 Add the **SpriteAnimator** or **UIAnimator** component to the object you want to animate and fill the animations list with the animations you want.
 This component requires a SpriteRenderer or Image component to work. If the object doesn't have one, the animator will add it automatically.
 On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimator\>** to get the reference and start using it.
 
-# Methods
-- **Play (string animationName, bool oneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays the animation infinite times if oneShot = false with the loop selected type, only one time if true, fordward if backwards = false and backwards if its true.
+# Animator Methods
+- **Play (bool oneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list.
+- **Play (string animation, bool oneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays the animation infinite times if oneShot = false with the loop selected type, only one time if true, fordward if backwards = false and backwards if its true.
   * If the animation is the same that is playing, nothing will happend but the **oneShot** attribute will update.
   * If the animation is the same that was playing but its not playing now, the animation will **Reset** and **Resume** and the **oneShot** attribute will update.
   * If the animation is different, it will play the new animation from the start.
 - **Play (SpriteAnimation animation, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the specified animation, this animation doesn't has to be on the animations list of the animator, yay!
-- **Play (bool oneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list.
 - **PlayRandom (bool playOneShot = false, bool backwards = false, LoopType = LoopType.repeat))** plays a random animation from the animation list.
-- **PlayStartingAtFrame (string name, int frame, ool playOneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays an animation starting at the specified frame.
 - **PlayStartingAtFrame (int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified frame.
+- **PlayStartingAtFrame (string animation, int frame, ool playOneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays an animation starting at the specified frame.
+- **PlayStartingAtFrame (SpriteAnimation, animation, int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified frame.
+
 - **Resume ()** resumes the current animation.
+- **Reset ()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.
 - **Stop ()** stops the current animation.
 - **StopAtFrame(int frame)** Stops when reaches the desired frame. If the desired frame has already passed and the animation is not looped it will stop at the end of the animation anyway.
-- **Reset ()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.
+
 - **SetFallbackAnimation(string animation, LoopType loopType)** Sets the fallback animation to play and its loop type.
 - **RemoveFallbackAnimation()** Removes the fallback animation
+
 - **SetActiveRenderer (bool active)** enable/disables the renderer.
 - **FlipSpriteX (bool flip)** flips the sprite on the X axis.
   * Not working on UIAnimator yet.
 - **FlipSpriteY (bool flip)** flips the sprite on the Y axis.
   * Not working on UIAnimator yet.
+
 - **AddCustomEvent (int frame)** adds an event to a specific frame of the first animation of the animation list and returns it.
-    * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
 - **AddCustomEvent (string animation, int frame)** adds an event to a specific frame of an animation and returns it.
-  * If the animation name is empty, it will get the first animation of the list.
-  * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
+- **AddCustomEvent (SpriteAnimation animation, int frame)** adds an event to a specific frame of an animation and returns it.
+- **AddCustomEventAtEnd ()** adds an event to the last frame of the first animation of the animation list and returns it.
 - **AddCustomEventAtEnd (string animation)** adds an event to the last frame of an animation and returns it.
-  * If the animation name is empty, it will get the first animation of the list.
+- **AddCustomEventAtEnd (SpriteAnimation animation)** adds an event to the last frame of an animation and returns it.
   * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
+  * If the animation doesn't exist or it hasn't enough frames, no event will be added.
+
 - **GetCustomEvent (int frame)** returns the event of the first animation of the animation list at the specific frame.
-  * Returns null if there's no event on that frame and animation.
 - **GetCustomEvent (string animation, int frame)** returns the event of the animation at the specific frame.
-  * Returns null if there's no event on that frame and animation.
+- **GetCustomEvent (SpriteAnimation animation, int frame)** returns the event of the animation at the specific frame.
+- **GetCustomEventAtEnd ()** returns the event of the first animation of the animation list at the last frame.
 - **GetCustomEventAtEnd (string animation)** returns the event of the animation at the last frame.
+- **GetCustomEventAtEnd (SpriteAnimation animation)** returns the event of the animation at the last frame.
+  * Returns null if the animations is null.
   * Returns null if there's no event on that frame and animation.
+  * Returns null of the animation doesn't have enough frames.
+
 - **SetRandomDelayBetweenLoops(float min, float max)** sets a random delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **SetDelayBetweenLoops(float delay)** sets a fixed delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
+
 - **Initialize(bool playOnAwake, List\<SpriteAnimation\> animations, string startAnimation)** manually initialize the animator. Useful and **NECESSARY** if the animator was instanced on runtime.
 
-# Properties
+# Animator Properties
 - **IsPlaying { get; }** returns true if the animation is playing and false if not.
 - **CurrentAnimation { get; }** returns a string with the current animation name.
 - **CurrentFrame { get; }** returns the current frame of the animation.
+- **PlayingAnimation { get; }** the currently playing animation file.
 - **DisableRenderOnFinish { set; }** sets the disableRenderer attribute. This will disable the renderer when the animation ends.
 - **RandomAnimation { set; }** if true the animator will get a random animation after every loop cycle
 - **StartAtRandomFrame { set; }** if true the animator will start the animations at a random frame instead of the first one. Cool if you want to desynchronize animations.
 Events
 - **StartAnimation { get; set; }** the animation to play with Play On Awake active and Random Animation disabled.
 
-# Events
+# Animator Events
 - You can suscribe to the animation events using the AddListener(Listener) method of the UnityEvent class.
 - **onFinish** calls when the animation reach the last frame.
 - **onPlay** calls when the animation starts playing.
@@ -98,6 +113,19 @@ Events
 - You can add an event to a specific frame of an animation using the method **AddCustomEvent(string animation, int frame)**.
   * The event subscriber must have this estructure **MethodName(BaseAnimator caller){}**
   * Ex: animation.AddCustomEvent("Walk", 3).AddListener(StepFrame). Now on the frame 3 of the animation "Walk" the method StepFrame will be called.
+
+# Animation Methods
+- **GetFrame (int frame)** Returns the sprite on the selected frame.
+- **GetFrameDuration (int frame)** Returns the duration (in frames) of the selected frame.
+
+# Animation Properties
+- **Name { get; }** Returns the name of the animation file.
+- **FPS { get; set; }** The FPS of the animation.
+- **FramesCount { get; }** Frames on this animation.
+- **Frames { get; set; }** The list of the frames in this animation.
+- **FramesDuration { get; set; }** The list of the durations (in frames) of the frames in this animation.
+- **AnimationDuration { get; }** The total duration of the animation (in frames)
+
 
 # Editor Utils
 - **[SpriteAnimationField]** : Use this attribute to transform a string field in a animation list field. This is useful to avoid human errors when setting animations from the inspector. Keep in mind that this attribute needs a Sprite Animator in the object containing the script OR a child of it. If multiple Sprite Animators are found, only the first one is used.

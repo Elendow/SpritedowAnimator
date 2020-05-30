@@ -85,5 +85,19 @@ namespace Elendow.SpritedowAnimator
             get { return framesDuration; }
             set { framesDuration = value; }
         }
+
+        /// <summary>
+        /// The total duration of the animation (in frames)
+        /// </summary>
+        public int AnimationDuration
+        {
+            get
+            {
+                int duration = 0;
+                for(int i = 0; i < framesDuration.Count; i++)
+                    duration += framesDuration[i];
+                return duration;
+            }
+        }
     }
 }

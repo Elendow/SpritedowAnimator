@@ -205,7 +205,7 @@ namespace Elendow.SpritedowAnimator
                     // Check events
                     if(customEvents != null)
                     {
-                        SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation.Name, frameIndex);
+                        SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation, frameIndex);
                         if (customEvents.ContainsKey(frameInfo))
                             customEvents[frameInfo].Invoke(this);
                     }
@@ -278,7 +278,7 @@ namespace Elendow.SpritedowAnimator
         /// <summary>
         /// Plays an animation.
         /// </summary>
-        public void Play(string name, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        public void Play(string animation, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             SetActiveRenderer(true);
 
@@ -287,7 +287,7 @@ namespace Elendow.SpritedowAnimator
             currentLoopType = loopType;
 
             // If it's the same animation but not playing, reset it, if playing, do nothing.
-            if (currentAnimation != null && currentAnimation.Name.Equals(name))
+            if (currentAnimation != null && currentAnimation.Name.Equals(animation))
             {
                 if (!playing)
                 {
@@ -298,8 +298,8 @@ namespace Elendow.SpritedowAnimator
                     return;
             }
             // Look for the animation only if its new or current animation is null
-            else if (currentAnimation == null || !currentAnimation.Name.Equals(name))
-                currentAnimation = GetAnimation(name);
+            else if (currentAnimation == null || !currentAnimation.Name.Equals(animation))
+                currentAnimation = GetAnimation(animation);
 
             StartPlay();
         }
@@ -361,16 +361,7 @@ namespace Elendow.SpritedowAnimator
         {
             // Get a random animation and plays it
             int animIndex = Random.Range(0, animations.Count);
-            Play(animations[animIndex].Name, playOneShot, playBackwards);
-        }
-
-        /// <summary>
-        /// Plays an animation starting at the specified frame.
-        /// </summary>
-        public void PlayStartingAtFrame(string name, int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
-        {
-            startingFrame = frame;
-            Play(name, playOneShot, playBackwards);
+            Play(animations[animIndex].Name, playOneShot, playBackwards, loopType);
         }
 
         /// <summary>
@@ -379,7 +370,26 @@ namespace Elendow.SpritedowAnimator
         public void PlayStartingAtFrame(int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             startingFrame = frame;
-            Play(playOneShot, playBackwards);
+            Play(playOneShot, playBackwards, loopType);
+        }
+
+
+        /// <summary>
+        /// Plays an animation starting at the specified frame.
+        /// </summary>
+        public void PlayStartingAtFrame(string animation, int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            startingFrame = frame;
+            Play(animation, playOneShot, playBackwards, loopType);
+        }
+
+        /// <summary>
+        /// Plays an animation starting at the specified frame.
+        /// </summary>
+        public void PlayStartingAtFrame(SpriteAnimation animation, int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            startingFrame = frame;
+            Play(animation, playOneShot, playBackwards, loopType);
         }
 
         /// <summary>
@@ -448,11 +458,13 @@ namespace Elendow.SpritedowAnimator
         /// Adds a custom event to the first animation on the list on a certain frame.
         /// </summary>
         /// <returns>
-        /// The event created. Null if the animation is not found or doesn't have enough frames.
+        /// The event created. Null if the animation list is empty or doesn't have enough frames.
         /// </returns>  
         public SpriteAnimatorEvent AddCustomEvent(int frame)
         {
-            return AddCustomEvent(animations[0].Name, frame);
+            if (animations.Count == 0)
+                return null;
+            return AddCustomEvent(animations[0], frame);
         }
 
         /// <summary>
@@ -464,7 +476,18 @@ namespace Elendow.SpritedowAnimator
         public SpriteAnimatorEvent AddCustomEvent(string animation, int frame)
         {
             SpriteAnimation anim = GetAnimation(animation);
-            if (anim == null || anim.FramesCount <= frame)
+            return AddCustomEvent(anim, frame);
+        }
+
+        /// <summary>
+        /// Adds a custom event to specified animation on a certain frame.
+        /// </summary>
+        /// <returns>
+        /// The event created. Null if the animation is null or doesn't have enough frames.
+        /// </returns>  
+        public SpriteAnimatorEvent AddCustomEvent(SpriteAnimation animation, int frame)
+        {
+            if (animation == null || animation.FramesCount <= frame)
                 return null;
 
             SpriteAnimatorEventInfo eventInfo = new SpriteAnimatorEventInfo(animation, frame);
@@ -484,12 +507,34 @@ namespace Elendow.SpritedowAnimator
         /// <returns>
         /// The event created. Null if the animation is not found or doesn't have enough frames.
         /// </returns>  
+        public SpriteAnimatorEvent AddCustomEventAtEnd()
+        {
+            if (animations.Count == 0)
+                return null;
+            return AddCustomEvent(animations[0], animations[0].FramesCount - 1);
+        }
+
+        /// <summary>
+        /// Adds a custom event to specified animation on the list on the last frame.
+        /// </summary>
+        /// <returns>
+        /// The event created. Null if the animation is not found.
+        /// </returns>  
         public SpriteAnimatorEvent AddCustomEventAtEnd(string animation)
         {
             SpriteAnimation anim = GetAnimation(animation);
-            if (anim == null)
-                return null;
             return AddCustomEvent(animation, anim.FramesCount - 1);
+        }
+
+        /// <summary>
+        /// Adds a custom event to specified animation on the last frame.
+        /// </summary>
+        /// <returns>
+        /// The event created. Null if the animation is null.
+        /// </returns>  
+        public SpriteAnimatorEvent AddCustomEventAtEnd(SpriteAnimation animation)
+        {
+            return AddCustomEvent(animation, animation.FramesCount - 1);
         }
 
         /// <summary>
@@ -502,7 +547,6 @@ namespace Elendow.SpritedowAnimator
         {
             if (animations.Count == 0)
                 return null;
-
             return GetCustomEvent(animations[0].Name, frame);
         }
 
@@ -514,11 +558,19 @@ namespace Elendow.SpritedowAnimator
         /// </returns>  
         public SpriteAnimatorEvent GetCustomEvent(string animation, int frame)
         {
-            if (animations.Count == 0)
-                return null;
-
             SpriteAnimation anim = GetAnimation(animation);
-            if (anim == null || anim.FramesCount <= frame)
+            return GetCustomEvent(anim, frame);
+        }
+
+        /// <summary>
+        /// Gets the custom event of an animation on a certain frame.
+        /// </summary>
+        /// <returns>
+        /// The event of the specified animation on the selected frame. Null if not found.
+        /// </returns>  
+        public SpriteAnimatorEvent GetCustomEvent(SpriteAnimation animation, int frame)
+        {
+            if (animation == null || animation.FramesCount <= frame)
                 return null;
 
             SpriteAnimatorEventInfo eventInfo = new SpriteAnimatorEventInfo(animation, frame);
@@ -529,6 +581,19 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
+        /// Gets the custom event of the first animation of the animation list on the last frame.
+        /// </summary>
+        /// <returns>
+        /// The event of the first animation of the animation list on the last frame. Null if not found.
+        /// </returns> 
+        public SpriteAnimatorEvent GetCustomEventAtEnd()
+        {
+            if (animations.Count == 0)
+                return null;
+            return GetCustomEvent(animations[0], animations[0].FramesCount - 1);
+        }
+
+        /// <summary>
         /// Gets the custom event of an animation on the last frame.
         /// </summary>
         /// <returns>
@@ -536,14 +601,21 @@ namespace Elendow.SpritedowAnimator
         /// </returns>  
         public SpriteAnimatorEvent GetCustomEventAtEnd(string animation)
         {
-            if (animations.Count == 0)
-                return null;
-
             SpriteAnimation anim = GetAnimation(animation);
-            if (anim == null)
-                return null;
+            return GetCustomEvent(anim, anim.FramesCount - 1);
+        }
 
-            return GetCustomEvent(animation, anim.FramesCount - 1);
+        /// <summary>
+        /// Gets the custom event of an animation on the last frame.
+        /// </summary>
+        /// <returns>
+        /// The event of the specified animation on the last frame. Null if not found.
+        /// </returns>  
+        public SpriteAnimatorEvent GetCustomEventAtEnd(SpriteAnimation animation)
+        {
+            if (animation == null)
+                return null;
+            return GetCustomEvent(animation, animation.FramesCount - 1);
         }
 
         /// <summary>
@@ -661,6 +733,14 @@ namespace Elendow.SpritedowAnimator
         public string CurrentAnimation
         {
             get { return (currentAnimation != null) ? currentAnimation.Name : string.Empty; }
+        }
+
+        /// <summary>
+        /// The currently playing animation.
+        /// </summary>
+        public SpriteAnimation PlayingAnimation
+        {
+            get { return currentAnimation; }
         }
 
         /// <summary>

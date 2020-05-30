@@ -13,6 +13,7 @@ namespace Elendow.SpritedowAnimator
     [RequireComponent(typeof(Image))]
     public class UIAnimator : BaseAnimator
     {
+        public bool adaptPivot;
         private float wDiff;
         private float hDiff;
         private Vector2 initSize;
@@ -39,6 +40,9 @@ namespace Elendow.SpritedowAnimator
             float newHDiff = frame.rect.size.y / initSize.y;
             imageRenderer.rectTransform.sizeDelta = new Vector2(initSize.x * (newWDiff / wDiff), initSize.y * (newHDiff / hDiff));
             imageRenderer.sprite = frame;
+
+            if (adaptPivot)
+                imageRenderer.rectTransform.pivot = new Vector2(frame.pivot.x / frame.rect.size.x, frame.pivot.y / frame.rect.size.y);
         }
 
         /// <summary>

@@ -8,10 +8,10 @@ namespace Elendow.SpritedowAnimator
     /// </summary>
     public struct SpriteAnimatorEventInfo
     {
-        public string animation;
+        public SpriteAnimation animation;
         public int frame;
 
-        public SpriteAnimatorEventInfo(string animation, int frame)
+        public SpriteAnimatorEventInfo(SpriteAnimation animation, int frame)
         {
             this.animation = animation;
             this.frame = frame;

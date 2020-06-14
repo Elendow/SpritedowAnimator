@@ -66,13 +66,17 @@ namespace Elendow.SpritedowAnimator
         private bool randomStartFrameApplied = false;
         private bool currentOneShot = false;
         private bool currentBackwards = false;
+        private bool useAnimatorFramerate = false;
         private int frameIndex = 0;
         private int stopAtFrame = -1;
         private int framesInAnimation = 0;
         private int frameDurationCounter = 0;
         private int startingFrame = -1;
+        private int currentFramerate = 60;
         private float animationTimer = 0f;
+        private float currentAnimationTime = 0f;
         private float loopTimer = 0f;
+        private float timePerFrame = 0f;
         private LoopType currentLoopType;
         private SpriteAnimation currentAnimation;
         private Dictionary<SpriteAnimatorEventInfo, SpriteAnimatorEvent> customEvents;
@@ -138,20 +142,27 @@ namespace Elendow.SpritedowAnimator
 
         private void Update()
         {
-            // We do nothing if FPS <= 0
-            if (currentAnimation == null || currentAnimation.FPS <= 0 || !playing)
+            // We do nothing if the current FPS <= 0
+            if (currentAnimation == null || currentFramerate <= 0 || !playing)
                 return;
 
+            // Add the delta time to the timer and the total time
             if (!ignoreTimeScale)
+            {
                 animationTimer += Time.deltaTime;
+                currentAnimationTime = (!currentBackwards) ? currentAnimationTime + Time.deltaTime : currentAnimationTime - Time.deltaTime;
+            }
             else
+            {
                 animationTimer += Time.unscaledDeltaTime;
+                currentAnimationTime = (!currentBackwards) ? currentAnimationTime + Time.unscaledDeltaTime : currentAnimationTime - Time.unscaledDeltaTime;
+            }
 
-            if (!waitingLoop && 1f / currentAnimation.FPS < animationTimer)
+            if (!waitingLoop && animationTimer >= timePerFrame)
             {
                 // Check frames duration
                 frameDurationCounter++;
-                animationTimer = 0;
+                animationTimer -= timePerFrame;
 
                 // Double check animation frame index 
                 if (CheckLastFrame())
@@ -232,6 +243,8 @@ namespace Elendow.SpritedowAnimator
                     {
                         // Continue playing the same animation
                         SetActiveRenderer(true);
+                        animationTimer = 0;
+                        currentAnimationTime = (currentBackwards) ? currentAnimation.AnimationDuration * timePerFrame : 0;
                         frameIndex = (currentBackwards) ? framesInAnimation - 1 : 0;
                         ChangeFrame(currentAnimation.GetFrame(frameIndex));
                     }
@@ -309,7 +322,11 @@ namespace Elendow.SpritedowAnimator
             // If we have an animation to play, flag as playing, reset timer and take frame count
             if (currentAnimation != null)
             {
+                if (!useAnimatorFramerate)
+                    currentFramerate = currentAnimation.FPS;
+                timePerFrame = 1f / currentFramerate;
                 framesInAnimation = currentAnimation.FramesCount;
+                currentAnimationTime = (currentBackwards) ? currentAnimation.AnimationDuration * timePerFrame : 0;
 
                 // Check if the animation have frames. Show warning if not.
                 if (framesInAnimation == 0)
@@ -459,6 +476,29 @@ namespace Elendow.SpritedowAnimator
         {
             fallbackAnimation = GetAnimation(animation);
             fallbackLoopType = loopType;
+        }
+
+        /// <summary>
+        /// Sets the animator FPS overriding the FPS of the animation.
+        /// </summary>
+        public void UseAnimatorFPS(int frameRate)
+        {
+            currentFramerate = frameRate;
+            timePerFrame = 1f / currentFramerate;
+            useAnimatorFramerate = true;
+        }
+
+        /// <summary>
+        /// Sets de animator FPS to the current animation FPS.
+        /// </summary>
+        public void UseAnimationFPS()
+        {
+            if (currentAnimation != null)
+            {
+                currentFramerate = currentAnimation.FPS;
+                timePerFrame = 1f / currentFramerate;
+                useAnimatorFramerate = false;
+            }
         }
 
         /// <summary>
@@ -703,28 +743,44 @@ namespace Elendow.SpritedowAnimator
         {
             if (currentAnimation != null)
             {
-                float timePerFrame = 1f / currentAnimation.FPS;
-                frameIndex = (currentBackwards) ? framesInAnimation - 1 : 0;
-                frameDurationCounter = 0;
-                animationTimer = 0;
+                currentAnimationTime = time;
 
-                while (time > timePerFrame)
+                float timePerFrame = 1f / currentFramerate;
+                float totalAnimationTime = currentAnimation.AnimationDuration * timePerFrame;
+
+                if (time >= totalAnimationTime)
                 {
-                    time -= timePerFrame;
-                    frameDurationCounter++;
+                    animationTimer = timePerFrame;
+                    frameIndex = framesInAnimation - 1;
+                    frameDurationCounter = currentAnimation.FramesDuration[frameIndex] - 1;
+                }
+                else if (time == 0)
+                {
+                    animationTimer = 0;
+                    frameIndex = 0;
+                    frameDurationCounter = 0;
+                }
+                else
+                {
+                    frameIndex = 0;
+                    frameDurationCounter = 0;
 
-                    if (frameDurationCounter >= currentAnimation.FramesDuration[frameIndex])
+                    while (time >= timePerFrame)
                     {
-                        frameIndex = (currentBackwards) ? frameIndex - 1 : frameIndex + 1;
+                        time -= timePerFrame;
+                        frameDurationCounter++;
+
+                        if (frameDurationCounter >= currentAnimation.FramesDuration[frameIndex])
+                        {
+                            frameIndex++;
+                            frameDurationCounter = 0;
+                        }
                     }
 
-                    if ((!currentBackwards && frameIndex > framesInAnimation - 1) || (currentBackwards && frameIndex < 0))
-                        time = 0;
+                    animationTimer = time;
                 }
 
                 ChangeFrame(currentAnimation.GetFrame(frameIndex));
-
-                animationTimer = time;
             }
         }
 
@@ -784,6 +840,22 @@ namespace Elendow.SpritedowAnimator
         public int CurrentFrame
         {
             get { return frameIndex; }
+        }
+
+        /// <summary>
+        /// The current FPS of the animator (it could be the animation FPS or an overrided FPS)
+        /// </summary>
+        public int CurrentFrameRate
+        {
+            get { return currentFramerate; }
+        }
+
+        /// <summary>
+        /// The current time in seconds of the playing animation
+        /// </summary>
+        public float CurrentAnimationTime
+        {
+            get { return currentAnimationTime; }
         }
 
         /// <summary>

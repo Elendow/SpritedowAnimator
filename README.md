@@ -94,8 +94,11 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 
 - **SetRandomDelayBetweenLoops(float min, float max)** sets a random delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **SetDelayBetweenLoops(float delay)** sets a fixed delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
-- **SetAnimationTime(float time)** Sets the animation time to the specified time in seconds, updating de sprite to the correspondent frame at that time.
+- **SetAnimationTime(float time)** sets the animation time to the specified time in seconds, updating de sprite to the correspondent frame at that time.
 - **Initialize(bool playOnAwake, List\<SpriteAnimation\> animations, string startAnimation)** manually initialize the animator. Useful and **NECESSARY** if the animator was instanced on runtime.
+
+- **UseAnimatorFPS(int frameRate)** sets the animator FPS overriding the FPS of the animation.
+- **UseAnimationFPS()** sets de animator FPS to the current animation FPS.
 
 # Animator Properties
 - **IsPlaying { get; }** returns true if the animation is playing and false if not.
@@ -107,6 +110,8 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **StartAtRandomFrame { set; }** if true the animator will start the animations at a random frame instead of the first one. Cool if you want to desynchronize animations.
 Events
 - **StartAnimation { get; set; }** the animation to play with Play On Awake active and Random Animation disabled.
+- **CurrentFrameRate { get; }** the current FPS of the animator (it could be the animation FPS or an overrided FPS)
+- **CurrentAnimationTime { get; }** the current time in seconds of the playing animation
 
 # Animator Events
 - You can suscribe to the animation events using the AddListener(Listener) method of the UnityEvent class.
@@ -128,7 +133,6 @@ Events
 - **Frames { get; set; }** The list of the frames in this animation.
 - **FramesDuration { get; set; }** The list of the durations (in frames) of the frames in this animation.
 - **AnimationDuration { get; }** The total duration of the animation (in frames)
-
 
 # Editor Utils
 - **[SpriteAnimationField]** : Use this attribute to transform a string field in a animation list field. This is useful to avoid human errors when setting animations from the inspector. Keep in mind that this attribute needs a Sprite Animator in the object containing the script OR a child of it. If multiple Sprite Animators are found, only the first one is used.

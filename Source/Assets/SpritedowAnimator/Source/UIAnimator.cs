@@ -24,9 +24,12 @@ namespace Elendow.SpritedowAnimator
         {
             imageRenderer = GetComponent<Image>();
             initSize = imageRenderer.rectTransform.sizeDelta;
-            firstFrameSize = imageRenderer.sprite.rect.size;
-            wDiff = firstFrameSize.x / initSize.x;
-            hDiff = firstFrameSize.y / initSize.y;
+            if (imageRenderer.sprite != null)
+            {
+                firstFrameSize = imageRenderer.sprite.rect.size;
+                wDiff = firstFrameSize.x / initSize.x;
+                hDiff = firstFrameSize.y / initSize.y;
+            }
             base.Awake();
         }
 
@@ -35,14 +38,21 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         protected override void ChangeFrame(Sprite frame)
         {
-            // Unity UI system doesn't change the rect size to the sprite rect size, we do it manually using the initial size as a reference.
-            float newWDiff = frame.rect.size.x / initSize.x;
-            float newHDiff = frame.rect.size.y / initSize.y;
-            imageRenderer.rectTransform.sizeDelta = new Vector2(initSize.x * (newWDiff / wDiff), initSize.y * (newHDiff / hDiff));
-            imageRenderer.sprite = frame;
+            if (frame != null)
+            {
+                // Unity UI system doesn't change the rect size to the sprite rect size, we do it manually using the initial size as a reference.
+                float newWDiff = frame.rect.size.x / initSize.x;
+                float newHDiff = frame.rect.size.y / initSize.y;
+                imageRenderer.rectTransform.sizeDelta = new Vector2(initSize.x * (newWDiff / wDiff), initSize.y * (newHDiff / hDiff));
+                imageRenderer.sprite = frame;
 
-            if (adaptPivot)
-                imageRenderer.rectTransform.pivot = new Vector2(frame.pivot.x / frame.rect.size.x, frame.pivot.y / frame.rect.size.y);
+                if (adaptPivot)
+                    imageRenderer.rectTransform.pivot = new Vector2(frame.pivot.x / frame.rect.size.x, frame.pivot.y / frame.rect.size.y);
+
+                imageRenderer.enabled = true;
+            }
+            else
+                imageRenderer.enabled = false;
         }
 
         /// <summary>

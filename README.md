@@ -54,7 +54,10 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **PlayRandom (bool playOneShot = false, bool backwards = false, LoopType = LoopType.repeat))** plays a random animation from the animation list.
 - **PlayStartingAtFrame (int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified frame.
 - **PlayStartingAtFrame (string animation, int frame, ool playOneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays an animation starting at the specified frame.
-- **PlayStartingAtFrame (SpriteAnimation, animation, int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified frame.
+- **PlayStartingAtFrame (SpriteAnimation, animation, int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified time (in seconds).
+- **PlayStartingAtTime (float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified time (in seconds).
+- **PlayStartingAtTime (string animation, float time, ool playOneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays an animation starting at the specified frame.
+- **PlayStartingAtTime (SpriteAnimation, animation, float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified time (in seconds).
 
 - **Resume ()** resumes the current animation.
 - **Reset ()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.
@@ -91,7 +94,7 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 
 - **SetRandomDelayBetweenLoops(float min, float max)** sets a random delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **SetDelayBetweenLoops(float delay)** sets a fixed delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
-
+- **SetAnimationTime(float time)** Sets the animation time to the specified time in seconds, updating de sprite to the correspondent frame at that time.
 - **Initialize(bool playOnAwake, List\<SpriteAnimation\> animations, string startAnimation)** manually initialize the animator. Useful and **NECESSARY** if the animator was instanced on runtime.
 
 # Animator Properties

@@ -373,7 +373,6 @@ namespace Elendow.SpritedowAnimator
             Play(playOneShot, playBackwards, loopType);
         }
 
-
         /// <summary>
         /// Plays an animation starting at the specified frame.
         /// </summary>
@@ -390,6 +389,33 @@ namespace Elendow.SpritedowAnimator
         {
             startingFrame = frame;
             Play(animation, playOneShot, playBackwards, loopType);
+        }
+
+        /// <summary>
+        /// Plays the first animation of the animation list starting at the specified time (in seconds). 
+        /// </summary>
+        public void PlayStartingAtTime(float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            Play(playOneShot, playBackwards, loopType);
+            SetAnimationTime(time);
+        }
+
+        /// <summary>
+        /// Plays an animation starting at the specified time (in seconds).
+        /// </summary>
+        public void PlayStartingAtTime(string animation, float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            Play(animation, playOneShot, playBackwards, loopType);
+            SetAnimationTime(time);
+        }
+
+        /// <summary>
+        /// Plays an animation starting at the specified time (in seconds).
+        /// </summary>
+        public void PlayStartingAtFrame(SpriteAnimation animation, float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            Play(animation, playOneShot, playBackwards, loopType);
+            SetAnimationTime(time);
         }
 
         /// <summary>
@@ -667,6 +693,39 @@ namespace Elendow.SpritedowAnimator
             delayBetweenLoops = true;
             minDelayBetweenLoops = delay;
             maxDelayBetweenLoops = delay;
+        }
+
+        /// <summary>
+        /// Sets the animation time to the specified time, updating de sprite to the correspondent frame at that time.
+        /// </summary>
+        /// <param name="time">Time in seconds</param>
+        public void SetAnimationTime(float time)
+        {
+            if (currentAnimation != null)
+            {
+                float timePerFrame = 1f / currentAnimation.FPS;
+                frameIndex = (currentBackwards) ? framesInAnimation - 1 : 0;
+                frameDurationCounter = 0;
+                animationTimer = 0;
+
+                while (time > timePerFrame)
+                {
+                    time -= timePerFrame;
+                    frameDurationCounter++;
+
+                    if (frameDurationCounter >= currentAnimation.FramesDuration[frameIndex])
+                    {
+                        frameIndex = (currentBackwards) ? frameIndex - 1 : frameIndex + 1;
+                    }
+
+                    if ((!currentBackwards && frameIndex > framesInAnimation - 1) || (currentBackwards && frameIndex < 0))
+                        time = 0;
+                }
+
+                ChangeFrame(currentAnimation.GetFrame(frameIndex));
+
+                animationTimer = time;
+            }
         }
 
         /// <summary>

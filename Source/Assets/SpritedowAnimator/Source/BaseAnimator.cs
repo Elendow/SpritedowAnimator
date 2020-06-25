@@ -322,6 +322,10 @@ namespace Elendow.SpritedowAnimator
             // If we have an animation to play, flag as playing, reset timer and take frame count
             if (currentAnimation != null)
             {
+                // Failsafe for old animations without the total animation duration calculated.
+                if (currentAnimation.AnimationDuration == -1)
+                    currentAnimation.Setup();
+
                 if (!useAnimatorFramerate)
                     currentFramerate = currentAnimation.FPS;
                 timePerFrame = 1f / currentFramerate;
@@ -743,27 +747,28 @@ namespace Elendow.SpritedowAnimator
         {
             if (currentAnimation != null)
             {
-                currentAnimationTime = time;
-
                 float timePerFrame = 1f / currentFramerate;
                 float totalAnimationTime = currentAnimation.AnimationDuration * timePerFrame;
 
                 if (time >= totalAnimationTime)
                 {
+                    currentAnimationTime = totalAnimationTime;
                     animationTimer = timePerFrame;
                     frameIndex = framesInAnimation - 1;
                     frameDurationCounter = currentAnimation.FramesDuration[frameIndex] - 1;
                 }
-                else if (time == 0)
+                else if (time <= 0)
                 {
                     animationTimer = 0;
                     frameIndex = 0;
                     frameDurationCounter = 0;
+                    currentAnimationTime = 0;
                 }
                 else
                 {
                     frameIndex = 0;
                     frameDurationCounter = 0;
+                    currentAnimationTime = time;
 
                     while (time >= timePerFrame)
                     {
@@ -776,6 +781,9 @@ namespace Elendow.SpritedowAnimator
                             frameDurationCounter = 0;
                         }
                     }
+
+                    if (frameIndex >= framesInAnimation)
+                        frameIndex = framesInAnimation - 1;
 
                     animationTimer = time;
                 }

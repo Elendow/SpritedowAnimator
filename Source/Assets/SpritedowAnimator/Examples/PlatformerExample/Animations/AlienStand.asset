@@ -11,8 +11,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d77f76fefc0e73d4184cf86fd1488e0f, type: 3}
   m_Name: AlienStand
   m_EditorClassIdentifier: 
-  fps: 30
-  animationName: AlienStand
+  fps: 9
+  totalDuration: 1
   frames:
   - {fileID: 21300012, guid: fc69b1cc68641924398c626474a656a0, type: 3}
   framesDuration: 01000000

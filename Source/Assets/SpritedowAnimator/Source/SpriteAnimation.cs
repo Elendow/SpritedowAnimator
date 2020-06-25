@@ -14,9 +14,21 @@ namespace Elendow.SpritedowAnimator
         [SerializeField]
         private int fps = 30;
         [SerializeField]
+        private int totalDuration = -1;
+        [SerializeField]
         private List<Sprite> frames;
         [SerializeField]
         private List<int> framesDuration;
+
+        /// <summary>
+        /// Initialize values. 
+        /// </summary>
+        public void Setup()
+        {
+            totalDuration = 0;
+            for (int i = 0; i < framesDuration.Count; i++)
+                totalDuration += framesDuration[i];
+        }
 
         /// <summary>
         /// Creates an empty animation.
@@ -91,13 +103,7 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         public int AnimationDuration
         {
-            get
-            {
-                int duration = 0;
-                for(int i = 0; i < framesDuration.Count; i++)
-                    duration += framesDuration[i];
-                return duration;
-            }
+            get { return totalDuration; }
         }
     }
 }

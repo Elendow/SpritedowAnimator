@@ -57,7 +57,10 @@ namespace Elendow.SpritedowAnimator
                 return;
 
             if (animation == null)
+            {
                 animation = (SpriteAnimation)target;
+                animation.Setup();
+            }
 
             EditorApplication.update += Update;
             init = false;
@@ -139,11 +142,11 @@ namespace Elendow.SpritedowAnimator
             if (isPlaying)
             {
                 animationTimer += deltaTime;
-
-                if (1f / framesPerSecond < animationTimer)
+                float timePerFrame = 1f / framesPerSecond;
+                if (timePerFrame < animationTimer)
                 {
                     frameDurationCounter++;
-                    animationTimer = 0;
+                    animationTimer -= timePerFrame;
                     if (frameDurationCounter >= animation.FramesDuration[currentFrame])
                     {
                         // Change frame and repaint the preview
@@ -185,6 +188,13 @@ namespace Elendow.SpritedowAnimator
                 EditorGUILayout.Space();
 
                 EditorGUILayout.EndScrollView();
+            }
+
+            if(GUI.changed)
+            {
+                animation.Setup();
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(animation);
             }
         }
 

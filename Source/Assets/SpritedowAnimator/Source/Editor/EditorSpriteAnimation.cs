@@ -606,6 +606,7 @@ namespace Elendow.SpritedowAnimator
         /// <param name="toDisk">If true, it forces the asset database to save the file to disk. It causes little freeze, so I only use it on a few moments. Remember to save project before closing Unity!!</param>
         private void SaveFile(bool toDisk = false)
         {
+            selectedAnimation.Setup();
             EditorUtility.SetDirty(selectedAnimation);
 
             if(toDisk)

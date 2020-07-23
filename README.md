@@ -52,12 +52,18 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
   * If the animation is different, it will play the new animation from the start.
 - **Play (SpriteAnimation animation, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the specified animation, this animation doesn't has to be on the animations list of the animator, yay!
 - **PlayRandom (bool playOneShot = false, bool backwards = false, LoopType = LoopType.repeat))** plays a random animation from the animation list.
+
 - **PlayStartingAtFrame (int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified frame.
 - **PlayStartingAtFrame (string animation, int frame, ool playOneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays an animation starting at the specified frame.
 - **PlayStartingAtFrame (SpriteAnimation, animation, int frame, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified time (in seconds).
+
 - **PlayStartingAtTime (float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified time (in seconds).
 - **PlayStartingAtTime (string animation, float time, ool playOneShot = false, bool backwards = false, LoopType loopType = LoopType.repeat)** plays an animation starting at the specified frame.
 - **PlayStartingAtTime (SpriteAnimation, animation, float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** plays the first animation of the animation list starting at the specified time (in seconds).
+
+- **PlayStartingAtNormalizedTime (float normalizedTime, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** Plays the first animation of the animation list starting at the specified normalized time (between 0 and 1). 
+- **PlayStartingAtNormalizedTime (string animation, float normalizedTime, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** Plays an animation starting at the specified normalized time (between 0 and 1).
+- **PlayStartingAtNormalizedTime (SpriteAnimation animation, float normalizedTime, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)** Plays an animation starting at the specified normalized time (between 0 and 1).
 
 - **Resume ()** resumes the current animation.
 - **Reset ()** restarts the animation (playing or not) to its initial state. If the animation is not playing, the restart will be applied only when it start playing again.
@@ -95,6 +101,8 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **SetRandomDelayBetweenLoops(float min, float max)** sets a random delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **SetDelayBetweenLoops(float delay)** sets a fixed delay between loops. The animation will stay at the last frame, but you can use **DisableRenderOnFinish** to avoid this.
 - **SetAnimationTime(float time)** sets the animation time to the specified time in seconds, updating de sprite to the correspondent frame at that time.
+- **SetAnimationNormalizedTime (float normalizedTime)** Sets the animation time to the specified normalized time (between 0 and 1), updating de sprite to the correspondent frame at that time.
+
 - **Initialize(bool playOnAwake, List\<SpriteAnimation\> animations, string startAnimation)** manually initialize the animator. Useful and **NECESSARY** if the animator was instanced on runtime.
 
 - **UseAnimatorFPS(int frameRate)** sets the animator FPS overriding the FPS of the animation.
@@ -108,7 +116,6 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **DisableRenderOnFinish { set; }** sets the disableRenderer attribute. This will disable the renderer when the animation ends.
 - **RandomAnimation { set; }** if true the animator will get a random animation after every loop cycle
 - **StartAtRandomFrame { set; }** if true the animator will start the animations at a random frame instead of the first one. Cool if you want to desynchronize animations.
-Events
 - **StartAnimation { get; set; }** the animation to play with Play On Awake active and Random Animation disabled.
 - **CurrentFrameRate { get; }** the current FPS of the animator (it could be the animation FPS or an overrided FPS)
 - **CurrentAnimationTime { get; }** the current time in seconds of the playing animation
@@ -125,6 +132,10 @@ Events
 # Animation Methods
 - **GetFrame (int frame)** Returns the sprite on the selected frame.
 - **GetFrameDuration (int frame)** Returns the duration (in frames) of the selected frame.
+- **GetFrameAtTime (float time)** Get the frame at the specified time using the animation frame rate.
+- **GetFrameAtTime (float time, int frameRate)** Get the frame at the specified time using the specified frame rate.
+- **GetFrameAtNormalizedTime (float normalizedTime)** Get the frame at the specified normalized time (between 0 and 1) using the animation frame rate.
+- **GetFrameAtNormalizedTime (float normalizedTime, int frameRate)** Get the frame at the specified  normalized time (between 0 and 1) using the specified frame rate.
 
 # Animation Properties
 - **Name { get; }** Returns the name of the animation file.

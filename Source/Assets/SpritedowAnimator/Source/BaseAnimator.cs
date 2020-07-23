@@ -214,12 +214,7 @@ namespace Elendow.SpritedowAnimator
                     }
 
                     // Check events
-                    if(customEvents != null)
-                    {
-                        SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation, frameIndex);
-                        if (customEvents.ContainsKey(frameInfo))
-                            customEvents[frameInfo].Invoke(this);
-                    }
+                    CheckEvents();
                 }
             }
 
@@ -247,9 +242,72 @@ namespace Elendow.SpritedowAnimator
                         currentAnimationTime = (currentBackwards) ? currentAnimation.AnimationDuration * timePerFrame : 0;
                         frameIndex = (currentBackwards) ? framesInAnimation - 1 : 0;
                         ChangeFrame(currentAnimation.GetFrame(frameIndex));
+                        CheckEvents();
                     }
                 }
             }
+        }
+
+        #region Play Methods
+        private void StartPlay()
+        {
+            // If we have an animation to play, flag as playing, reset timer and take frame count
+            if (currentAnimation != null)
+            {
+                // Failsafe for old animations without the total animation duration calculated.
+                if (currentAnimation.AnimationDuration == -1)
+                    currentAnimation.Setup();
+
+                if (!useAnimatorFramerate)
+                    currentFramerate = currentAnimation.FPS;
+                timePerFrame = 1f / currentFramerate;
+                framesInAnimation = currentAnimation.FramesCount;
+                currentAnimationTime = (currentBackwards) ? currentAnimation.AnimationDuration * timePerFrame : 0;
+
+                // Check if the animation have frames. Show warning if not.
+                if (framesInAnimation == 0)
+                {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    Debug.LogWarning("Animation '" + name + "' has no frames.", gameObject);
+#endif
+                    playing = false;
+                    return;
+                }
+
+                Restart();
+
+                // The first loop will have a random start frame if desired
+                if (startAtRandomFrame && !randomStartFrameApplied)
+                {
+                    randomStartFrameApplied = true;
+                    frameIndex = Random.Range(0, framesInAnimation - 1);
+                }
+                else if (startingFrame != -1)
+                {
+                    frameIndex = startingFrame;
+                    if (CheckLastFrame())
+                    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogWarning("Starting frame out of bounds.", gameObject);
+#endif
+                        frameIndex = 0;
+                    }
+                    startingFrame = -1;
+                }
+
+                onPlay.Invoke();
+                playing = true;
+
+                if (!waitingLoop)
+                {
+                    ChangeFrame(currentAnimation.GetFrame(frameIndex));
+                    CheckEvents();
+                }
+            }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            else
+                Debug.LogError("Animation '" + name + "' not found.", gameObject);
+#endif
         }
 
         public void Play(SpriteAnimation animation, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
@@ -317,64 +375,6 @@ namespace Elendow.SpritedowAnimator
             StartPlay();
         }
 
-        private void StartPlay()
-        {
-            // If we have an animation to play, flag as playing, reset timer and take frame count
-            if (currentAnimation != null)
-            {
-                // Failsafe for old animations without the total animation duration calculated.
-                if (currentAnimation.AnimationDuration == -1)
-                    currentAnimation.Setup();
-
-                if (!useAnimatorFramerate)
-                    currentFramerate = currentAnimation.FPS;
-                timePerFrame = 1f / currentFramerate;
-                framesInAnimation = currentAnimation.FramesCount;
-                currentAnimationTime = (currentBackwards) ? currentAnimation.AnimationDuration * timePerFrame : 0;
-
-                // Check if the animation have frames. Show warning if not.
-                if (framesInAnimation == 0)
-                {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    Debug.LogWarning("Animation '" + name + "' has no frames.", gameObject);
-#endif
-                    playing = false;
-                    return;
-                }
-
-                Restart();
-
-                // The first loop will have a random start frame if desired
-                if (startAtRandomFrame && !randomStartFrameApplied)
-                {
-                    randomStartFrameApplied = true;
-                    frameIndex = Random.Range(0, framesInAnimation - 1);
-                }
-                else if (startingFrame != -1)
-                {
-                    frameIndex = startingFrame;
-                    if (CheckLastFrame())
-                    {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                        Debug.LogWarning("Starting frame out of bounds.", gameObject);
-#endif
-                        frameIndex = 0;
-                    }
-                    startingFrame = -1;
-                }
-
-                onPlay.Invoke();
-                playing = true;
-
-                if (!waitingLoop)
-                    ChangeFrame(currentAnimation.GetFrame(frameIndex));
-            }
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            else
-                Debug.LogError("Animation '" + name + "' not found.", gameObject);
-#endif
-        }
-
         /// <summary>
         /// Plays a random animation of the animation list.
         /// </summary>
@@ -433,11 +433,39 @@ namespace Elendow.SpritedowAnimator
         /// <summary>
         /// Plays an animation starting at the specified time (in seconds).
         /// </summary>
-        public void PlayStartingAtFrame(SpriteAnimation animation, float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        public void PlayStartingAtTime(SpriteAnimation animation, float time, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             Play(animation, playOneShot, playBackwards, loopType);
             SetAnimationTime(time);
         }
+
+        /// <summary>
+        /// Plays the first animation of the animation list starting at the specified normalized time (between 0 and 1). 
+        /// </summary>
+        public void PlayStartingAtNormalizedTime(float normalizedTime, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            Play(playOneShot, playBackwards, loopType);
+            SetAnimationNormalizedTime(normalizedTime);
+        }
+
+        /// <summary>
+        /// Plays an animation starting at the specified normalized time (between 0 and 1).
+        /// </summary>
+        public void PlayStartingAtNormalizedTime(string animation, float normalizedTime, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            Play(animation, playOneShot, playBackwards, loopType);
+            SetAnimationNormalizedTime(normalizedTime);
+        }
+
+        /// <summary>
+        /// Plays an animation starting at the specified normalized time (between 0 and 1).
+        /// </summary>
+        public void PlayStartingAtNormalizedTime(SpriteAnimation animation, float normalizedTime, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
+        {
+            Play(animation, playOneShot, playBackwards, loopType);
+            SetAnimationNormalizedTime(normalizedTime);
+        }
+        #endregion
 
         /// <summary>
         /// Resumes the animation.
@@ -522,6 +550,17 @@ namespace Elendow.SpritedowAnimator
             frameIndex = (currentBackwards) ? framesInAnimation - 1 : 0;
             frameDurationCounter = 0;
             ChangeFrame(currentAnimation.GetFrame(frameIndex));
+        }
+
+        #region Custom event methods
+        private void CheckEvents()
+        {
+            if (customEvents != null)
+            {
+                SpriteAnimatorEventInfo frameInfo = new SpriteAnimatorEventInfo(currentAnimation, frameIndex);
+                if (customEvents.ContainsKey(frameInfo))
+                    customEvents[frameInfo].Invoke(this);
+            }
         }
 
         /// <summary>
@@ -687,6 +726,7 @@ namespace Elendow.SpritedowAnimator
                 return null;
             return GetCustomEvent(animation, animation.FramesCount - 1);
         }
+        #endregion
 
         /// <summary>
         /// Search an animation with the given name.
@@ -699,6 +739,7 @@ namespace Elendow.SpritedowAnimator
             return animations.Find(x => x.Name.Equals(animationName));
         }
 
+        #region Render methods
         /// <summary>
         /// Changes the renderer to the given sprite
         /// </summary>
@@ -718,6 +759,7 @@ namespace Elendow.SpritedowAnimator
         /// Flip the sprite on the Y axis
         /// </summary>
         public virtual void FlipSpriteY(bool flip) { }
+        #endregion
 
         /// <summary>
         /// Sets a random delay between loops
@@ -789,6 +831,19 @@ namespace Elendow.SpritedowAnimator
                 }
 
                 ChangeFrame(currentAnimation.GetFrame(frameIndex));
+            }
+        }
+
+        /// <summary>
+        /// Sets the animation time to the specified normalized time (between 0 and 1), updating de sprite to the correspondent frame at that time.
+        /// </summary>
+        /// <param name="time">Time normalized (between 0 and 1)</param>
+        public void SetAnimationNormalizedTime(float normalizedTime)
+        {
+            if (currentAnimation != null)
+            {
+                normalizedTime = Mathf.Clamp(normalizedTime, 0f, 1f);
+                SetAnimationTime(currentAnimation.AnimationDuration * timePerFrame * normalizedTime);
             }
         }
 
@@ -890,6 +945,9 @@ namespace Elendow.SpritedowAnimator
             set { startAtRandomFrame = value; }
         }
 
+        /// <summary>
+        /// The animation that will play after the current animation ends.
+        /// </summary>
         public SpriteAnimation FallbackAnimation
         {
             get { return fallbackAnimation; }

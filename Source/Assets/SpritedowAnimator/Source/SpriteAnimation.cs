@@ -56,6 +56,72 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
+        /// Get the frame at the specified time using the animation frame rate.
+        /// </summary>
+        public int GetFrameAtTime(float time)
+        {
+            return GetFrameAtTime(time, fps);
+        }
+
+        /// <summary>
+        /// Get the frame at the specified time using the specified frame rate.
+        /// </summary>
+        public int GetFrameAtTime(float time, int frameRate)
+        {
+            int index = 0;
+            float timePerFrame = 1f / frameRate;
+            float totalAnimationTime = totalDuration * timePerFrame;
+
+            if (time >= totalAnimationTime)
+            {
+                index = frames.Count - 1;
+            }
+            else if (time <= 0)
+            {
+                index = 0;
+            }
+            else
+            {
+                int frameDurationCounter = 0;
+
+                while (time >= timePerFrame)
+                {
+                    time -= timePerFrame;
+                    frameDurationCounter++;
+
+                    if (frameDurationCounter >= framesDuration[index])
+                    {
+                        index++;
+                        frameDurationCounter = 0;
+                    }
+                }
+
+                if (index >= frames.Count)
+                    index = frames.Count - 1;
+            }
+
+            return index;
+        }
+
+        /// <summary>
+        /// Get the frame at the specified normalized time (between 0 and 1) using the animation frame rate.
+        /// </summary>
+        public int GetFrameAtNormalizedTime(float normalizedTime)
+        {
+            normalizedTime = Mathf.Clamp(normalizedTime, 0f, 1f);
+            return GetFrameAtTime(totalDuration * (1f / fps) * normalizedTime, fps);
+        }
+
+        /// <summary>
+        /// Get the frame at the specified  normalized time (between 0 and 1) using the specified frame rate.
+        /// </summary>
+        public int GetFrameAtNormalizedTime(float normalizedTime, int frameRate)
+        {
+            normalizedTime = Mathf.Clamp(normalizedTime, 0f, 1f);
+            return GetFrameAtTime(totalDuration * (1f / frameRate) * normalizedTime, frameRate);
+        }
+
+        /// <summary>
         /// Name property.
         /// </summary>
         public string Name

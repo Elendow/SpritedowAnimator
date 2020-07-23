@@ -37,7 +37,7 @@ Use the animation editor to create new animation files. You can open it selectin
   - The first animation will the one to play when **Play on Awake** is enabled.
 
 # UI Image Animator Inspector properties
-- **Adapt UI Pivot** with this option selected the pivot of the UI will move using the Sprite pivot. This is usefull if you have an animation with multiple canvas sizes but you want it static on one place.
+- **Adapt UI Pivot** with this option selected the pivot of the UI will move using the Sprite pivot. This is useful if you have an animation with multiple canvas sizes but you want it static on one place.
 
 # Using the animations
 Add the **SpriteAnimator** or **UIAnimator** component to the object you want to animate and fill the animations list with the animations you want.

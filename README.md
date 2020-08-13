@@ -1,5 +1,5 @@
 # Spritedow Animator
-A plugin to do simple sprite animations avoiding the big and tedious Unitys's Mecanim system.
+A plugin to do simple sprite animations avoiding the big and tedious Unity's Mecanim system.
 Oriented to programmers, if you prefer visual scripting you maybe prefer using Mecanim instead of this.
 
 # Installation Guide

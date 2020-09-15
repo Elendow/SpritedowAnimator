@@ -22,6 +22,7 @@ namespace Elendow.SpritedowAnimator
         private bool forceRepaint = false;
         private bool loop = true;
         private bool isPanning = false;
+        private bool saveToDisk = false;
         private int currentFrame = 0;
         private int loadedFPS = 30;
         private int framesPerSecond = 30;
@@ -176,7 +177,9 @@ namespace Elendow.SpritedowAnimator
 
         public override void OnInspectorGUI()
         {
-			animation.FPS = EditorGUILayout.IntField("FPS", animation.FPS);
+            saveToDisk = false;
+
+            animation.FPS = EditorGUILayout.IntField("FPS", animation.FPS);
 
             if (frameList != null)
             {
@@ -190,11 +193,27 @@ namespace Elendow.SpritedowAnimator
                 EditorGUILayout.EndScrollView();
             }
 
-            if(GUI.changed)
+            if (animation.FramesCount > 0)
+            {
+                if (GUILayout.Button("Delete All Frames"))
+                {
+                    if (EditorUtility.DisplayDialog("Delete All Frames", "Are you sure you want to delete all frames?", "Yes", "No"))
+                    {
+                        animation.Frames.Clear();
+                        animation.FramesDuration.Clear();
+                        InitializeReorderableList();
+                        saveToDisk = true;
+                    }
+                }
+            }
+
+            if (GUI.changed || saveToDisk)
             {
                 animation.Setup();
                 serializedObject.ApplyModifiedProperties();
                 EditorUtility.SetDirty(animation);
+                if(saveToDisk)
+                    AssetDatabase.SaveAssets();
             }
         }
 

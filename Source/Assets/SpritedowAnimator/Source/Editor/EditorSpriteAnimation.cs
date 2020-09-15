@@ -14,7 +14,6 @@ namespace Elendow.SpritedowAnimator
     /// </summary>
     public class EditorSpriteAnimation : EditorWindow
     {
-        private const float CONFIG_BOX_HEIGHT = 120;
         private const float DROP_AREA_HEIGHT = 50;
         private const float MIN_WINDOW_WIDTH = 500f;
         private const float MIN_WINDOW_HEIGHT = 200f;
@@ -234,6 +233,20 @@ namespace Elendow.SpritedowAnimator
                                 EditorGUILayout.Space();
                             }
                             EditorGUILayout.EndScrollView();
+
+                            if (selectedAnimation.FramesCount > 0)
+                            {
+                                if (GUILayout.Button("Delete All Frames"))
+                                {
+                                    if (EditorUtility.DisplayDialog("Delete All Frames", "Are you sure you want to delete all frames?", "Yes", "No"))
+                                    {
+                                        selectedAnimation.Frames.Clear();
+                                        selectedAnimation.FramesDuration.Clear();
+                                        InitializeReorderableList();
+                                        SaveFile(true);
+                                    }
+                                }
+                            }
 
                             EditorGUILayout.Space();
                         }

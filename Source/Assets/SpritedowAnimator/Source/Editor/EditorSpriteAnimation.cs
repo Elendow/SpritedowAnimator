@@ -21,6 +21,7 @@ namespace Elendow.SpritedowAnimator
         private bool init = false;
         private bool justCreatedAnim = false;
         private int frameListSelectedIndex = -1;
+        private int fps;
         private Texture2D clockIcon = null;
         private SpriteAnimation selectedAnimation = null;
         private Vector2 scrollWindowPosition = Vector2.zero;
@@ -78,8 +79,6 @@ namespace Elendow.SpritedowAnimator
 
 			// Events
 			EditorApplication.update += Update;
-
-            Undo.undoRedoPerformed += OnUndoOrRedo;
         }
 
         private void OnDisable()
@@ -95,20 +94,6 @@ namespace Elendow.SpritedowAnimator
 				frameList.onSelectCallback -= SelectFrameListItem;
 				frameList.onReorderCallback -= ReorderFrameListItem;
 			}
-
-            Undo.undoRedoPerformed -= OnUndoOrRedo;
-        }
-
-        /// <summary>
-        /// Reinitialize the frame list on undo/redo
-        /// </summary>
-        private void OnUndoOrRedo()
-        {
-            if (selectedAnimation != null)
-            {
-                InitializeReorderableList();
-                Repaint();
-            }
         }
 
         private void OnSelectionChange()
@@ -129,12 +114,45 @@ namespace Elendow.SpritedowAnimator
 
         private void Update()
         {
+            if(selectedAnimation != null)
+            {
+                if (selectedAnimation.FPS != fps)
+                    Repaint();
+                CheckListOutOfSync();
+            }
+
             // Only force repaint on update if the preview is playing and has changed the frame
             if (spritePreview != null && 
                (spritePreview.IsPlaying || spritePreview.IsPanning) &&
                 spritePreview.ForceRepaint)
             {
                 spritePreview.ForceRepaint = false;
+                Repaint();
+            }
+        }
+
+        private void CheckListOutOfSync()
+        {
+            bool outOfSync = false;
+
+            if (selectedAnimation.Frames == null || frames.Count != selectedAnimation.Frames.Count)
+                outOfSync = true;
+            else
+            {
+                for (int i = 0; i < frames.Count; i++)
+                {
+                    if (frames[i].Duration != selectedAnimation.FramesDuration[i] ||
+                       frames[i].Frame != selectedAnimation.Frames[i])
+                    {
+                        outOfSync = true;
+                        break;
+                    }
+                }
+            }
+
+            if (outOfSync)
+            {
+                InitializeReorderableList();
                 Repaint();
             }
         }
@@ -210,9 +228,9 @@ namespace Elendow.SpritedowAnimator
                         EditorGUILayout.BeginVertical();
                         {
                             // FPS 
-                            int fps = selectedAnimation.FPS;
                             EditorGUI.BeginChangeCheck();
                             {
+                                Undo.RecordObject(selectedAnimation, "Change FPS");
                                 fps = EditorGUILayout.IntField("FPS", selectedAnimation.FPS);
                             }
                             if (EditorGUI.EndChangeCheck())
@@ -238,13 +256,12 @@ namespace Elendow.SpritedowAnimator
                             {
                                 if (GUILayout.Button("Delete All Frames"))
                                 {
-                                    if (EditorUtility.DisplayDialog("Delete All Frames", "Are you sure you want to delete all frames?", "Yes", "No"))
-                                    {
-                                        selectedAnimation.Frames.Clear();
-                                        selectedAnimation.FramesDuration.Clear();
-                                        InitializeReorderableList();
-                                        SaveFile(true);
-                                    }
+                                    Undo.RecordObject(selectedAnimation, "Delete All Frames");
+
+                                    selectedAnimation.Frames.Clear();
+                                    selectedAnimation.FramesDuration.Clear();
+                                    InitializeReorderableList();
+                                    SaveFile(true);
                                 }
                             }
 
@@ -340,7 +357,6 @@ namespace Elendow.SpritedowAnimator
                 frameList.onSelectCallback -= SelectFrameListItem;
                 frameList.onReorderCallback -= ReorderFrameListItem;
             }
-
 
             frameList = new ReorderableList(frames, typeof(AnimationFrame));
             frameList.drawHeaderCallback += DrawFrameListHeader;

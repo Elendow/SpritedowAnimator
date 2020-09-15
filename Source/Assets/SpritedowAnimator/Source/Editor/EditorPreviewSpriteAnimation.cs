@@ -18,6 +18,7 @@ namespace Elendow.SpritedowAnimator
         private const string FPS_EDITOR_PREFS = "spritedowFPSpreviewWindow";
 
         private bool init = false;
+        private bool enabled = false;
         private bool isPlaying = false;
         private bool forceRepaint = false;
         private bool loop = true;
@@ -54,72 +55,80 @@ namespace Elendow.SpritedowAnimator
 
         private void OnEnable()
         {
-            if (target == null)
-                return;
-
-            if (animation == null)
+            if (!enabled)
             {
-                animation = (SpriteAnimation)target;
-                animation.Setup();
+                enabled = true;
+
+                if (target == null)
+                    return;
+
+                if (animation == null)
+                {
+                    animation = (SpriteAnimation)target;
+                    animation.Setup();
+                }
+
+                EditorApplication.update += Update;
+
+                // Load last used settings
+                loadedFPS = framesPerSecond = EditorPrefs.GetInt(FPS_EDITOR_PREFS, 30);
+
+                // Setup preview object and camera
+                go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
+                cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
+                sr = go.GetComponent<SpriteRenderer>();
+                pc = cameraGO.GetComponent<Camera>();
+
+                // Set camera
+                pc.cameraType = CameraType.Preview;
+                pc.clearFlags = CameraClearFlags.Depth;
+                pc.backgroundColor = Color.clear;
+                pc.orthographic = true;
+                pc.orthographicSize = 3;
+                pc.nearClipPlane = -10;
+                pc.farClipPlane = 10;
+                pc.targetDisplay = -1;
+                pc.depth = -999;
+
+                // Set renderer
+                if (animation != null && animation.FramesCount > 0)
+                {
+                    sr.sprite = animation.Frames[0];
+                    cameraGO.transform.position = Vector2.zero;
+                }
+
+                // Get preview culling layer in order to render only the preview object and nothing more
+                pc.cullingMask = -2147483648;
+                go.layer = 0x1f;
+
+                // Also, disable the object to prevent render on scene/game views
+                go.SetActive(false);
             }
-
-            EditorApplication.update += Update;
-            init = false;
-
-            // Load last used settings
-            loadedFPS = framesPerSecond = EditorPrefs.GetInt(FPS_EDITOR_PREFS, 30);
-
-            // Setup preview object and camera
-            go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
-            cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
-            sr = go.GetComponent<SpriteRenderer>();
-            pc = cameraGO.GetComponent<Camera>();
-
-            // Set camera
-            pc.cameraType = CameraType.Preview;
-            pc.clearFlags = CameraClearFlags.Depth;
-            pc.backgroundColor = Color.clear;
-            pc.orthographic = true;
-            pc.orthographicSize = 3;
-            pc.nearClipPlane = -10;
-            pc.farClipPlane = 10;
-            pc.targetDisplay = -1;
-            pc.depth = -999;
-
-            // Set renderer
-            if (animation != null && animation.FramesCount > 0)
-            {
-                sr.sprite = animation.Frames[0];
-                cameraGO.transform.position = Vector2.zero;
-            }
-
-            // Get preview culling layer in order to render only the preview object and nothing more
-            pc.cullingMask = -2147483648;
-            go.layer = 0x1f;
-
-            // Also, disable the object to prevent render on scene/game views
-            go.SetActive(false);
         }
 
         private void OnDisable()
         {
-            EditorApplication.update -= Update;
-
-            if (frameList != null)
+            if (enabled)
             {
-                frameList.drawHeaderCallback -= DrawFrameListHeader;
-                frameList.drawElementCallback -= DrawFrameListElement;
-                frameList.onAddCallback -= AddFrameListItem;
-                frameList.onRemoveCallback -= RemoveFrameListItem;
-                frameList.onSelectCallback -= SelectFrameListItem;
-                frameList.onReorderCallback -= ReorderFrameListItem;
+                enabled = false;
+                EditorApplication.update -= Update;
+
+                if (frameList != null)
+                {
+                    frameList.drawHeaderCallback -= DrawFrameListHeader;
+                    frameList.drawElementCallback -= DrawFrameListElement;
+                    frameList.onAddCallback -= AddFrameListItem;
+                    frameList.onRemoveCallback -= RemoveFrameListItem;
+                    frameList.onSelectCallback -= SelectFrameListItem;
+                    frameList.onReorderCallback -= ReorderFrameListItem;
+                }
+
+                if (go != null)
+                    DestroyImmediate(go);
+
+                if (cameraGO != null)
+                    DestroyImmediate(cameraGO);
             }
-
-            if (go != null)
-                DestroyImmediate(go);
-
-            if (cameraGO != null)
-                DestroyImmediate(cameraGO);
         }
 
         private void Update()
@@ -129,11 +138,13 @@ namespace Elendow.SpritedowAnimator
             deltaTime = timeSinceStartup - lastFrameEditorTime;
             lastFrameEditorTime = timeSinceStartup;
 
-            if (animation == null || animation.FramesCount == 0)
+            if (animation == null)
                 return;
 
             if (frameList == null)
                 InitializeReorderableList();
+
+            CheckListOutOfSync();
 
             // Check animation bounds
             if (currentFrame < 0) currentFrame = 0;
@@ -175,10 +186,36 @@ namespace Elendow.SpritedowAnimator
             }
         }
 
+        private void CheckListOutOfSync()
+        {
+            bool outOfSync = false;
+
+            if (frames.Count != animation.Frames.Count)
+                outOfSync = true;
+            else
+            {
+                for(int i = 0; i < frames.Count; i++)
+                {
+                    if(frames[i].Duration != animation.FramesDuration[i] ||
+                       frames[i].Frame != animation.Frames[i])
+                    {
+                        outOfSync = true;
+                        break;
+                    }
+                }
+            }
+
+            if(outOfSync)
+            {
+                InitializeReorderableList();
+            }
+        }
+
         public override void OnInspectorGUI()
         {
             saveToDisk = false;
 
+            Undo.RecordObject(animation, "Change FPS");
             animation.FPS = EditorGUILayout.IntField("FPS", animation.FPS);
 
             if (frameList != null)
@@ -197,13 +234,12 @@ namespace Elendow.SpritedowAnimator
             {
                 if (GUILayout.Button("Delete All Frames"))
                 {
-                    if (EditorUtility.DisplayDialog("Delete All Frames", "Are you sure you want to delete all frames?", "Yes", "No"))
-                    {
-                        animation.Frames.Clear();
-                        animation.FramesDuration.Clear();
-                        InitializeReorderableList();
-                        saveToDisk = true;
-                    }
+                    Undo.RecordObject(animation, "Delete All Frames");
+
+                    animation.Frames.Clear();
+                    animation.FramesDuration.Clear();
+                    InitializeReorderableList();
+                    saveToDisk = true;
                 }
             }
 

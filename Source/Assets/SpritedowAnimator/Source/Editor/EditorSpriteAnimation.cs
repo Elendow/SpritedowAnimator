@@ -114,7 +114,7 @@ namespace Elendow.SpritedowAnimator
 
         private void Update()
         {
-            if(selectedAnimation != null)
+            if(selectedAnimation != null && frames != null)
             {
                 if (selectedAnimation.FPS != fps)
                     Repaint();

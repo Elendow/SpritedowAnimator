@@ -52,6 +52,8 @@ namespace Elendow.SpritedowAnimator
         private GameObject cameraGO;
         private Camera pc;
         private SpriteRenderer sr;
+        private Material linearMaterial;
+        private Material defaultMaterial;
 
         private void OnEnable()
         {
@@ -70,6 +72,8 @@ namespace Elendow.SpritedowAnimator
 
                 EditorApplication.update += Update;
 
+                linearMaterial = Resources.Load<Material>("Spritedow");
+
                 // Load last used settings
                 loadedFPS = framesPerSecond = EditorPrefs.GetInt(FPS_EDITOR_PREFS, 30);
 
@@ -77,6 +81,11 @@ namespace Elendow.SpritedowAnimator
                 go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
                 cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
                 sr = go.GetComponent<SpriteRenderer>();
+                defaultMaterial = sr.material;
+                if (PlayerSettings.colorSpace == ColorSpace.Linear)
+                    sr.material = linearMaterial;
+                else
+                    sr.material = defaultMaterial;
                 pc = cameraGO.GetComponent<Camera>();
 
                 // Set camera
@@ -133,6 +142,14 @@ namespace Elendow.SpritedowAnimator
 
         private void Update()
         {
+            if (sr != null)
+            {
+                if (PlayerSettings.colorSpace == ColorSpace.Linear)
+                    sr.material = linearMaterial;
+                else
+                    sr.material = defaultMaterial;
+            }
+
             // Calculate deltaTime
             float timeSinceStartup = (float)EditorApplication.timeSinceStartup;
             deltaTime = timeSinceStartup - lastFrameEditorTime;

@@ -52,8 +52,11 @@ namespace Elendow.SpritedowAnimator
         private GameObject cameraGO;
         private Camera pc;
         private SpriteRenderer sr;
+
+#if !UNITY_5
         private Material linearMaterial;
         private Material defaultMaterial;
+#endif
 
         private void OnEnable()
         {
@@ -72,8 +75,6 @@ namespace Elendow.SpritedowAnimator
 
                 EditorApplication.update += Update;
 
-                linearMaterial = Resources.Load<Material>("Spritedow");
-
                 // Load last used settings
                 loadedFPS = framesPerSecond = EditorPrefs.GetInt(FPS_EDITOR_PREFS, 30);
 
@@ -81,11 +82,17 @@ namespace Elendow.SpritedowAnimator
                 go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
                 cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
                 sr = go.GetComponent<SpriteRenderer>();
-                defaultMaterial = sr.material;
+
+                // Colorspace correction is only needed after Unity 5 for some reasons
+#if !UNITY_5
+                linearMaterial = Resources.Load<Material>("Spritedow");
+                defaultMaterial = sr.sharedMaterial;
                 if (PlayerSettings.colorSpace == ColorSpace.Linear)
-                    sr.material = linearMaterial;
+                    sr.sharedMaterial = linearMaterial;
                 else
-                    sr.material = defaultMaterial;
+                    sr.sharedMaterial = defaultMaterial;
+#endif
+
                 pc = cameraGO.GetComponent<Camera>();
 
                 // Set camera
@@ -142,13 +149,15 @@ namespace Elendow.SpritedowAnimator
 
         private void Update()
         {
+#if !UNITY_5
             if (sr != null)
             {
                 if (PlayerSettings.colorSpace == ColorSpace.Linear)
-                    sr.material = linearMaterial;
+                    sr.sharedMaterial = linearMaterial;
                 else
-                    sr.material = defaultMaterial;
+                    sr.sharedMaterial = defaultMaterial;
             }
+#endif
 
             // Calculate deltaTime
             float timeSinceStartup = (float)EditorApplication.timeSinceStartup;
@@ -372,7 +381,7 @@ namespace Elendow.SpritedowAnimator
 			return (animation != null && animation.FramesCount > 0);
 		}
 
-        #region Reorderable List Methods
+#region Reorderable List Methods
         private void InitializeReorderableList()
         {
             if (animation == null)
@@ -489,9 +498,9 @@ namespace Elendow.SpritedowAnimator
             forceRepaint = true;
             frameListSelectedIndex = list.index;
         }
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
         public int FramesPerSecond
         {
             get { return framesPerSecond; }
@@ -547,6 +556,6 @@ namespace Elendow.SpritedowAnimator
             get { return isPanning; }
             set { isPanning = value; }
         }
-        #endregion
+#endregion
     }
 }

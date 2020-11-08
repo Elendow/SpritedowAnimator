@@ -82,9 +82,10 @@ namespace Elendow.SpritedowAnimator
                 go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
                 cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
                 sr = go.GetComponent<SpriteRenderer>();
+                pc = cameraGO.GetComponent<Camera>();
 
-                // Colorspace correction is only needed after Unity 5 for some reasons
 #if !UNITY_5
+                // Colorspace correction is only needed after Unity 5 for some reasons
                 linearMaterial = Resources.Load<Material>("Spritedow");
                 defaultMaterial = sr.sharedMaterial;
                 if (PlayerSettings.colorSpace == ColorSpace.Linear)
@@ -93,7 +94,6 @@ namespace Elendow.SpritedowAnimator
                     sr.sharedMaterial = defaultMaterial;
 #endif
 
-                pc = cameraGO.GetComponent<Camera>();
 
                 // Set camera
                 pc.cameraType = CameraType.Preview;

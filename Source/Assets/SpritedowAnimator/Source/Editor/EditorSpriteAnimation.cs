@@ -254,15 +254,39 @@ namespace Elendow.SpritedowAnimator
 
                             if (selectedAnimation.FramesCount > 0)
                             {
-                                if (GUILayout.Button("Delete All Frames"))
+                                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
                                 {
-                                    Undo.RecordObject(selectedAnimation, "Delete All Frames");
+                                    if (GUILayout.Button("Delete All Frames"))
+                                    {
+                                        Undo.RecordObject(selectedAnimation, "Delete All Frames");
 
-                                    selectedAnimation.Frames.Clear();
-                                    selectedAnimation.FramesDuration.Clear();
-                                    InitializeReorderableList();
-                                    SaveFile(true);
+                                        selectedAnimation.Frames.Clear();
+                                        selectedAnimation.FramesDuration.Clear();
+                                        InitializeReorderableList();
+                                        SaveFile(true);
+                                    }
+
+                                    if (GUILayout.Button("Reverse Frames"))
+                                    {
+                                        Undo.RecordObject(selectedAnimation, "Reverse Frames");
+
+                                        List<Sprite> prevFrames = new List<Sprite>(selectedAnimation.Frames);
+                                        List<int> prevFramesDuration = new List<int>(selectedAnimation.FramesDuration);
+
+                                        selectedAnimation.Frames.Clear();
+                                        selectedAnimation.FramesDuration.Clear();
+
+                                        for (int i = prevFrames.Count - 1; i >= 0; i--)
+                                        {
+                                            selectedAnimation.Frames.Add(prevFrames[i]);
+                                            selectedAnimation.FramesDuration.Add(prevFramesDuration[i]);
+                                        }
+
+                                        InitializeReorderableList();
+                                        SaveFile(true);
+                                    }
                                 }
+                                EditorGUILayout.EndHorizontal();
                             }
 
                             EditorGUILayout.Space();

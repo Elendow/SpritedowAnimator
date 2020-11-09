@@ -258,15 +258,39 @@ namespace Elendow.SpritedowAnimator
 
             if (animation.FramesCount > 0)
             {
-                if (GUILayout.Button("Delete All Frames"))
+                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
                 {
-                    Undo.RecordObject(animation, "Delete All Frames");
+                    if (GUILayout.Button("Delete All Frames"))
+                    {
+                        Undo.RecordObject(animation, "Delete All Frames");
 
-                    animation.Frames.Clear();
-                    animation.FramesDuration.Clear();
-                    InitializeReorderableList();
-                    saveToDisk = true;
+                        animation.Frames.Clear();
+                        animation.FramesDuration.Clear();
+                        InitializeReorderableList();
+                        saveToDisk = true;
+                    }
+
+                    if(GUILayout.Button("Reverse Frames"))
+                    {
+                        Undo.RecordObject(animation, "Reverse Frames");
+
+                        List<Sprite> prevFrames = new List<Sprite>(animation.Frames);
+                        List<int> prevFramesDuration = new List<int>(animation.FramesDuration);
+
+                        animation.Frames.Clear();
+                        animation.FramesDuration.Clear();
+
+                        for(int i = prevFrames.Count - 1; i >= 0; i--)
+                        {
+                            animation.Frames.Add(prevFrames[i]);
+                            animation.FramesDuration.Add(prevFramesDuration[i]);
+                        }
+
+                        InitializeReorderableList();
+                        saveToDisk = true;
+                    }
                 }
+                EditorGUILayout.EndHorizontal();
             }
 
             if (GUI.changed || saveToDisk)

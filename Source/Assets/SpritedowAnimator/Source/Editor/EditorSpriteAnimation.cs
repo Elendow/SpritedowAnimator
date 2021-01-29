@@ -121,6 +121,9 @@ namespace Elendow.SpritedowAnimator
                 CheckListOutOfSync();
             }
 
+            if (spritePreview.IsPlaying && frames.Count == 0)
+                spritePreview.IsPlaying = false;
+
             // Only force repaint on update if the preview is playing and has changed the frame
             if (spritePreview != null && 
                (spritePreview.IsPlaying || spritePreview.IsPanning) &&
@@ -142,7 +145,7 @@ namespace Elendow.SpritedowAnimator
                 for (int i = 0; i < frames.Count; i++)
                 {
                     if (frames[i].Duration != selectedAnimation.FramesDuration[i] ||
-                       frames[i].Frame != selectedAnimation.Frames[i])
+                        frames[i].Frame != selectedAnimation.Frames[i])
                     {
                         outOfSync = true;
                         break;
@@ -195,9 +198,6 @@ namespace Elendow.SpritedowAnimator
                     // Add the frames dropped on the drag and drop box
                     if (draggedSprites != null && draggedSprites.Count > 0)
                     {
-                        // TODO Record Undo/Redo for dragged sprites, currently not working, don't know why
-                        //Undo.RecordObject(selectedAnimation, "Add Frames");
-
                         for (int i = 0; i < draggedSprites.Count; i++)
                             AddFrame(draggedSprites[i]);
                         draggedSprites.Clear();
@@ -260,6 +260,7 @@ namespace Elendow.SpritedowAnimator
                                     {
                                         Undo.RecordObject(selectedAnimation, "Delete All Frames");
 
+                                        spritePreview.IsPlaying = false;
                                         selectedAnimation.Frames.Clear();
                                         selectedAnimation.FramesDuration.Clear();
                                         InitializeReorderableList();
@@ -478,7 +479,7 @@ namespace Elendow.SpritedowAnimator
                                 }
                             }
 
-                            if (DragAndDrop.objectReferences.Length > 1)
+                            if (draggedSprites.Count > 1)
                             {
                                 draggedSprites.Sort(new SpriteSorter());
                             }

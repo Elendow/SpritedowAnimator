@@ -136,6 +136,8 @@ On your code, use **GetComponent\<SpriteAnimator\>** or **GetComponent\<UIAnimat
 - **GetFrameAtTime (float time, int frameRate)** Get the frame at the specified time using the specified frame rate.
 - **GetFrameAtNormalizedTime (float normalizedTime)** Get the frame at the specified normalized time (between 0 and 1) using the animation frame rate.
 - **GetFrameAtNormalizedTime (float normalizedTime, int frameRate)** Get the frame at the specified  normalized time (between 0 and 1) using the specified frame rate.
+- **GetAnimationDurationInSeconds()** Get the animation duration in seconds using the animation frame rate.
+- **GetAnimationDurationInSeconds(int frameRate)** Get the animation duration in seconds using the specified frame rate.
 
 # Animation Properties
 - **Name { get; }** Returns the name of the animation file.

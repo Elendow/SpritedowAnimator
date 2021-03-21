@@ -160,34 +160,33 @@ namespace Elendow.SpritedowAnimator
 
             if (!waitingLoop && animationTimer >= timePerFrame)
             {
-                // Check frames duration
-                frameDurationCounter++;
-                animationTimer -= timePerFrame;
-
-                // Double check animation frame index 
-                if (CheckLastFrame())
-                    Restart();
-
-                if (frameDurationCounter >= currentAnimation.FramesDuration[frameIndex])
+                // Check frame skips
+                while (animationTimer >= timePerFrame)
                 {
-                    // Change frame only if have passed the desired frames
-                    frameIndex = (currentBackwards) ? frameIndex - 1 : frameIndex + 1;
-                    frameDurationCounter = 0;
+                    frameDurationCounter++;
+                    animationTimer -= timePerFrame;
+                }
 
-                    // Check last or first frame
-                    if (CheckLastFrame())
+                // Change frame only if have passed the desired frames
+                if (frameDurationCounter >= currentAnimation.FramesDuration[frameIndex] && playing)
+                {
+                    while(frameDurationCounter >= currentAnimation.FramesDuration[frameIndex])
                     {
-                        // Last frame, reset index and stop if is one shot
-                        onFinish.Invoke();
+                        frameDurationCounter -= currentAnimation.FramesDuration[frameIndex];
+                        frameIndex = (currentBackwards) ? frameIndex - 1 : frameIndex + 1;
 
-                        if (currentOneShot)
+                        // Check last or first frame
+                        if (CheckLastFrame())
                         {
-                            Stop();
-                            return;
-                        }
-                        else
-                        {
-                            if (!waitingLoop)
+                            // Last frame, reset index and stop if is one shot
+                            onFinish.Invoke();
+
+                            if (currentOneShot)
+                            {
+                                Stop();
+                                return;
+                            }
+                            else
                             {
                                 waitingLoop = true;
                                 loopTimer = 0;
@@ -201,20 +200,17 @@ namespace Elendow.SpritedowAnimator
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        // Change sprite
-                        ChangeFrame(currentAnimation.GetFrame(frameIndex));
-
-                        if(frameIndex == stopAtFrame)
+                        else
                         {
-                            Stop();
-                        }
-                    }
+                            // Change sprite
+                            ChangeFrame(currentAnimation.GetFrame(frameIndex));
 
-                    // Check events
-                    CheckEvents();
+                            if (frameIndex == stopAtFrame)
+                                Stop();
+                        }
+
+                        CheckEvents(frameIndex);
+                    }
                 }
             }
 
@@ -237,12 +233,13 @@ namespace Elendow.SpritedowAnimator
                     else
                     {
                         // Continue playing the same animation
-                        SetActiveRenderer(true);
                         animationTimer = 0;
                         currentAnimationTime = (currentBackwards) ? currentAnimation.AnimationDuration * timePerFrame : 0;
                         frameIndex = (currentBackwards) ? framesInAnimation - 1 : 0;
+
+                        SetActiveRenderer(true);
                         ChangeFrame(currentAnimation.GetFrame(frameIndex));
-                        CheckEvents();
+                        CheckEvents(frameIndex);
                     }
                 }
             }
@@ -301,7 +298,7 @@ namespace Elendow.SpritedowAnimator
                 if (!waitingLoop)
                 {
                     ChangeFrame(currentAnimation.GetFrame(frameIndex));
-                    CheckEvents();
+                    CheckEvents(frameIndex);
                 }
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -310,6 +307,9 @@ namespace Elendow.SpritedowAnimator
 #endif
         }
 
+        /// <summary>
+        /// Plays the specified animation
+        /// </summary>
         public void Play(SpriteAnimation animation, bool playOneShot = false, bool playBackwards = false, LoopType loopType = LoopType.repeat)
         {
             SetActiveRenderer(true);
@@ -553,7 +553,7 @@ namespace Elendow.SpritedowAnimator
         }
 
         #region Custom event methods
-        private void CheckEvents()
+        private void CheckEvents(int frameIndex)
         {
             if (customEvents != null)
             {
@@ -852,7 +852,18 @@ namespace Elendow.SpritedowAnimator
         /// </summary>
         private bool CheckLastFrame()
         {
-            return (!currentBackwards && frameIndex > framesInAnimation - 1) || (currentBackwards && frameIndex < 0);
+            if((!currentBackwards && frameIndex > framesInAnimation - 1))
+            {
+                frameIndex = framesInAnimation - 1;
+                return true;
+            }
+            else if (currentBackwards && frameIndex < 0)
+            {
+                frameIndex = 0;
+                return true;
+            }
+
+            return false;
         }
         #endregion
 

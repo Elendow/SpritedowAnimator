@@ -244,6 +244,8 @@ namespace Elendow.SpritedowAnimator
             Undo.RecordObject(animation, "Change FPS");
             animation.FPS = EditorGUILayout.IntField("FPS", animation.FPS);
 
+            Buttons();
+
             if (frameList != null)
             {
                 scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition);
@@ -256,8 +258,24 @@ namespace Elendow.SpritedowAnimator
                 EditorGUILayout.EndScrollView();
             }
 
+            Buttons();
+
+            if (GUI.changed || saveToDisk)
+            {
+                animation.Setup();
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(animation);
+                if(saveToDisk)
+                    AssetDatabase.SaveAssets();
+            }
+        }
+
+        private void Buttons()
+        {
             if (animation.FramesCount > 0)
             {
+                EditorGUILayout.Space();
+
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
                 {
                     if (GUILayout.Button("Delete All Frames"))
@@ -270,7 +288,7 @@ namespace Elendow.SpritedowAnimator
                         saveToDisk = true;
                     }
 
-                    if(GUILayout.Button("Reverse Frames"))
+                    if (GUILayout.Button("Reverse Frames"))
                     {
                         Undo.RecordObject(animation, "Reverse Frames");
 
@@ -280,7 +298,7 @@ namespace Elendow.SpritedowAnimator
                         animation.Frames.Clear();
                         animation.FramesDuration.Clear();
 
-                        for(int i = prevFrames.Count - 1; i >= 0; i--)
+                        for (int i = prevFrames.Count - 1; i >= 0; i--)
                         {
                             animation.Frames.Add(prevFrames[i]);
                             animation.FramesDuration.Add(prevFramesDuration[i]);
@@ -291,15 +309,8 @@ namespace Elendow.SpritedowAnimator
                     }
                 }
                 EditorGUILayout.EndHorizontal();
-            }
 
-            if (GUI.changed || saveToDisk)
-            {
-                animation.Setup();
-                serializedObject.ApplyModifiedProperties();
-                EditorUtility.SetDirty(animation);
-                if(saveToDisk)
-                    AssetDatabase.SaveAssets();
+                EditorGUILayout.Space();
             }
         }
 
@@ -402,7 +413,7 @@ namespace Elendow.SpritedowAnimator
 
 		public override bool HasPreviewGUI()
 		{
-			return (animation != null && animation.FramesCount > 0);
+            return false; // (animation != null && animation.FramesCount > 0);
 		}
 
 #region Reorderable List Methods

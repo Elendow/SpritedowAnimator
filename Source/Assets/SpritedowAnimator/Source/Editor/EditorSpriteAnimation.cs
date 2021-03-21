@@ -121,8 +121,11 @@ namespace Elendow.SpritedowAnimator
                 CheckListOutOfSync();
             }
 
-            if (spritePreview.IsPlaying && frames.Count == 0)
-                spritePreview.IsPlaying = false;
+            if (spritePreview != null)
+            {
+                if (spritePreview.IsPlaying && frames.Count == 0)
+                    spritePreview.IsPlaying = false;
+            }
 
             // Only force repaint on update if the preview is playing and has changed the frame
             if (spritePreview != null && 

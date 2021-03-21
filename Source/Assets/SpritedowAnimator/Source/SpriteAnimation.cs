@@ -104,6 +104,22 @@ namespace Elendow.SpritedowAnimator
         }
 
         /// <summary>
+        /// Get the total duration of the animation in seconds using the animation frame rate.
+        /// </summary>
+        public float GetAnimationDurationInSeconds()
+        {
+            return GetAnimationDurationInSeconds(fps);
+        }
+
+        /// <summary>
+        /// Get the total duration of the animation in seconds using the specified frame rate.
+        /// </summary>
+        public float GetAnimationDurationInSeconds(int frameRate)
+        {
+            return AnimationDuration / frameRate;
+        }
+
+        /// <summary>
         /// Get the frame at the specified normalized time (between 0 and 1) using the animation frame rate.
         /// </summary>
         public int GetFrameAtNormalizedTime(float normalizedTime)

@@ -83,6 +83,10 @@ namespace Elendow.SpritedowAnimator
             {
                 PlayOnAwake();
             }
+            else
+            {
+                enabled = false;
+            }
         }
 
         #region Updates

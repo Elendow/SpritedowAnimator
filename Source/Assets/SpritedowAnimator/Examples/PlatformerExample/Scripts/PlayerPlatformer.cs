@@ -1,25 +1,30 @@
-﻿using UnityEngine;
+﻿// Spritedow Animation Plugin by Elendow
+// https://elendow.com
+
+using UnityEngine;
 
 namespace Elendow.SpritedowAnimator.Examples
 {
     public class PlayerPlatformer : MonoBehaviour
     {
-        [SpriteAnimationField]
-        public string duckAnimation;
-		[SpriteAnimationField]
-		public string standAnimation;
-		[SpriteAnimationField]
-		public string jumpAnimation;
-		[SpriteAnimationField]
-		public string walkAnimation;
+        public SpriteAnimation duckAnimation;
+		public SpriteAnimation standAnimation;
+		public SpriteAnimation walkAnimation;
 
-		private SpriteAnimator spriteAnimator;
 		private Rigidbody2D rigidBody;
 
-		private void Awake()
+        public SpriteAnimation jumpAnimation;
+        private SpriteAnimator spriteAnimator;
+
+        private void Awake()
         {
             spriteAnimator = GetComponent<SpriteAnimator>();
-            rigidBody = GetComponent<Rigidbody2D>();
+            spriteAnimator.AddCustomEvent(jumpAnimation, 5).AddListener(JumpEvent);
+        }
+
+        private void JumpEvent(BaseAnimator animator)
+        {
+            // Do something
         }
 
         private void Update()
@@ -48,7 +53,7 @@ namespace Elendow.SpritedowAnimator.Examples
                 rigidBody.AddForce(Vector2.up * 500);
             }
 
-            if (!spriteAnimator.CurrentAnimation.Equals(duckAnimation))
+            if (!spriteAnimator.PlayingAnimation.Equals(duckAnimation))
             {
                 if (rigidBody.velocity.y != 0)
                 {

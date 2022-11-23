@@ -26,3 +26,8 @@ ExportedObj/
 sysinfo.txt
 Source/Assets/AssetStoreTools.meta
 .vs/
+Packages/
+UserSettings/
+Logs/
+obj/
+.vsconfig

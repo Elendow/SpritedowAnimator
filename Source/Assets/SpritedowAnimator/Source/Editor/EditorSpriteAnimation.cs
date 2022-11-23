@@ -1,379 +1,458 @@
 ﻿// Spritedow Animation Plugin by Elendow
-// http://elendow.com
+// https://elendow.com
 
-using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
-using System.Linq;
+using UnityEngine;
 using UnityEditorInternal;
+using System.Collections.Generic;
 
 namespace Elendow.SpritedowAnimator
 {
-    /// <summary>
-    /// Editor window to edit animations
-    /// </summary>
-    public class EditorSpriteAnimation : EditorWindow
+    /// <summary>Editor class to show the animation preview.</summary>
+    [CustomEditor(typeof(SpriteAnimation))]
+    public class EditorSpriteAnimation : Editor
     {
-        private const float DROP_AREA_HEIGHT = 50;
-        private const float MIN_WINDOW_WIDTH = 500f;
-        private const float MIN_WINDOW_HEIGHT = 200f;
+        private const float PANNING_SPEED = 0.5f;
+        private const string FPS_EDITOR_PREFS = "spritedowFPSpreviewWindow";
 
         private bool init = false;
-        private bool justCreatedAnim = false;
+        private bool enabled = false;
+        private bool isPlaying = false;
+        private bool forceRepaint = false;
+        private bool loop = true;
+        private bool isPanning = false;
+        private bool saveToDisk = false;
+        private int currentFrame = 0;
+        private int loadedFPS = 30;
+        private int framesPerSecond = 30;
+        private int frameDurationCounter = 0;
         private int frameListSelectedIndex = -1;
-        private int fps;
-        private Texture2D clockIcon = null;
-        private SpriteAnimation selectedAnimation = null;
-        private Vector2 scrollWindowPosition = Vector2.zero;
-        private List<Sprite> draggedSprites = null;
-        private EditorPreviewSpriteAnimation spritePreview = null;
-		private ReorderableList frameList;
-		private List<AnimationFrame> frames;
+        private float animationTimer = 0;
+        private float lastFrameEditorTime = 0;
+        private float deltaTime;
+        private Vector2 scrollWindowPosition;
+        private SpriteAnimation animation = null;
+        private ReorderableList frameList;
+        private List<SpriteAnimationFrame> frames;
+        private List<SpriteAnimationAction> actions;
 
         // Styles
-        private GUIStyle box;
-		private GUIStyle dragAndDropBox;
-        private GUIStyle lowPaddingBox;
-        private GUIStyle buttonStyle;
-        private GUIStyle sliderStyle;
-        private GUIStyle sliderThumbStyle;
-        private GUIStyle labelStyle;
-        private GUIStyle previewToolBar;
-        private GUIStyle preview;
+        private GUIStyle previewButtonSettings;
+        private GUIStyle preSlider;
+        private GUIStyle preSliderThumb;
+        private GUIStyle preLabel;
+        private GUIContent speedScale;
         private GUIContent playButtonContent;
         private GUIContent pauseButtonContent;
-		private GUIContent speedScaleIcon;
         private GUIContent loopIcon;
         private GUIContent loopIconActive;
 
-        [MenuItem("Tools/Spritedow/Sprite Animation Editor", false, 0)]
-        private static void ShowWindow()
-        {
-            GetWindow(typeof(EditorSpriteAnimation), false, "Sprite Animation");
-        }
+        private GameObject go;
+        private GameObject cameraGO;
+        private Camera pc;
+        private SpriteRenderer sr;
 
-        [MenuItem("Assets/Create/Spritedow/Sprite Animation")]
-        public static void CreateAsset()
-        {
-            SpriteAnimation asset = CreateInstance<SpriteAnimation>();
-            string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-            if (path == "")
-                path = "Assets";
-            else if (System.IO.Path.GetExtension(path) != "")
-                path = path.Replace(System.IO.Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
-            string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/New Animation.asset");
-            AssetDatabase.CreateAsset(asset, assetPathAndName);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
+#if !UNITY_5
+        private Material linearMaterial;
+        private Material defaultMaterial;
+#endif
 
         private void OnEnable()
         {
-            // Get clock icon
-            if (clockIcon == null)
-                clockIcon = Resources.Load<Texture2D>("clockIcon");
+            if (!enabled)
+            {
+                enabled = true;
 
-            // Initialize
-            draggedSprites = new List<Sprite>();
-            init = false;
+                if (target == null)
+                {
+                    return;
+                }
 
-			// Events
-			EditorApplication.update += Update;
+                if (animation == null)
+                {
+                    animation = (SpriteAnimation)target;
+                    animation.Setup();
+                }
+
+                EditorApplication.update += Update;
+
+                // Load last used settings
+                loadedFPS = framesPerSecond = EditorPrefs.GetInt(FPS_EDITOR_PREFS, 30);
+
+                // Setup preview object and camera
+                go = EditorUtility.CreateGameObjectWithHideFlags("previewGO", HideFlags.HideAndDontSave, typeof(SpriteRenderer));
+                cameraGO = EditorUtility.CreateGameObjectWithHideFlags("cameraGO", HideFlags.HideAndDontSave, typeof(Camera));
+                sr = go.GetComponent<SpriteRenderer>();
+                pc = cameraGO.GetComponent<Camera>();
+
+#if !UNITY_5
+                // Colorspace correction is only needed after Unity 5 for some reasons
+                linearMaterial = Resources.Load<Material>("Spritedow");
+                defaultMaterial = sr.sharedMaterial;
+                if (PlayerSettings.colorSpace == ColorSpace.Linear)
+                {
+                    sr.sharedMaterial = linearMaterial;
+                }
+                else
+                {
+                    sr.sharedMaterial = defaultMaterial;
+                }
+#endif
+
+                // Set camera
+                pc.cameraType = CameraType.Preview;
+                pc.clearFlags = CameraClearFlags.Depth;
+                pc.backgroundColor = Color.clear;
+                pc.orthographic = true;
+                pc.orthographicSize = 3;
+                pc.nearClipPlane = -10;
+                pc.farClipPlane = 10;
+                pc.targetDisplay = -1;
+                pc.depth = -999;
+
+                // Set renderer
+                if (animation != null && animation.FramesCount > 0)
+                {
+                    sr.sprite = animation.Frames[0].Sprite;
+                    cameraGO.transform.position = Vector2.zero;
+                }
+
+                // Get preview culling layer in order to render only the preview object and nothing more
+                pc.cullingMask = -2147483648;
+                go.layer = 0x1f;
+
+                // Also, disable the object to prevent render on scene/game views
+                go.SetActive(false);
+            }
         }
 
         private void OnDisable()
         {
-            EditorApplication.update -= Update;
-
-			if(frameList != null)
-			{
-				frameList.drawHeaderCallback -= DrawFrameListHeader;
-				frameList.drawElementCallback -= DrawFrameListElement;
-				frameList.onAddCallback -= AddFrameListItem;
-				frameList.onRemoveCallback -= RemoveFrameListItem;
-				frameList.onSelectCallback -= SelectFrameListItem;
-				frameList.onReorderCallback -= ReorderFrameListItem;
-			}
-        }
-
-        private void OnSelectionChange()
-        {
-            // Change animation if we select an animation on the project
-            if (Selection.activeObject != null && Selection.activeObject.GetType() == typeof(SpriteAnimation))
+            if (enabled)
             {
-                SpriteAnimation sa = Selection.activeObject as SpriteAnimation;
-                if (sa != selectedAnimation)
+                enabled = false;
+                EditorApplication.update -= Update;
+
+                if (frameList != null)
                 {
-                    selectedAnimation = sa;
-                    spritePreview = null;
-                    InitializeReorderableList();
-                    Repaint();
+                    frameList.drawHeaderCallback -= DrawFrameListHeader;
+                    frameList.drawElementCallback -= DrawFrameListElement;
+                    frameList.onAddCallback -= AddFrameListItem;
+                    frameList.onRemoveCallback -= RemoveFrameListItem;
+                    frameList.onSelectCallback -= SelectFrameListItem;
+                    frameList.onReorderCallback -= ReorderFrameListItem;
+                }
+
+                if (go != null)
+                {
+                    DestroyImmediate(go);
+                }
+
+                if (cameraGO != null)
+                {
+                    DestroyImmediate(cameraGO);
                 }
             }
         }
 
         private void Update()
         {
-            if(selectedAnimation != null && frames != null)
+#if !UNITY_5
+            if (sr != null)
             {
-                if (selectedAnimation.FPS != fps)
-                    Repaint();
-                CheckListOutOfSync();
-            }
-
-            if (spritePreview != null)
-            {
-                if (spritePreview.IsPlaying && frames.Count == 0)
-                    spritePreview.IsPlaying = false;
-            }
-
-            // Only force repaint on update if the preview is playing and has changed the frame
-            if (spritePreview != null && 
-               (spritePreview.IsPlaying || spritePreview.IsPanning) &&
-                spritePreview.ForceRepaint)
-            {
-                spritePreview.ForceRepaint = false;
-                Repaint();
-            }
-        }
-
-        private void CheckListOutOfSync()
-        {
-            bool outOfSync = false;
-
-            if (selectedAnimation.Frames == null || frames.Count != selectedAnimation.Frames.Count)
-                outOfSync = true;
-            else
-            {
-                for (int i = 0; i < frames.Count; i++)
+                if (PlayerSettings.colorSpace == ColorSpace.Linear)
                 {
-                    if (frames[i].Duration != selectedAnimation.FramesDuration[i] ||
-                        frames[i].Frame != selectedAnimation.Frames[i])
-                    {
-                        outOfSync = true;
-                        break;
-                    }
-                }
-            }
-
-            if (outOfSync)
-            {
-                InitializeReorderableList();
-                Repaint();
-            }
-        }
-
-        private void OnGUI()
-        {
-            // Style initialization
-            if (!init)
-            {
-                Initialize();
-                init = true;
-            }
-
-            // Create animation box
-            NewAnimationBox();
-
-            if(justCreatedAnim)
-            {
-                justCreatedAnim = false;
-                return;
-            }
-
-            // Edit animation box
-            EditorGUILayout.Space();
-            EditorGUILayout.BeginVertical();
-            {
-                // Animation asset field
-                if (selectedAnimation == null)
-                {
-                    EditorGUILayout.BeginVertical(box);
-                    selectedAnimation = EditorGUILayout.ObjectField("Animation", selectedAnimation, typeof(SpriteAnimation), false) as SpriteAnimation;
-                    EditorGUILayout.EndVertical();
+                    sr.sharedMaterial = linearMaterial;
                 }
                 else
                 {
-                    // Init reorderable list
-					if(frameList == null)
-                        InitializeReorderableList();
-
-                    // Add the frames dropped on the drag and drop box
-                    if (draggedSprites != null && draggedSprites.Count > 0)
-                    {
-                        for (int i = 0; i < draggedSprites.Count; i++)
-                            AddFrame(draggedSprites[i]);
-                        draggedSprites.Clear();
-
-                        SaveFile(true);
-                    }
-
-                    // Retrocompatibility check for the new frames duration field
-                    if (selectedAnimation.FramesCount != selectedAnimation.FramesDuration.Count)
-                    {
-                        selectedAnimation.FramesDuration.Clear();
-                        for (int i = 0; i < selectedAnimation.FramesCount; i++)
-                            selectedAnimation.FramesDuration.Add(1);
-                    }
-
-					// Config settings
-					ConfigBox();
-
-                    EditorGUILayout.Space();
-
-                    EditorGUILayout.BeginHorizontal();
-					{
-                        // Preview window setup
-						Rect previewRect = EditorGUILayout.BeginVertical(lowPaddingBox, GUILayout.MaxWidth(position.width / 2));
-                        PreviewBox(previewRect);
-						EditorGUILayout.EndVertical();
-
-                        EditorGUILayout.BeginVertical();
-                        {
-                            // FPS 
-                            EditorGUI.BeginChangeCheck();
-                            {
-                                Undo.RecordObject(selectedAnimation, "Change FPS");
-                                fps = EditorGUILayout.IntField("FPS", selectedAnimation.FPS);
-                            }
-                            if (EditorGUI.EndChangeCheck())
-                            {
-                                Undo.RecordObject(selectedAnimation, "Change FPS");
-                                selectedAnimation.FPS = fps;
-                                if (selectedAnimation.FPS < 0)
-                                    selectedAnimation.FPS = 0;
-                            }
-
-                            EditorGUILayout.Space();
-
-                            scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition);
-                            {
-                                // Individual frames
-                                frameList.displayRemove = (selectedAnimation.FramesCount > 0);
-                                frameList.DoLayoutList();
-                                EditorGUILayout.Space();
-                            }
-                            EditorGUILayout.EndScrollView();
-
-                            if (selectedAnimation.FramesCount > 0)
-                            {
-                                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                                {
-                                    if (GUILayout.Button("Delete All Frames"))
-                                    {
-                                        Undo.RecordObject(selectedAnimation, "Delete All Frames");
-
-                                        spritePreview.IsPlaying = false;
-                                        selectedAnimation.Frames.Clear();
-                                        selectedAnimation.FramesDuration.Clear();
-                                        InitializeReorderableList();
-                                        SaveFile(true);
-                                    }
-
-                                    if (GUILayout.Button("Reverse Frames"))
-                                    {
-                                        Undo.RecordObject(selectedAnimation, "Reverse Frames");
-
-                                        List<Sprite> prevFrames = new List<Sprite>(selectedAnimation.Frames);
-                                        List<int> prevFramesDuration = new List<int>(selectedAnimation.FramesDuration);
-
-                                        selectedAnimation.Frames.Clear();
-                                        selectedAnimation.FramesDuration.Clear();
-
-                                        for (int i = prevFrames.Count - 1; i >= 0; i--)
-                                        {
-                                            selectedAnimation.Frames.Add(prevFrames[i]);
-                                            selectedAnimation.FramesDuration.Add(prevFramesDuration[i]);
-                                        }
-
-                                        InitializeReorderableList();
-                                        SaveFile(true);
-                                    }
-                                }
-                                EditorGUILayout.EndHorizontal();
-                            }
-
-                            EditorGUILayout.Space();
-                        }
-                        EditorGUILayout.EndVertical();
-
-                        // Check Events
-                        Event evt = Event.current;
-                        switch (evt.type)
-                        {
-                            // Delete frames with supr
-                            case EventType.KeyDown:
-                                if (Event.current.keyCode == KeyCode.Delete &&
-                                    selectedAnimation.FramesCount > 0 &&
-                                    frameList.HasKeyboardControl() &&
-                                    frameListSelectedIndex != -1)
-                                {
-                                    RemoveFrameListItem(frameList);
-                                }
-                                break;
-                            // Zoom preview window with scrollwheel
-                            case EventType.ScrollWheel:
-                                if (spritePreview != null)
-                                {
-                                    Vector2 mpos = Event.current.mousePosition;
-                                    if (mpos.x >= previewRect.x && mpos.x <= previewRect.x + previewRect.width &&
-                                        mpos.y >= previewRect.y && mpos.y <= previewRect.y + previewRect.height)
-                                    {
-                                        Repaint();
-                                        spritePreview.Zoom = -evt.delta.y;
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                    EditorGUILayout.EndHorizontal();
+                    sr.sharedMaterial = defaultMaterial;
                 }
             }
-            EditorGUILayout.EndVertical();
-  
-            if (GUI.changed && selectedAnimation != null)
+#endif
+
+            // Calculate deltaTime
+            float timeSinceStartup = (float)EditorApplication.timeSinceStartup;
+            deltaTime = timeSinceStartup - lastFrameEditorTime;
+            lastFrameEditorTime = timeSinceStartup;
+
+            if (animation == null)
             {
-                SaveFile();
+                return;
+            }
+
+            if (frameList == null || SpriteEditorHelper.CheckListOutOfSync(frames, actions, animation))
+            {
+                InitializeReorderableList();
+            }
+
+            // Check animation bounds
+            if (currentFrame < 0)
+            {
+                currentFrame = 0;
+            }
+            else if (currentFrame > animation.FramesCount)
+            {
+                currentFrame = animation.FramesCount - 1;
+            }
+
+            // Check if playing and use the editor time to change frames
+            if (isPlaying)
+            {
+                animationTimer += deltaTime;
+                float timePerFrame = 1f / framesPerSecond;
+                if (timePerFrame < animationTimer)
+                {
+                    frameDurationCounter++;
+                    animationTimer -= timePerFrame;
+                    if (frameDurationCounter >= animation.Frames[currentFrame].Duration)
+                    {
+                        // Change frame and repaint the preview
+                        currentFrame++;
+                        if (currentFrame >= animation.FramesCount)
+                        {
+                            currentFrame = 0;
+
+                            if (!loop)
+                            {
+                                isPlaying = false;
+                            }
+                        }
+
+                        frameDurationCounter = 0;
+                        Repaint();
+                        forceRepaint = true;
+                    }
+                }
+            }
+
+            // Save preview FPS value on the editorPrefs
+            if (framesPerSecond != loadedFPS)
+            {
+                loadedFPS = framesPerSecond;
+                EditorPrefs.SetInt(FPS_EDITOR_PREFS, framesPerSecond);
             }
         }
 
-        private void Initialize()
+        public override void OnInspectorGUI()
         {
-            minSize = new Vector2(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
-            buttonStyle = new GUIStyle("preButton");
-            sliderStyle = new GUIStyle("preSlider");
-            sliderThumbStyle = new GUIStyle("preSliderThumb");
-            labelStyle = new GUIStyle("preLabel");
-            box = new GUIStyle(EditorStyles.helpBox);
-            playButtonContent = EditorGUIUtility.IconContent("PlayButton");
-            pauseButtonContent = EditorGUIUtility.IconContent("PauseButton");
-            speedScaleIcon = EditorGUIUtility.IconContent("SpeedScale");
-            loopIcon = EditorGUIUtility.IconContent("RotateTool");
-            loopIconActive = EditorGUIUtility.IconContent("RotateTool On");
-            lowPaddingBox = new GUIStyle(EditorStyles.helpBox);
-            lowPaddingBox.padding = new RectOffset(1, 1, 1, 1);
-			lowPaddingBox.stretchWidth = true;
-			lowPaddingBox.stretchHeight = true;
-            previewToolBar = new GUIStyle("RectangleToolHBar");
-            preview = new GUIStyle("CurveEditorBackground");
+            saveToDisk = false;
 
-			dragAndDropBox = new GUIStyle(EditorStyles.helpBox);
-			dragAndDropBox.richText = true;
-            dragAndDropBox.alignment = TextAnchor.MiddleCenter;
+            FPSDrawer();
+           
+            Buttons();
+
+            if (frameList != null)
+            {
+                scrollWindowPosition = EditorGUILayout.BeginScrollView(scrollWindowPosition);
+
+                // Individual frames
+                frameList.displayRemove = (animation.FramesCount > 0);
+                frameList.DoLayoutList();
+                EditorGUILayout.Space();
+
+                EditorGUILayout.EndScrollView();
+            }
+
+            Buttons();
+
+            if (GUI.changed || saveToDisk)
+            {
+                animation.Setup();
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(animation);
+                if(saveToDisk)
+                {
+                    AssetDatabase.SaveAssets();
+                }
+            }
         }
 
+        public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
+        {
+            if (currentFrame >= 0 &&
+                animation != null &&
+                animation.FramesCount > 0 &&
+                currentFrame < animation.FramesCount)
+            {
+                // Draw Camera
+                sr.sprite = animation.Frames[currentFrame].Sprite;
+                go.SetActive(true);
+                Handles.DrawCamera(r, pc);
+                go.SetActive(false);
+
+                // Check Events
+                Event evt = Event.current;
+
+                // Zoom preview window with scrollwheel
+                if (evt.type == EventType.ScrollWheel)
+                {
+                    Vector2 mpos = Event.current.mousePosition;
+                    if (mpos.x >= r.x && mpos.x <= r.x + r.width &&
+                        mpos.y >= r.y && mpos.y <= r.y + r.height)
+                    {
+                        Zoom = -evt.delta.y;
+                    }
+                    forceRepaint = true;
+                    Repaint();
+                }
+                // Stop panning on mouse up
+                else if (evt.type == EventType.MouseUp)
+                {
+                    isPanning = false;
+                }
+                // Pan the camera with mouse drag
+                else if (evt.type == EventType.MouseDrag)
+                {
+                    Vector2 mpos = Event.current.mousePosition;
+                    if ((mpos.x >= r.x && mpos.x <= r.x + r.width &&
+                        mpos.y >= r.y && mpos.y <= r.y + r.height) ||
+                        isPanning)
+                    {
+                        Vector2 panning = Vector2.zero;
+                        panning.x -= Event.current.delta.x;
+                        panning.y += Event.current.delta.y;
+                        cameraGO.transform.Translate(panning * PANNING_SPEED * deltaTime);
+                        forceRepaint = true;
+                        isPanning = true;
+                        Repaint();
+                    }
+                }
+                // Reset camera pressing F
+                else if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.F)
+                {
+                    cameraGO.transform.position = Vector2.zero;
+                    forceRepaint = true;
+                    isPanning = true;
+                    Repaint();
+                }
+            }
+        }
+
+        public override GUIContent GetPreviewTitle()
+        {
+            return new GUIContent("Animation Preview");
+        }
+
+        public override void OnPreviewSettings()
+        {
+            if (!init)
+            {
+                // Define styles
+                previewButtonSettings = new GUIStyle("preButton");
+                preSlider = new GUIStyle("preSlider");
+                preSliderThumb = new GUIStyle("preSliderThumb");
+                preLabel = new GUIStyle("preLabel");
+                speedScale = EditorGUIUtility.IconContent("SpeedScale");
+                playButtonContent = EditorGUIUtility.IconContent("PlayButton");
+                pauseButtonContent = EditorGUIUtility.IconContent("PauseButton");
+                loopIcon = EditorGUIUtility.IconContent("RotateTool");
+                loopIconActive = EditorGUIUtility.IconContent("RotateTool On");
+                init = true;
+            }
+
+            // Play Button
+            GUIContent buttonContent = isPlaying ? pauseButtonContent : playButtonContent;
+            isPlaying = GUILayout.Toggle(isPlaying, buttonContent, previewButtonSettings);
+
+            // Loop Button
+            GUIContent loopContent = loop ? loopIconActive : loopIcon;
+            loop = GUILayout.Toggle(loop, loopContent, previewButtonSettings);
+
+            // FPS Slider
+            GUILayout.Box(speedScale, preLabel);
+            framesPerSecond = (int)GUILayout.HorizontalSlider(framesPerSecond, 0, 60, preSlider, preSliderThumb);
+            GUILayout.Label(framesPerSecond.ToString("0") + " fps", preLabel, GUILayout.Width(50));
+        }
+
+		public override bool HasPreviewGUI()
+		{
+            // The preview is broken on the inspector right now.
+            return false; // (animation != null && animation.FramesCount > 0);
+		}
+
+        #region Drawers
+        public void FPSDrawer()
+        {
+            EditorGUI.BeginChangeCheck();
+            int fpsValue = EditorGUILayout.IntField("FPS", animation.FPS);
+            
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(animation, "Change FPS");
+                animation.FPS = fpsValue;
+            }
+        }
+
+        private void Buttons()
+        {
+            if (animation.FramesCount > 0)
+            {
+                EditorGUILayout.Space();
+
+                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                {
+                    if (GUILayout.Button("Delete All Frames"))
+                    {
+                        Undo.RecordObject(animation, "Delete All Frames");
+                        animation.Frames.Clear();
+                        InitializeReorderableList();
+                        saveToDisk = true;
+                    }
+
+                    if (GUILayout.Button("Reverse Frames"))
+                    {
+                        Undo.RecordObject(animation, "Reverse Frames");
+                        List<SpriteAnimationFrame> prevFrames = new List<SpriteAnimationFrame>(animation.Frames);
+                        animation.Frames.Clear();
+
+                        for (int i = prevFrames.Count - 1; i >= 0; i--)
+                        {
+                            animation.Frames.Add(prevFrames[i]);
+                        }
+
+                        InitializeReorderableList();
+                        saveToDisk = true;
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.Space();
+            }
+        }
+        #endregion
+
+
+        #region Reorderable List Methods
         private void InitializeReorderableList()
         {
+            if (animation == null)
+            {
+                return;
+            }
+
             if (frames == null)
-                frames = new List<AnimationFrame>();
+            {
+                frames = new List<SpriteAnimationFrame>();
+            }
+
+            if (actions == null)
+            {
+                actions = new List<SpriteAnimationAction>();
+            }
 
             frames.Clear();
+            actions.Clear();
 
-            if (selectedAnimation == null)
-                return;
+            for (int i = 0; i < animation.Actions.Count; i++)
+            {
+                actions.Add(animation.Actions[i]);
+            }
 
-            for (int i = 0; i < selectedAnimation.FramesCount; i++)
-                frames.Add(new AnimationFrame(selectedAnimation.Frames[i], selectedAnimation.FramesDuration[i]));
+            for (int i = 0; i < animation.FramesCount; i++)
+            {
+                frames.Add(animation.Frames[i]);
+            }
 
             // Kill listener of the previous list
             if (frameList != null)
@@ -384,155 +463,19 @@ namespace Elendow.SpritedowAnimator
                 frameList.onRemoveCallback -= RemoveFrameListItem;
                 frameList.onSelectCallback -= SelectFrameListItem;
                 frameList.onReorderCallback -= ReorderFrameListItem;
+                frameList.elementHeightCallback -= ElementHeightCallback;
             }
 
-            frameList = new ReorderableList(frames, typeof(AnimationFrame));
+            frameList = new ReorderableList(frames, typeof(SpriteAnimationFrame));
             frameList.drawHeaderCallback += DrawFrameListHeader;
             frameList.drawElementCallback += DrawFrameListElement;
             frameList.onAddCallback += AddFrameListItem;
             frameList.onRemoveCallback += RemoveFrameListItem;
             frameList.onSelectCallback += SelectFrameListItem;
             frameList.onReorderCallback += ReorderFrameListItem;
+            frameList.elementHeightCallback += ElementHeightCallback;
         }
 
-        /// <summary>
-        /// Draws the new animation box
-        /// </summary>
-        private void NewAnimationBox()
-        {
-			EditorGUILayout.BeginHorizontal(EditorStyles.toolbar, GUILayout.ExpandWidth(true));
-            {
-                GUILayout.FlexibleSpace();
-
-                // New animaton button
-                if (GUILayout.Button("Create Animation", EditorStyles.toolbarButton, GUILayout.ExpandWidth(false)))
-                {
-                    CreateAnimation();
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-        }
-
-        /// <summary>
-        /// Draws the box with the name and file of the animation
-        /// </summary>
-        private void ConfigBox()
-        {
-            EditorGUILayout.BeginVertical(box);
-            {
-                SpriteAnimation newSpriteAnimation = EditorGUILayout.ObjectField("Animation", selectedAnimation, typeof(SpriteAnimation), false) as SpriteAnimation; 
-                if (newSpriteAnimation == null)
-                    return;
-
-                // Reset preview and list if we select a new animation
-                if (newSpriteAnimation != selectedAnimation)
-                {
-                    selectedAnimation = newSpriteAnimation;
-                    InitializeReorderableList();
-                    spritePreview = (EditorPreviewSpriteAnimation)Editor.CreateEditor(selectedAnimation, typeof(EditorPreviewSpriteAnimation));
-                }
-
-                EditorGUILayout.Space();
-                DragAndDropBox();
-            }
-            EditorGUILayout.EndVertical();
-        }
-
-        /// <summary>
-        /// Draws the drag and drop box and saves the dragged objects
-        /// </summary>
-        private void DragAndDropBox()
-        {
-            // Drag and drop box for sprite frames
-			Rect dropArea = GUILayoutUtility.GetRect(0f, DROP_AREA_HEIGHT, GUILayout.ExpandWidth(true));
-            Event evt = Event.current;
-			GUI.Box(dropArea, "Drop sprites <b>HERE</b> to add frames automatically.", dragAndDropBox);
-            switch (evt.type)
-            {
-                case EventType.DragUpdated:
-                case EventType.DragPerform:
-                    if (!dropArea.Contains(evt.mousePosition))
-                        return;
-
-                    DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
-
-                    if (evt.type == EventType.DragPerform)
-                    {
-                        if (DragAndDrop.objectReferences.Length > 0)
-                        {
-                            DragAndDrop.AcceptDrag();
-							draggedSprites.Clear();
-                            foreach (Object draggedObject in DragAndDrop.objectReferences)
-                            {
-                                // Get dragged sprites
-                                Sprite s = draggedObject as Sprite;
-                                if (s != null)
-                                    draggedSprites.Add(s);
-                                else
-                                {
-                                    // If the object is a complete texture, get all the sprites in it
-                                    Texture2D t = draggedObject as Texture2D;
-                                    if (t != null)
-                                    {
-                                        string texturePath = AssetDatabase.GetAssetPath(t);
-                                        Sprite[] spritesInTexture = AssetDatabase.LoadAllAssetsAtPath(texturePath).OfType<Sprite>().ToArray();
-                                        for (int i = 0; i < spritesInTexture.Length; i++)
-                                            draggedSprites.Add(spritesInTexture[i]);
-                                    }
-                                }
-                            }
-
-                            if (draggedSprites.Count > 1)
-                            {
-                                draggedSprites.Sort(new SpriteSorter());
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Draws the preview window
-        /// </summary>
-        /// <param name="r">Draw rect</param>
-        private void PreviewBox(Rect r)
-        {
-            if (spritePreview == null || spritePreview.CurrentAnimation != selectedAnimation)
-                spritePreview = (EditorPreviewSpriteAnimation)Editor.CreateEditor(selectedAnimation, typeof(EditorPreviewSpriteAnimation));
-
-            if (spritePreview != null)
-            {
-				EditorGUILayout.BeginVertical(preview, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
-                {
-                    r.height -= 21;
-                    r.width -= 2;
-                    r.y += 1;
-                    r.x += 1;
-                    spritePreview.OnInteractivePreviewGUI(r, EditorStyles.whiteLabel);
-                }
-                EditorGUILayout.EndVertical();
-
-                EditorGUILayout.BeginHorizontal(previewToolBar);
-                {
-                    // Play Button
-                    GUIContent buttonContent = spritePreview.IsPlaying ? pauseButtonContent : playButtonContent;
-                    spritePreview.IsPlaying = GUILayout.Toggle(spritePreview.IsPlaying, buttonContent, buttonStyle, GUILayout.Width(40));
-
-                    // Loop Button
-                    GUIContent loopContent = spritePreview.Loop ? loopIconActive : loopIcon;
-                    spritePreview.Loop = GUILayout.Toggle(spritePreview.Loop, loopContent, buttonStyle, GUILayout.Width(40));
-
-                    // FPS Slider
-                    GUILayout.Box(speedScaleIcon, labelStyle, GUILayout.ExpandWidth(false));
-                    spritePreview.FramesPerSecond = (int)GUILayout.HorizontalSlider(spritePreview.FramesPerSecond, 0, 60, sliderStyle, sliderThumbStyle);
-                    GUILayout.Label(spritePreview.FramesPerSecond.ToString("0") + " fps", labelStyle, GUILayout.Width(50));
-                }
-                EditorGUILayout.EndHorizontal();
-            }
-        }
-
-        #region Reorderable List Methods
         private void DrawFrameListHeader(Rect r)
         {
             GUI.Label(r, "Frame List");
@@ -540,134 +483,137 @@ namespace Elendow.SpritedowAnimator
 
         private void DrawFrameListElement(Rect r, int i, bool active, bool focused)
         {
-            EditorGUI.BeginChangeCheck();
+            if(speedScale == null)
             {
-                string spriteName = (selectedAnimation.Frames[i] != null) ? selectedAnimation.Frames[i].name : "No sprite selected";
-                EditorGUI.LabelField(new Rect(r.x, r.y + 2, r.width, r.height), spriteName);
-                selectedAnimation.Frames[i] = EditorGUI.ObjectField(new Rect(r.x + r.width - 120, r.y + 1, 50, r.height - 4), "", selectedAnimation.Frames[i], typeof(Sprite), false) as Sprite;
-                EditorGUIUtility.labelWidth = 20;
-                selectedAnimation.FramesDuration[i] = EditorGUI.IntField(new Rect(r.x + r.width - 50, r.y + 1, 50, r.height - 4), speedScaleIcon, selectedAnimation.FramesDuration[i]);
+                speedScale = EditorGUIUtility.IconContent("SpeedScale");
             }
-            if (EditorGUI.EndChangeCheck())
-                SaveFile(true);
+
+            if (i < animation.FramesCount)
+            {
+                SpriteEditorHelper.DrawFrameListElement(ref animation, speedScale, r, i, active, focused);
+            }
         }
 
         private void AddFrameListItem(ReorderableList list)
         {
-            Undo.RecordObject(selectedAnimation, "Add Frame");
+            Undo.RecordObject(animation, "Add Frame");
             AddFrame();
-            SaveFile(true);
+            EditorUtility.SetDirty(animation);
+        }
+
+        private void AddFrame()
+        {
+            frameList.list.Add(new SpriteAnimationFrame(null, 1));
+            animation.Frames.Add(null);
         }
 
         private void RemoveFrameListItem(ReorderableList list)
         {
-            Undo.RecordObject(selectedAnimation, "Remove Frame");
+            Undo.RecordObject(animation, "Remove Frame");
 
             int i = list.index;
-            selectedAnimation.Frames.RemoveAt(i);
-            selectedAnimation.FramesDuration.RemoveAt(i);
+            animation.Frames.RemoveAt(i);
             frameList.list.RemoveAt(i);
             frameListSelectedIndex = frameList.index;
 
-            if (i >= selectedAnimation.FramesCount)
+            if (i >= animation.FramesCount)
             {
                 frameList.index -= 1;
                 frameListSelectedIndex -= 1;
-                spritePreview.CurrentFrame = frameListSelectedIndex;
+                currentFrame = frameListSelectedIndex;
                 frameList.GrabKeyboardFocus();
             }
 
+            EditorUtility.SetDirty(animation);
             Repaint();
-            SaveFile(true);
         }
 
         private void ReorderFrameListItem(ReorderableList list)
         {
-            Undo.RecordObject(selectedAnimation, "Reorder Frames");
+            Undo.RecordObject(animation, "Reorder Frames");
 
-            Sprite s = selectedAnimation.Frames[frameListSelectedIndex];
-            selectedAnimation.Frames.RemoveAt(frameListSelectedIndex);
-            selectedAnimation.Frames.Insert(list.index, s);
+            SpriteAnimationFrame frame = animation.Frames[frameListSelectedIndex];
 
-            int i = selectedAnimation.FramesDuration[frameListSelectedIndex];
-            selectedAnimation.FramesDuration.RemoveAt(frameListSelectedIndex);
-            selectedAnimation.FramesDuration.Insert(list.index, i);
+            animation.Frames.RemoveAt(frameListSelectedIndex);
+            animation.Frames.Insert(list.index, frame);
 
-            SaveFile(true);
+            EditorUtility.SetDirty(animation);
         }
 
         private void SelectFrameListItem(ReorderableList list)
         {
-            spritePreview.CurrentFrame = list.index;
-            spritePreview.ForceRepaint = true;
+            currentFrame = list.index;
+            forceRepaint = true;
             frameListSelectedIndex = list.index;
+        }
+
+        private float ElementHeightCallback(int index)
+        {
+            if (index >= animation.FramesCount)
+            {
+                return 0;
+            }
+
+            return SpriteEditorHelper.GetElementHeight(animation, index);
         }
         #endregion
 
-        /// <summary>
-        /// Adds an empty frame
-        /// </summary>
-        private void AddFrame()
+        #region Properties
+        public int FramesPerSecond
         {
-            frameList.list.Add(new AnimationFrame(null, 1));
-            selectedAnimation.Frames.Add(null);
-            selectedAnimation.FramesDuration.Add(1);
+            get => framesPerSecond;
+            set => framesPerSecond = value;
         }
 
-        /// <summary>
-        /// Adds a frame with specified sprite
-        /// </summary>
-        /// <param name="s">Sprite to add</param>
-        private void AddFrame(Sprite s)
+        public bool IsPlaying
         {
-            frameList.list.Add(new AnimationFrame(s, 1));
-            selectedAnimation.Frames.Add(s);
-            selectedAnimation.FramesDuration.Add(1);
+            get => isPlaying; 
+            set => isPlaying = value; 
         }
 
-        /// <summary>
-        /// Creates the animation asset with a prompt
-        /// </summary>
-        private void CreateAnimation()
+        public bool ForceRepaint
         {
-            string folder = EditorUtility.SaveFilePanel("New Animation", "Assets", "New Animation", "asset");
-            string relativeFolder = folder;
+            get =>  forceRepaint;
+            set => forceRepaint = value;
+        }
 
-            if (folder.Length > 0)
+        public SpriteAnimation CurrentAnimation
+        {
+            get => animation;
+        }
+
+        public int CurrentFrame
+        {
+            set => currentFrame = value;
+        }
+
+        public bool Loop
+        {
+            get => loop;
+            set => loop = value;
+        }
+
+        public float Zoom
+        {
+            set
             {
-                int folderPosition = folder.IndexOf("Assets/", System.StringComparison.InvariantCulture);
-                if (folderPosition > 0)
+                if (pc != null)
                 {
-                    relativeFolder = folder.Substring(folderPosition);
-
-                    // Create the animation
-                    SpriteAnimation asset = CreateInstance<SpriteAnimation>(); 
-                    AssetDatabase.CreateAsset(asset, relativeFolder);
-                    AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
-
-                    selectedAnimation = AssetDatabase.LoadAssetAtPath<SpriteAnimation>(relativeFolder);
-                    InitializeReorderableList();
-                    justCreatedAnim = true;
-                }
-                else
-                {
-                    EditorUtility.DisplayDialog("Invalid Path", "Select a path inside the Assets folder", "OK");
+                    float z = value / 50f;
+                    if (pc.orthographicSize + z >= 0.1f &&
+                        pc.orthographicSize + z <= 100)
+                    {
+                        pc.orthographicSize += z;
+                    }
                 }
             }
         }
 
-        /// <summary>
-        /// Forces serialization of the current animation
-        /// </summary>
-        /// <param name="toDisk">If true, it forces the asset database to save the file to disk. It causes little freeze, so I only use it on a few moments. Remember to save project before closing Unity!!</param>
-        private void SaveFile(bool toDisk = false)
+        public bool IsPanning
         {
-            selectedAnimation.Setup();
-            EditorUtility.SetDirty(selectedAnimation);
-
-            if(toDisk)
-                AssetDatabase.SaveAssets();
+            get => isPanning;
+            set => isPanning = value;
         }
+        #endregion
     }
 }

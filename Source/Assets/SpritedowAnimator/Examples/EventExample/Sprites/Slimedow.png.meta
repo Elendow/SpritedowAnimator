@@ -144,6 +144,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -152,9 +153,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -175,6 +176,8 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
@@ -977,6 +980,42 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      Slimedow_4: 21300008
+      Slimedow_18: 21300036
+      Slimedow_3: 21300006
+      Slimedow_6: 21300012
+      Slimedow_7: 21300014
+      Slimedow_26: 21300052
+      Slimedow_22: 21300044
+      Slimedow_28: 21300056
+      Slimedow_1: 21300002
+      Slimedow_13: 21300026
+      Slimedow_24: 21300048
+      Slimedow_30: 21300060
+      Slimedow_2: 21300004
+      Slimedow_29: 21300058
+      Slimedow_16: 21300032
+      Slimedow_31: 21300062
+      Slimedow_14: 21300028
+      Slimedow_20: 21300040
+      Slimedow_34: 21300068
+      Slimedow_23: 21300046
+      Slimedow_27: 21300054
+      Slimedow_10: 21300020
+      Slimedow_21: 21300042
+      Slimedow_5: 21300010
+      Slimedow_33: 21300066
+      Slimedow_11: 21300022
+      Slimedow_32: 21300064
+      Slimedow_17: 21300034
+      Slimedow_25: 21300050
+      Slimedow_0: 21300000
+      Slimedow_9: 21300018
+      Slimedow_8: 21300016
+      Slimedow_19: 21300038
+      Slimedow_15: 21300030
+      Slimedow_12: 21300024
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

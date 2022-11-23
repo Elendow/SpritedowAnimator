@@ -1,5 +1,5 @@
 ﻿// Spritedow Animation Plugin by Elendow
-// http://elendow.com
+// https://elendow.com
 
 using UnityEditor;
 

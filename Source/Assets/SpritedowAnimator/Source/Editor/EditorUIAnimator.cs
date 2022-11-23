@@ -1,5 +1,5 @@
 ﻿// Spritedow Animation Plugin by Elendow
-// http://elendow.com
+// https://elendow.com
 
 using UnityEditor;
 
@@ -16,8 +16,6 @@ namespace Elendow.SpritedowAnimator
             Undo.RecordObject(t, "Edit UI Animator");
 
             EditorGUILayout.Space();
-
-            EditorGUILayout.LabelField("UI Settings");
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             {

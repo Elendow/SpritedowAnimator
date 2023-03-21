@@ -40,7 +40,7 @@ Use the animation editor to create new animation files. You can open it selectin
 - **Fallback Animation** if a fallback animation is specified, when any animation finish this animation will be played. Useful for idle animations.
 
 # UI Image Animator Inspector properties
-- **Adapt UI Pivot** with this option selected the pivot of the UI will move using the Sprite pivot. This is useful if you have an animation with multiple canvas sizes but you want it static on one place.
+- **Preserve Aspect Ratio** this option will set the "Preserve Aspect Ratio" property of the image to the desired value, usefull because without an initial sprite assigned this value is not visible on the Image component.
 
 # Using the animations
 Add the **SpriteAnimator** or **UIAnimator** component to the object you want to animate.

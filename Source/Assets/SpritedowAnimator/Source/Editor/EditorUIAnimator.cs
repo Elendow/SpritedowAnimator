@@ -19,7 +19,7 @@ namespace Elendow.SpritedowAnimator
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             {
-                t.adaptPivot = EditorGUILayout.Toggle("Adapt UI Pivot", t.adaptPivot);
+                t.preserveAspectRatio = EditorGUILayout.Toggle("Preserve Aspect Ratio", t.preserveAspectRatio);
             }
             EditorGUILayout.EndVertical();
 
